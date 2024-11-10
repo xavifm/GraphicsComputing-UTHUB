@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "glad.c",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\glad.c",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\glad.c",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\glad.c",
+              "RelativeToolTip": "GraphicsEngine_GL\\glad.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2024-11-10T13:11:20.103Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\main.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\main.cpp",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAcwCQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-10T12:12:51.282Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

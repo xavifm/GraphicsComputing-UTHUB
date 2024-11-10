@@ -1,0 +1,4 @@
+﻿  glad.c
+  main.cpp
+LINK : warning LNK4098: la biblioteca predeterminada'MSVCRT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
+  GraphicsEngine_GL.vcxproj -> C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\x64\Debug\GraphicsEngine_GL.exe
