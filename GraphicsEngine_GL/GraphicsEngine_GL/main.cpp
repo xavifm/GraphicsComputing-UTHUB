@@ -1,6 +1,7 @@
 #include <iostream>
 #include <glad//glad.h>
 #include <GLFW/glfw3.h>
+#include "Shader/ShaderProgram.h"
 
 float vertices[] = {
     -0.5f, -0.5f, 0.0f,
@@ -57,20 +58,15 @@ int main(void)
     
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
+    Shader* vertexShader = new Shader(GL_VERTEX_SHADER, vertexShaderSource);
+    Shader* fragmentShader = new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+    ShaderProgram* shaderProgram = new ShaderProgram();
+    shaderProgram->AttachShader(*vertexShader);
+    shaderProgram->AttachShader(*fragmentShader);
+    shaderProgram->Link();
 
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    //glAttachShader(shaderProgram, fragmentShader);
 
     unsigned int VBO;
     unsigned int VAO;
@@ -93,7 +89,7 @@ int main(void)
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        shaderProgram->Use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -103,7 +99,6 @@ int main(void)
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
 
     glfwTerminate();
     return 0;

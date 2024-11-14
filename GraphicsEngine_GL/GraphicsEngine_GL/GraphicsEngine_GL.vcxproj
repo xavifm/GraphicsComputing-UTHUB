@@ -132,8 +132,12 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Shader\Shader.cpp" />
+    <ClCompile Include="Shader\ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Shader\Shader.h" />
+    <ClInclude Include="Shader\ShaderProgram.h" />
     <ClInclude Include="ThirdParty\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3native.h" />
