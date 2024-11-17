@@ -5,10 +5,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,20 +14,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ShaderProgram.cpp",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
-              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
-              "ViewState": "AgIAABIAAAAAAAAAAAAowCEAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-14T12:16:45.559Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -40,7 +24,7 @@
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\main.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAUAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-10T12:12:51.282Z",
               "EditorCaption": ""

@@ -1,2 +1,18 @@
 ﻿  main.cpp
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(8,5): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(8,10): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(9,5): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(9,10): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(10,5): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(10,10): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(11,6): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(11,12): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(12,6): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(12,11): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(13,6): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(13,11): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(14,6): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(15,5): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(15,11): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\main.cpp(16,12): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
   GraphicsEngine_GL.vcxproj -> C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\x64\Debug\GraphicsEngine_GL.exe
