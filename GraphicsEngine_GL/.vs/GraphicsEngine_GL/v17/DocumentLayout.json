@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\ShaderProgram.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,20 +30,70 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ShaderProgram.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\ShaderProgram.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\ShaderProgram.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-17T14:07:14.247Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ShaderProgram.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-17T14:06:53.354Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Shader.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\Shader.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\Shader.cpp",
+              "ViewState": "AgIAAAIAAAAAAAAAAADgvw8AAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-17T14:06:45.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\main.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\main.cpp",
-              "ViewState": "AgIAAGYAAAAAAAAAAAAAAAUAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAADwAAAAAAAAAAADwv0oAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-10T12:12:51.282Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Shader.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\Shader.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\Shader.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-17T14:08:09.268Z"
             }
           ]
         }
