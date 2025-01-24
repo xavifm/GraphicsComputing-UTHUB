@@ -10,6 +10,7 @@ public:
     ShaderProgram();
     ~ShaderProgram();
     void AttachShader(const Shader& shader);
+    GLuint GetProgramId();
     void Link();
     void Use() const;
 

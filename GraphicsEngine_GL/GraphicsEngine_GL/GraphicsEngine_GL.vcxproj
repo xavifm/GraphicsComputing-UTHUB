@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -130,12 +130,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Controllers\Input\InputController.cpp" />
+    <ClCompile Include="Controllers\OpenGL\OpenGLController.cpp" />
+    <ClCompile Include="Controllers\Window\WindowController.cpp" />
+    <ClCompile Include="Controllers\Worlds\WorldController.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh\Mesh.cpp" />
+    <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Controllers\Controller.h" />
+    <ClInclude Include="Controllers\Input\InputController.h" />
+    <ClInclude Include="Controllers\OpenGL\OpenGLController.h" />
+    <ClInclude Include="Controllers\Window\WindowController.h" />
+    <ClInclude Include="Controllers\Worlds\WorldController.h" />
+    <ClInclude Include="Mesh\Mesh.h" />
+    <ClInclude Include="Model\Model.h" />
+    <ClInclude Include="Parameters\Globals.h" />
     <ClInclude Include="Shader\Shader.h" />
     <ClInclude Include="Shader\ShaderProgram.h" />
     <ClInclude Include="ThirdParty\include\glad\glad.h" />

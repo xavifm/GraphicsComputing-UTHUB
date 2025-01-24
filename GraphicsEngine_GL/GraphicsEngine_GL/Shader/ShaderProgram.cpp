@@ -16,6 +16,11 @@ void ShaderProgram::AttachShader(const Shader& shader)
     glAttachShader(ProgramId, shader.GetId());
 }
 
+GLuint ShaderProgram::GetProgramId()
+{
+    return ProgramId;
+}
+
 void ShaderProgram::Link() 
 {
     glLinkProgram(ProgramId);
