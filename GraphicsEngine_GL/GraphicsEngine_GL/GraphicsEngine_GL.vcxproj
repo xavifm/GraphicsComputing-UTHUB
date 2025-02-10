@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Controllers\Camera\CameraController.cpp" />
     <ClCompile Include="Controllers\Input\InputController.cpp" />
     <ClCompile Include="Controllers\OpenGL\OpenGLController.cpp" />
     <ClCompile Include="Controllers\Window\WindowController.cpp" />
@@ -144,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Controllers\Camera\CameraController.h" />
     <ClInclude Include="Controllers\Controller.h" />
     <ClInclude Include="Controllers\Input\InputController.h" />
     <ClInclude Include="Controllers\OpenGL\OpenGLController.h" />

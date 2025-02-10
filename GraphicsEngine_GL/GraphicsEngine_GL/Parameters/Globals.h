@@ -191,6 +191,24 @@ struct Mat4x4 {
         return result;
     }
 
+    static Mat4x4 Translate(const Vector3D& pos)
+    {
+        Mat4x4 mat;
+        mat.m[3][0] = pos.x;
+        mat.m[3][1] = pos.y;
+        mat.m[3][2] = pos.z;
+        return mat;
+    }
+
+    static Mat4x4 Scale(const Vector3D& s)
+    {
+        Mat4x4 mat;
+        mat.m[0][0] = s.x;
+        mat.m[1][1] = s.y;
+        mat.m[2][2] = s.z;
+        return mat;
+    }
+
     float* operator[](int index) { return m[index]; }
     const float* operator[](int index) const { return m[index]; }
 };

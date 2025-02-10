@@ -3,6 +3,7 @@
 #include "../../Shader/ShaderProgram.h"
 #include "../../Model/Model.h"
 #include "../../Parameters/Globals.h"
+#include "../Camera/CameraController.h"
 
 class WorldController : public Controller
 {
@@ -20,12 +21,7 @@ private:
     void SetupShaders();
     void UpdateMVP();
 
-    Mat4x4 Translate(const Vector3D& pos);
-
-    Mat4x4 Scale(const Vector3D& s);
-
-    Mat4x4 LookAt(const Vector3D& eye, const Vector3D& center, const Vector3D& up);
-    Mat4x4 Perspective(float fov, float aspect, float nearPlane, float farPlane);
+    CameraController* cameraController;
 
 private:
     ShaderProgram* program = nullptr;

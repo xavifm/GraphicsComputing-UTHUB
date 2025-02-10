@@ -5,17 +5,18 @@
 #include "Controllers/OpenGL/OpenGLController.h"
 #include "Controllers/Input/InputController.h"
 #include "Controllers/Worlds/WorldController.h"
+#include "Controllers/Camera/CameraController.h"
+
 
 int main()
 {
-    Application app;
+    Application* App = new Application();;
 
-    app.AddController(new WindowController());
-    app.AddController(new OpenGLController());
-    app.AddController(new InputController());
-    app.AddController(new WorldController());
+    App->AddController(new WindowController());
+    App->AddController(new OpenGLController());
+    App->AddController(new WorldController());
 
-    if (!app.Init())
+    if (!App->Init())
     {
         std::cerr << "[MAIN] Error starting the engine." << std::endl;
         return -1;
@@ -24,18 +25,18 @@ int main()
     bool run = true;
     while (run)
     {
-        if (app.PreUpdate() == UPDATE_STOP)
+        if (App->PreUpdate() == UPDATE_STOP)
             break;
 
-        update_status status = app.Update();
+        update_status status = App->Update();
         if (status == UPDATE_STOP || status == UPDATE_ERROR)
             break;
 
-        if (app.PostUpdate() == UPDATE_STOP)
+        if (App->PostUpdate() == UPDATE_STOP)
             break;
     }
 
-    if (!app.CleanUp())
+    if (!App->CleanUp())
     {
         std::cerr << "[MAIN] error deleting memory." << std::endl;
         return -1;
