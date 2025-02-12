@@ -142,8 +142,11 @@
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\ShaderProgram.cpp" />
+    <ClCompile Include="Texture\Texture.cpp" />
+    <ClCompile Include="ThirdParty\include\Texture\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Downloads\stb_image.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Controllers\Camera\CameraController.h" />
     <ClInclude Include="Controllers\Controller.h" />
@@ -156,10 +159,12 @@
     <ClInclude Include="Parameters\Globals.h" />
     <ClInclude Include="Shader\Shader.h" />
     <ClInclude Include="Shader\ShaderProgram.h" />
+    <ClInclude Include="Texture\Texture.h" />
     <ClInclude Include="ThirdParty\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3.h" />
     <ClInclude Include="ThirdParty\include\GLFW\glfw3native.h" />
     <ClInclude Include="ThirdParty\include\KHR\khrplatform.h" />
+    <ClInclude Include="ThirdParty\include\Texture\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="ThirdParty\lib\glfw3.lib" />

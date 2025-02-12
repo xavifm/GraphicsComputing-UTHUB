@@ -31,7 +31,7 @@ bool WorldController::Init()
     cameraController->Init();
     
     SetupShaders();
-    LoadNewModel("cube.obj");
+    LoadNewModel("cube.obj", "grass_texture.png");
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
@@ -78,11 +78,11 @@ void WorldController::DestroyModel()
     }
 }
 
-void WorldController::LoadNewModel(const std::string& fileName)
+void WorldController::LoadNewModel(const std::string& fileName, const std::string& textureName)
 {
     DestroyModel();
     model = new Model();
-    if (!model->LoadModel(fileName))
+    if (!model->LoadModel(fileName, textureName))
     {
         std::cerr << "[WorldController] Error loading the model: " << fileName << std::endl;
     }

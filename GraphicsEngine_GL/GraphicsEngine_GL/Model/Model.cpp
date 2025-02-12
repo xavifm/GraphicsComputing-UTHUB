@@ -16,7 +16,7 @@ Model::~Model()
     Destroy(); 
 }
 
-bool Model::LoadModel(const std::string& fileName)
+bool Model::LoadModel(const std::string& fileName, const std::string& textureName)
 {
     std::ifstream file(fileName);
     if (!file.is_open())
@@ -26,6 +26,7 @@ bool Model::LoadModel(const std::string& fileName)
     }
 
     std::vector<float> positions;
+    std::vector<float> texCoords;
     std::vector<unsigned int> indices;
 
     std::string line;
@@ -39,6 +40,14 @@ bool Model::LoadModel(const std::string& fileName)
             positions.push_back(x);
             positions.push_back(y);
             positions.push_back(z);
+        }
+        else if (line.rfind("vt ", 0) == 0)
+        {
+            std::istringstream iss(line.substr(3));
+            float u, v;
+            iss >> u >> v;
+            texCoords.push_back(u);
+            texCoords.push_back(v);
         }
         else if (line.rfind("f ", 0) == 0)
         {
@@ -68,11 +77,13 @@ bool Model::LoadModel(const std::string& fileName)
 
     Mesh* mesh = new Mesh();
 
-    mesh->SetData(positions, indices);
+    mesh->SetData(positions, texCoords, indices);
 
     _mesh_list.push_back(mesh);
 
     CalcNumVerticesTriangles();
+
+    _texture_attached = SetupTexture(textureName);
 
     std::cout << "[Model] Loaded " << fileName << " with "
         << _totalVertices << " vertex and "
@@ -81,19 +92,18 @@ bool Model::LoadModel(const std::string& fileName)
     return true;
 }
 
-void Model::LoadMaterials(const model::Model& srcModel)
-{
-
-}
-
 void Model::Draw(unsigned int program) const
 {
-    //textures here
+    if (_texture_attached)
+        _texture_attached->Bind();
 
     for (auto* mesh : _mesh_list)
     {
         mesh->Draw();
     }
+
+    if (_texture_attached)
+        _texture_attached->Unbind();
 }
 
 void Model::CalcNumVerticesTriangles()
@@ -123,6 +133,13 @@ void Model::Destroy()
 
     _totalTriangles = 0;
     _totalVertices = 0;
+}
+
+Texture* Model::SetupTexture(const std::string textureName)
+{
+    if (textureName.empty()) return nullptr;
+
+    return new Texture(textureName);
 }
 
 void Model::SetPosition(const Vector3D& newPos)

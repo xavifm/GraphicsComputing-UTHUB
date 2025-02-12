@@ -9,7 +9,7 @@ public:
     Mesh() : VAO(0), VBO(0), EBO(0) {}
     ~Mesh() { Destroy(); }
 
-    void SetData(const std::vector<float>& vertexData, const std::vector<unsigned int>& indices);
+    void SetData(const std::vector<float>& vertexData, const std::vector<float>& texCoords, const std::vector<unsigned int>& indices);
     void Draw() const;
     void Destroy();
 
@@ -19,11 +19,11 @@ public:
 private:
     void SetupMesh();
 
-    unsigned int VAO, VBO, EBO;
+    unsigned int VAO, VBO, EBO, TBO;
     std::vector<float> vertices;
+    std::vector<float> texCoords;
     std::vector<unsigned int> inds;
 
     size_t vertexCount = 0;
     size_t indexCount = 0;
 };
-

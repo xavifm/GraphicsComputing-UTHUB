@@ -17,7 +17,7 @@ public:
 
 private:
     void DestroyModel();
-    void LoadNewModel(const std::string& fileName);
+    void LoadNewModel(const std::string& fileName, const std::string& textureName = "");
     void SetupShaders();
     void UpdateMVP();
 

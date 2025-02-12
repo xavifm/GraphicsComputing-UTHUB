@@ -3,6 +3,7 @@
 #include <vector>
 #include "../Mesh/Mesh.h"
 #include "../Parameters/Globals.h"
+#include "../Texture/Texture.h"
 
 class Mesh;
 
@@ -15,8 +16,7 @@ public:
     Model();
     ~Model();
 
-    bool LoadModel(const std::string& fileName);
-    void LoadMaterials(const model::Model& srcModel);
+    bool LoadModel(const std::string& fileName, const std::string& textureName = "");
     void Draw(unsigned int program) const;
 
     void CalcNumVerticesTriangles();
@@ -25,6 +25,7 @@ public:
 
     void Destroy();
 
+    Texture* SetupTexture(const std::string textureName);
     void SetPosition(const Vector3D& newPos);
     Vector3D GetPosition() const;
 
@@ -32,6 +33,8 @@ public:
     Vector3D GetScale() const;
 
     std::vector<Mesh*> _mesh_list;
+
+    Texture* _texture_attached;
 
 private:
     std::vector<unsigned int> _textures;
