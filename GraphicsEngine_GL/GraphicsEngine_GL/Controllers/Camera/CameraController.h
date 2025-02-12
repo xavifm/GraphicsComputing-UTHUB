@@ -1,5 +1,6 @@
 #pragma once
 #include "../Controller.h"
+#include "../Input/InputController.h"
 
 class CameraController : public Controller
 {
@@ -16,6 +17,8 @@ public:
 
     Mat4x4 Perspective(float fov, float aspect, float nearPlane, float farPlane);
 
+    float GetDeltaTime();
+
     void MoveCamera();
     void RotateCamera();
 
@@ -27,6 +30,9 @@ private:
     float _yaw;
     float _pitch;
 
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+
     Mat4x4 _viewMatrix;
     Mat4x4 _projMatrix;
 
@@ -34,8 +40,13 @@ private:
     float _rotationSpeed;
     float _sensitivity;
 
+    float fov = 30.0f;
+
     Vector3D _cameraPosition;
     Vector3D _cameraTarget;
     Vector3D _cameraUp;
+    Vector3D _cameraFront;
+
+    InputController* input;
 };
 

@@ -3,6 +3,7 @@
 #include "../../Shader/ShaderProgram.h"
 #include "../../Model/Model.h"
 #include "../../Parameters/Globals.h"
+#include "../Input/InputController.h"
 #include "../Camera/CameraController.h"
 
 class WorldController : public Controller

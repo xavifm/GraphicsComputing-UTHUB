@@ -29,4 +29,6 @@ private:
     
     Vector2D MouseMotion;
     Vector2D MousePosition;
+
+    bool firstMouse;
 };

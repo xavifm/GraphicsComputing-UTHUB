@@ -143,6 +143,39 @@ struct Vector3D {
     }
 };
 
+struct Quaternion {
+    float w, x, y, z;
+
+    Quaternion(float w = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f)
+        : w(w), x(x), y(y), z(z) {}
+
+    static Quaternion FromAxisAngle(const Vector3D& axis, float angle) {
+        float halfAngle = angle * 0.5f;
+        float s = std::sin(halfAngle);
+        return Quaternion(std::cos(halfAngle), axis.x * s, axis.y * s, axis.z * s);
+    }
+
+    Quaternion operator*(const Quaternion& other) const {
+        return Quaternion(
+            w * other.w - x * other.x - y * other.y - z * other.z,
+            w * other.x + x * other.w + y * other.z - z * other.y,
+            w * other.y - x * other.z + y * other.w + z * other.x,
+            w * other.z + x * other.y - y * other.x + z * other.w
+        );
+    }
+
+    Quaternion conjugate() const {
+        return Quaternion(w, -x, -y, -z);
+    }
+
+    Vector3D rotate(const Vector3D& v) const {
+        Quaternion qv(0, v.x, v.y, v.z);
+        Quaternion res = (*this) * qv * conjugate();
+        return Vector3D(res.x, res.y, res.z);
+    }
+};
+
+
 struct Mat4x4 {
     float m[4][4];
 

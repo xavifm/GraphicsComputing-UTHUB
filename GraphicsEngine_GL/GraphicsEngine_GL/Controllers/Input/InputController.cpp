@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-InputController::InputController() : MouseX(0), MouseY(0), LastMouseX(0), LastMouseY(0) 
+InputController::InputController()
 {
 }
 
@@ -12,6 +12,11 @@ InputController::~InputController()
 
 bool InputController::Init()
 {
+    GLFWwindow* window = glfwGetCurrentContext();
+    if (!window) return false;
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     return true;
 }
 
@@ -22,17 +27,21 @@ update_status InputController::PreUpdate()
 
     double x, y;
     glfwGetCursorPos(window, &x, &y);
+
     MouseX = static_cast<float>(x);
     MouseY = static_cast<float>(y);
 
-    MouseMotion.x = MouseX - LastMouseX;
-    MouseMotion.y = MouseY - LastMouseY;
+    MouseMotion.x = std::max(-50.0f, std::min(MouseX - LastMouseX, 50.0f));
+    MouseMotion.y = std::max(-50.0f, std::min(MouseY - LastMouseY, 50.0f));
+
+    MouseMotion.y = -MouseMotion.y;
 
     LastMouseX = MouseX;
     LastMouseY = MouseY;
 
     return UPDATE_CONTINUE;
 }
+
 
 update_status InputController::Update()
 {

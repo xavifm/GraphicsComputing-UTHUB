@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include "../Input/InputController.h"
 
 static std::string ReadTextFile(const std::string& fileName)
 {
@@ -118,6 +117,6 @@ void WorldController::UpdateMVP()
     
     modelMatrix = translation * scaleMat;
     
-    Mat4x4 mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
+    Mat4x4 mvp = cameraController->GetViewMatrix() * cameraController->GetProjMatrix() * modelMatrix;
     glUniformMatrix4fv(uMVP_Location, 1, GL_FALSE, &mvp.m[0][0]);
 }
