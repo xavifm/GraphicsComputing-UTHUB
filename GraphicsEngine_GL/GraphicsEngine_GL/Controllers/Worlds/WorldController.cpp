@@ -30,9 +30,11 @@ bool WorldController::Init()
     cameraController->Init();
     
     SetupShaders();
-    LoadNewModel("cube.obj", "grass_texture.png");
+    LoadNewModel("forest_nature_set_all_in.obj", "texture_gradient.png");
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_CULL_FACE); 
+
     
     return true;
 }

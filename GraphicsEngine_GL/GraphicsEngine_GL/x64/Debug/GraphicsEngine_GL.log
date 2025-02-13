@@ -1,6 +1,2 @@
-﻿  CameraController.cpp
-C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\Controllers\Camera\CameraController.cpp(61,48): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\Controllers\Camera\CameraController.cpp(62,25): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\Controllers\Camera\CameraController.cpp(63,48): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\GraphicsEngine_GL\Controllers\Camera\CameraController.cpp(110,24): warning C4244: 'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+﻿  Model.cpp
   GraphicsEngine_GL.vcxproj -> C:\Users\sdasd\Documents\GitHub\GraphicsComputing-UTHUB\GraphicsEngine_GL\x64\Debug\GraphicsEngine_GL.exe

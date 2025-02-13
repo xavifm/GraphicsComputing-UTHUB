@@ -29,6 +29,9 @@ bool Model::LoadModel(const std::string& fileName, const std::string& textureNam
     std::vector<float> texCoords;
     std::vector<unsigned int> indices;
 
+    std::vector<float> finalVertices;
+    std::vector<float> finalTexCoords;
+
     std::string line;
     while (std::getline(file, line))
     {
@@ -47,46 +50,105 @@ bool Model::LoadModel(const std::string& fileName, const std::string& textureNam
             float u, v;
             iss >> u >> v;
             texCoords.push_back(u);
-            texCoords.push_back(v);
+            texCoords.push_back(1.0f - v);
         }
         else if (line.rfind("f ", 0) == 0)
         {
             std::istringstream iss(line.substr(2));
-            std::string f1, f2, f3;
-            iss >> f1 >> f2 >> f3;
+            std::vector<std::string> faceTokens;
+            std::string token;
+            while (iss >> token)
+                faceTokens.push_back(token);
 
-            auto parseIndex = [](const std::string& token) -> unsigned int
+            auto parseFace = [](const std::string& token, int& vertexIndex, int& texIndex)
                 {
-                    size_t pos = token.find('/');
-                    if (pos == std::string::npos)
-                    {
-                        return static_cast<unsigned int>(std::stoi(token) - 1);
-                    }
-                    else
-                    {
-                        return static_cast<unsigned int>(std::stoi(token.substr(0, pos)) - 1);
-                    }
+                    size_t firstSlash = token.find('/');
+                    size_t secondSlash = token.find('/', firstSlash + 1);
+
+                    vertexIndex = std::stoi(token.substr(0, firstSlash)) - 1;
+                    texIndex = std::stoi(token.substr(firstSlash + 1, secondSlash - firstSlash - 1)) - 1;
                 };
 
-            indices.push_back(parseIndex(f1));
-            indices.push_back(parseIndex(f2));
-            indices.push_back(parseIndex(f3));
+            if (faceTokens.size() == 3 || faceTokens.size() == 4)
+            {
+                std::vector<int> vertexIndices;
+                std::vector<int> texIndices;
+
+                for (const auto& f : faceTokens)
+                {
+                    int vIdx, tIdx;
+                    parseFace(f, vIdx, tIdx);
+                    vertexIndices.push_back(vIdx);
+                    texIndices.push_back(tIdx);
+                }
+
+                for (size_t i = 0; i < 3; ++i)
+                {
+                    int vIdx = vertexIndices[i] * 3;
+                    int tIdx = texIndices[i] * 2;
+
+                    finalVertices.push_back(positions[vIdx]);
+                    finalVertices.push_back(positions[vIdx + 1]);
+                    finalVertices.push_back(positions[vIdx + 2]);
+
+                    finalTexCoords.push_back(texCoords[tIdx]);
+                    finalTexCoords.push_back(texCoords[tIdx + 1]);
+
+                    indices.push_back(static_cast<unsigned int>(finalVertices.size() / 3) - 1);
+                }
+
+                if (faceTokens.size() == 4)
+                {
+                    int vIdx = vertexIndices[0] * 3;
+                    int tIdx = texIndices[0] * 2;
+
+                    finalVertices.push_back(positions[vIdx]);
+                    finalVertices.push_back(positions[vIdx + 1]);
+                    finalVertices.push_back(positions[vIdx + 2]);
+
+                    finalTexCoords.push_back(texCoords[tIdx]);
+                    finalTexCoords.push_back(texCoords[tIdx + 1]);
+
+                    indices.push_back(static_cast<unsigned int>(finalVertices.size() / 3) - 1);
+
+                    vIdx = vertexIndices[2] * 3;
+                    tIdx = texIndices[2] * 2;
+
+                    finalVertices.push_back(positions[vIdx]);
+                    finalVertices.push_back(positions[vIdx + 1]);
+                    finalVertices.push_back(positions[vIdx + 2]);
+
+                    finalTexCoords.push_back(texCoords[tIdx]);
+                    finalTexCoords.push_back(texCoords[tIdx + 1]);
+
+                    indices.push_back(static_cast<unsigned int>(finalVertices.size() / 3) - 1);
+
+                    vIdx = vertexIndices[3] * 3;
+                    tIdx = texIndices[3] * 2;
+
+                    finalVertices.push_back(positions[vIdx]);
+                    finalVertices.push_back(positions[vIdx + 1]);
+                    finalVertices.push_back(positions[vIdx + 2]);
+
+                    finalTexCoords.push_back(texCoords[tIdx]);
+                    finalTexCoords.push_back(texCoords[tIdx + 1]);
+
+                    indices.push_back(static_cast<unsigned int>(finalVertices.size() / 3) - 1);
+                }
+            }
         }
     }
     file.close();
 
     Mesh* mesh = new Mesh();
-
-    mesh->SetData(positions, texCoords, indices);
-
+    mesh->SetData(finalVertices, finalTexCoords, indices);
     _mesh_list.push_back(mesh);
 
     CalcNumVerticesTriangles();
-
     _texture_attached = SetupTexture(textureName);
 
     std::cout << "[Model] Loaded " << fileName << " with "
-        << _totalVertices << " vertex and "
+        << _totalVertices << " vertices and "
         << _totalTriangles << " triangles." << std::endl;
 
     return true;
