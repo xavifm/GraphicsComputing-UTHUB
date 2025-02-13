@@ -41,14 +41,36 @@ bool WorldController::Init()
 
 update_status WorldController::Update()
 {
-    if (!program) 
+    if (!program)
         return UPDATE_CONTINUE;
 
     cameraController->Update();
     program->Use();
 
     UpdateMVP();
-    
+
+    Vector3D lightOffset(5.0f, 5.0f, 5.0f);
+    Vector3D lightPosition = lightOffset;
+
+    glUniform3f(glGetUniformLocation(program->GetProgramId(), "lightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
+    glUniform3f(glGetUniformLocation(program->GetProgramId(), "lightColor"), 1.0f, 1.0f, 1.0f);
+    glUniform3f(glGetUniformLocation(program->GetProgramId(), "viewPos"),
+        cameraController->GetCameraPosition().x,
+        cameraController->GetCameraPosition().y,
+        cameraController->GetCameraPosition().z);
+
+    glUniform1f(glGetUniformLocation(program->GetProgramId(), "ambientStrength"), 1.f);
+    glUniform1f(glGetUniformLocation(program->GetProgramId(), "specularStrength"), 0.7f);
+    glUniform1f(glGetUniformLocation(program->GetProgramId(), "shininess"), 32.0f);
+
+
+    Mat4x4 normalMatrix = modelMatrix.Inverse().Transpose();
+    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "normalMatrix"), 1, GL_FALSE, &normalMatrix.m[0][0]);
+
+    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "model"), 1, GL_FALSE, &modelMatrix.m[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "u_MVP"), 1, GL_FALSE, &mvp.m[0][0]);
+
+
     if (model)
     {
         model->Draw(program->GetProgramId());
@@ -119,6 +141,6 @@ void WorldController::UpdateMVP()
     
     modelMatrix = translation * scaleMat;
     
-    Mat4x4 mvp = cameraController->GetViewMatrix() * cameraController->GetProjMatrix() * modelMatrix;
+    mvp = cameraController->GetViewMatrix() * cameraController->GetProjMatrix() * modelMatrix;
     glUniformMatrix4fv(uMVP_Location, 1, GL_FALSE, &mvp.m[0][0]);
 }

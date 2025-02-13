@@ -17,6 +17,8 @@ public:
 
     Mat4x4 Perspective(float fov, float aspect, float nearPlane, float farPlane);
 
+    Vector3D GetCameraPosition() const { return _cameraPosition; }
+
     float GetDeltaTime();
 
     void MoveCamera();

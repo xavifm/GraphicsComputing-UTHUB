@@ -175,7 +175,6 @@ struct Quaternion {
     }
 };
 
-
 struct Mat4x4 {
     float m[4][4];
 
@@ -214,16 +213,6 @@ struct Mat4x4 {
         return result;
     }
 
-    Mat4x4 Transpose() const {
-        Mat4x4 result;
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                result.m[i][j] = m[j][i];
-            }
-        }
-        return result;
-    }
-
     static Mat4x4 Translate(const Vector3D& pos)
     {
         Mat4x4 mat;
@@ -244,8 +233,52 @@ struct Mat4x4 {
 
     float* operator[](int index) { return m[index]; }
     const float* operator[](int index) const { return m[index]; }
-};
 
+
+    Mat4x4 Transpose() const {
+        Mat4x4 result;
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                result.m[i][j] = m[j][i];
+            }
+        }
+        return result;
+    }
+
+    Mat4x4 Inverse() const {
+        Mat4x4 result;
+        float inv[16], det;
+        float mat[16] = {
+            m[0][0], m[0][1], m[0][2], m[0][3],
+            m[1][0], m[1][1], m[1][2], m[1][3],
+            m[2][0], m[2][1], m[2][2], m[2][3],
+            m[3][0], m[3][1], m[3][2], m[3][3]
+        };
+
+        inv[0] = mat[5] * mat[10] * mat[15] - mat[5] * mat[11] * mat[14] -
+            mat[9] * mat[6] * mat[15] + mat[9] * mat[7] * mat[14] +
+            mat[13] * mat[6] * mat[11] - mat[13] * mat[7] * mat[10];
+
+        det = mat[0] * inv[0];
+
+        if (det == 0) {
+            std::cerr << "[Mat4x4] WARNING: Attempted to invert a singular matrix!" << std::endl;
+            return Mat4x4();
+        }
+
+        det = 1.0f / det;
+
+        for (int i = 0; i < 16; i++)
+            inv[i] *= det;
+
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
+                result.m[i][j] = inv[i * 4 + j];
+
+        return result;
+    }
+
+};
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
