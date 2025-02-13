@@ -3,24 +3,40 @@
   "WorkspaceRootPath": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Texture\\Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Parameters\\Globals.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Texture\\Texture.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Model\\Model.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Model\\Model.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Model\\Model.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Mesh\\Mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -31,20 +47,28 @@
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Mesh\\Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Input\\InputController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Model\\Model.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Parameters\\Globals.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Input\\InputController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\ThirdParty\\include\\glad\\glad.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -55,24 +79,8 @@
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\ShaderProgram.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Controllers\\Window\\WindowController.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|solutionrelative:GraphicsEngine_GL\\Shader\\Shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{83C4363F-9242-4EC3-A156-0C1B2BF20131}|GraphicsEngine_GL\\GraphicsEngine_GL.vcxproj|C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -90,74 +98,60 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Globals.h",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Parameters\\Globals.h",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h",
-              "RelativeToolTip": "GraphicsEngine_GL\\Parameters\\Globals.h",
-              "ViewState": "AgIAAOEAAAAAAAAAAAAmwBYBAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-02-13T12:55:21.728Z",
+              "DocumentIndex": 0,
+              "Title": "Texture.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Texture\\Texture.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\Texture\\Texture.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-02-13T18:35:07.852Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
+              "Title": "Texture.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Texture\\Texture.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Texture\\Texture.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Texture\\Texture.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-02-13T18:35:00.456Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "CameraController.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Camera\\CameraController.cpp",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAAHQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-12T15:56:04.521Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-12T15:56:04.521Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "WorldController.cpp",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
-              "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
-              "ViewState": "AgIAADYAAAAAAAAAAAAWwD4AAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-12T16:41:03.531Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\main.cpp",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
-              "RelativeToolTip": "GraphicsEngine_GL\\main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-01-24T12:44:53.056Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "WindowController.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Window\\WindowController.cpp",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-01-24T11:31:20.142Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 12,
               "Title": "Shader.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\Shader.cpp",
@@ -169,44 +163,43 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 11,
               "Title": "ShaderProgram.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Shader\\ShaderProgram.cpp",
-              "ViewState": "AgIAAAkAAAAAAAAAAIBZwBsAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-01-24T14:44:11.115Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "Mesh.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Mesh\\Mesh.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Mesh\\Mesh.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Mesh\\Mesh.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Mesh\\Mesh.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAD0AAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-01-24T14:41:43.707Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "Model.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Model\\Model.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Model\\Model.cpp",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAACcAAAAzAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAKEAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-12T11:57:16.372Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-12T11:57:16.372Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 9,
               "Title": "Mesh.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Mesh\\Mesh.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Mesh\\Mesh.h",
@@ -218,31 +211,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 3,
               "Title": "InputController.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Input\\InputController.cpp",
-              "ViewState": "AgIAABAAAAAAAAAAAAAmwDwAAAApAAAAAAAAAA==",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAADwAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-02-12T14:39:21.22Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "InputController.h",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
-              "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-02-12T15:35:48.196Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 7,
               "Title": "Model.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Model\\Model.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Model\\Model.h",
@@ -254,19 +235,79 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 4,
               "Title": "OpenGLController.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp",
               "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp",
               "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.cpp",
-              "ViewState": "AgIAABIAAAAAAAAAAIBZwDgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAADgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-01-24T09:43:14.242Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 2,
+              "Title": "Shader.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\Shader.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\Shader.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-24T12:47:03.35Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\main.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\main.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-01-24T12:44:53.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "WorldController.cpp",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
+              "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Worlds\\WorldController.cpp",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAAACMAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-02-12T16:41:03.531Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Globals.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Parameters\\Globals.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Parameters\\Globals.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Parameters\\Globals.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAmwLAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-02-13T12:55:21.728Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "InputController.h",
+              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
+              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
+              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
+              "RelativeToolTip": "GraphicsEngine_GL\\Controllers\\Input\\InputController.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-02-12T15:35:48.196Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "glad.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\ThirdParty\\include\\glad\\glad.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\ThirdParty\\include\\glad\\glad.h",
@@ -278,7 +319,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 18,
               "Title": "Application.cpp",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Application.cpp",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Application.cpp",
@@ -290,7 +331,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 19,
               "Title": "WindowController.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\Window\\WindowController.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\Window\\WindowController.h",
@@ -302,7 +343,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "ShaderProgram.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\ShaderProgram.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\ShaderProgram.h",
@@ -314,7 +355,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "OpenGLController.h",
               "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.h",
               "RelativeDocumentMoniker": "GraphicsEngine_GL\\Controllers\\OpenGL\\OpenGLController.h",
@@ -323,18 +364,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-01-24T12:45:50.059Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "Shader.h",
-              "DocumentMoniker": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
-              "RelativeDocumentMoniker": "GraphicsEngine_GL\\Shader\\Shader.h",
-              "ToolTip": "C:\\Users\\sdasd\\Documents\\GitHub\\GraphicsComputing-UTHUB\\GraphicsEngine_GL\\GraphicsEngine_GL\\Shader\\Shader.h",
-              "RelativeToolTip": "GraphicsEngine_GL\\Shader\\Shader.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-01-24T12:47:03.35Z"
             }
           ]
         }
