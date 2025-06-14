@@ -140,6 +140,6 @@ void WorldController::UpdateMVP()
     
     modelMatrix = translation * scaleMat;
     
-    mvp = cameraController->GetViewMatrix() * cameraController->GetProjMatrix() * modelMatrix;
+    mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
     glUniformMatrix4fv(uMVP_Location, 1, GL_FALSE, &mvp.m[0][0]);
 }

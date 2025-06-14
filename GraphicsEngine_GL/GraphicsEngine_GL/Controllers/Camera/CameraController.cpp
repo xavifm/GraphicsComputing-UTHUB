@@ -90,19 +90,21 @@ Mat4x4 CameraController::LookAt(const Vector3D& eye, const Vector3D& center, con
     return result;
 }
 
-
-Mat4x4 CameraController::Perspective(float fov, float aspect, float nearPlane, float farPlane)
+Mat4x4 CameraController::Perspective(float fovDeg, float aspect, float nearZ, float farZ)
 {
-    Mat4x4 result = {};
-    float tanHalfFOV = std::tan((fov * 3.1415926535f / 180.0f) / 2.0f);
+    Mat4x4 p;
+    std::memset(p.m, 0, sizeof(p.m));
 
-    result.m[0][0] = 1.0f / (aspect * tanHalfFOV);
-    result.m[1][1] = 1.0f / tanHalfFOV;
-    result.m[2][2] = -(farPlane + nearPlane) / (farPlane - nearPlane);
-    result.m[2][3] = -1.0f;
-    result.m[3][2] = -(2.0f * farPlane * nearPlane) / (farPlane - nearPlane);
+    float rad      = fovDeg * M_PI / 180.0f;
+    float tanHalf  = std::tan(rad * 0.5f);
 
-    return result;
+    p.m[0][0] = 1.0f / (aspect * tanHalf);
+    p.m[1][1] = 1.0f / tanHalf;
+    p.m[2][2] = -(farZ + nearZ) / (farZ - nearZ);
+    p.m[2][3] = -1.0f;
+    p.m[3][2] = -(2.0f * farZ * nearZ) / (farZ - nearZ);
+
+    return p;
 }
 
 float CameraController::GetDeltaTime()

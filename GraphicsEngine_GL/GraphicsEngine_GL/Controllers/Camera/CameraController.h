@@ -42,7 +42,7 @@ private:
     float _rotationSpeed;
     float _sensitivity;
 
-    float fov = 30.0f;
+    float fov = 45.0f;
 
     Vector3D _cameraPosition;
     Vector3D _cameraTarget;
