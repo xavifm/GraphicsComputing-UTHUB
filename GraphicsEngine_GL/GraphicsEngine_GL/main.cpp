@@ -6,13 +6,14 @@
 #include "Controllers/Input/InputController.h"
 #include "Controllers/Worlds/WorldController.h"
 #include "Controllers/Camera/CameraController.h"
-
+#include "Controllers/UI/ImguiController.h"
 
 int main()
 {
     Application* App = new Application();;
 
     App->AddController(new WindowController());
+    App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0))));
     App->AddController(new OpenGLController());
     App->AddController(new WorldController());
 

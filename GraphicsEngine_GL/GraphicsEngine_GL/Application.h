@@ -17,7 +17,7 @@ public:
     bool CleanUp();
 
     void AddController(Controller* controller);
-
+    Controller* GetController(int index);
 
 private:
     std::vector<Controller*> controllers;

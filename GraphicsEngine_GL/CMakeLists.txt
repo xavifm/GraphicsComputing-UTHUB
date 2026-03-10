@@ -9,12 +9,22 @@ file(GLOB_RECURSE SRC_FILES
 
 set(GLAD_SRC GraphicsEngine_GL/glad.c)
 
+add_library(imgui
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui.cpp
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui_draw.cpp
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui_widgets.cpp
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui_tables.cpp
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui_impl_glfw.cpp
+        GraphicsEngine_GL/ThirdParty/include/imgui/imgui_impl_opengl3.cpp
+)
+
 include_directories(
         GraphicsEngine_GL
         GraphicsEngine_GL/Controllers
         GraphicsEngine_GL/Controllers/Camera
         GraphicsEngine_GL/Controllers/Input
         GraphicsEngine_GL/Controllers/OpenGL
+        GraphicsEngine_GL/Controllers/UI
         GraphicsEngine_GL/Controllers/Window
         GraphicsEngine_GL/Controllers/Worlds
         GraphicsEngine_GL/Mesh
@@ -33,4 +43,5 @@ target_link_libraries(GraphicsEngine_GL
         OpenGL::GL
         glfw
         dl
+        imgui
 )

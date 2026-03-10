@@ -66,3 +66,8 @@ void Application::AddController(Controller* controller)
 {
     controllers.push_back(controller);
 }
+
+Controller* Application::GetController(int index)
+{
+    return controllers[index];
+}
