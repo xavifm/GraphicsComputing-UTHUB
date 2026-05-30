@@ -4,12 +4,13 @@
 #include "../../Model/Model.h"
 #include "../../Parameters/Globals.h"
 #include "../Input/InputController.h"
+#include "../Camera/FrameBufferController.h"
 #include "../Camera/CameraController.h"
 
 class WorldController : public Controller
 {
 public:
-    WorldController();
+    WorldController(FrameBufferController* frameBuffer);
     ~WorldController();
 
     bool Init() override;
@@ -23,6 +24,7 @@ private:
     void UpdateMVP();
 
     CameraController* cameraController;
+    FrameBufferController* frameBufferController;
 
 private:
     ShaderProgram* program = nullptr;

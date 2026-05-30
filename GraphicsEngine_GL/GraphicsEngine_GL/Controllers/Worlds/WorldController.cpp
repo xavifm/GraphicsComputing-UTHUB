@@ -6,6 +6,8 @@
 #include <sstream>
 #include <cmath>
 
+#include "FrameBufferController.h"
+
 static std::string ReadTextFile(const std::string& fileName)
 {
     std::ifstream file(fileName);
@@ -21,7 +23,9 @@ static std::string ReadTextFile(const std::string& fileName)
     return ss.str();
 }
 
-WorldController::WorldController() {}
+WorldController::WorldController(FrameBufferController* frameBuffer) {
+    frameBufferController = frameBuffer;
+}
 WorldController::~WorldController() {}
 
 bool WorldController::Init()
@@ -42,6 +46,13 @@ update_status WorldController::Update()
 {
     if (!program)
         return UPDATE_CONTINUE;
+
+    frameBufferController->Bind();
+
+    glViewport(0, 0, 1280, 720);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     cameraController->Update();
     program->Use();
@@ -74,6 +85,8 @@ update_status WorldController::Update()
     {
         model->Draw(program->GetProgramId());
     }
+
+    frameBufferController->Unbind();
 
     return UPDATE_CONTINUE;
 }

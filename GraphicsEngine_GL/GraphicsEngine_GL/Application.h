@@ -18,6 +18,7 @@ public:
 
     void AddController(Controller* controller);
     Controller* GetController(int index);
+    std::vector<Controller*>& GetControllers();
 
 private:
     std::vector<Controller*> controllers;

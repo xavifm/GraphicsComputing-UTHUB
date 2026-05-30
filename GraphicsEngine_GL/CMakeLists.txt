@@ -7,7 +7,8 @@ file(GLOB_RECURSE SRC_FILES
         "GraphicsEngine_GL/*.cpp"
 )
 
-set(GLAD_SRC GraphicsEngine_GL/glad.c)
+set(GLAD_SRC GraphicsEngine_GL/glad.c
+        GraphicsEngine_GL/Controllers/Camera/FrameBufferController.cpp)
 
 add_library(imgui
         GraphicsEngine_GL/ThirdParty/include/imgui/imgui.cpp

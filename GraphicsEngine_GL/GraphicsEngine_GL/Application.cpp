@@ -71,3 +71,7 @@ Controller* Application::GetController(int index)
 {
     return controllers[index];
 }
+
+std::vector<Controller*>& Application::GetControllers() {
+    return controllers;
+}

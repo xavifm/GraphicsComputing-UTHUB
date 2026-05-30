@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "FrameBufferController.h"
 #include "ThirdParty/include/imgui/imgui.h"
 #include "ThirdParty/include/imgui/imgui_impl_glfw.h"
 #include "ThirdParty/include/imgui/imgui_impl_opengl3.h"
@@ -10,7 +11,7 @@
 class ImguiController : public Controller
 {
 public:
-    ImguiController(WindowController* controller);
+    ImguiController(WindowController* controller, FrameBufferController* frameBuffer);
     ~ImguiController();
 
     bool Init() override;
@@ -21,5 +22,6 @@ public:
 private:
     bool contextCreated = false;
     WindowController* windowController;
+    FrameBufferController* frameBufferController;
     GLFWwindow* window;
 };

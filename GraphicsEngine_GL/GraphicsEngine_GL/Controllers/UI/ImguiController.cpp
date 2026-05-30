@@ -3,9 +3,10 @@
 #include <iostream>
 #include "Controllers/Window/WindowController.h"
 
-ImguiController::ImguiController(WindowController* controller)
+ImguiController::ImguiController(WindowController* controller, FrameBufferController* frameBuffer)
 {
     windowController = controller;
+    frameBufferController = frameBuffer;
 }
 
 ImguiController::~ImguiController() {}
@@ -56,14 +57,125 @@ update_status ImguiController::PostUpdate()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Quick Test");
-    ImGui::Text("It works!");
+    ImGuiIO& io = ImGui::GetIO();
 
-    static float value = 0.5f;
-    ImGui::SliderFloat("value", &value, 0.0f, 1.0f);
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(io.DisplaySize);
 
-    if (ImGui::Button("Button"))
-        std::cout << "Button pressed\n";
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+    ImGui::Begin("Game Engine Editor", nullptr, flags);
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            ImGui::MenuItem("New Scene");
+            ImGui::MenuItem("Open Scene");
+            ImGui::MenuItem("Save Scene");
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("GameObject"))
+        {
+            ImGui::MenuItem("Create Empty");
+            ImGui::MenuItem("Create Cube");
+            ImGui::MenuItem("Create Camera");
+            ImGui::MenuItem("Create Light");
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
+    ImVec2 available = ImGui::GetContentRegionAvail();
+
+    float hierarchyWidth = 260.0f;
+    float bottomHeight = 220.0f;
+
+    ImGui::BeginChild("UpperArea", ImVec2(available.x, available.y - bottomHeight), true);
+
+    ImGui::BeginChild("SceneHierarchy", ImVec2(hierarchyWidth, 0), true);
+    ImGui::Text("Scene Hierarchy");
+    ImGui::Separator();
+
+    if (ImGui::TreeNode("Scene"))
+    {
+        ImGui::Selectable("Main Camera");
+        ImGui::Selectable("Directional Light");
+        ImGui::Selectable("Player");
+        ImGui::Selectable("Enemy_01");
+        ImGui::Selectable("Terrain");
+
+        if (ImGui::TreeNode("Environment"))
+        {
+            ImGui::Selectable("Tree_01");
+            ImGui::Selectable("Rock_01");
+            ImGui::Selectable("House");
+            ImGui::TreePop();
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Viewport", ImVec2(0, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Text("Viewport");
+
+    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+    GLuint sceneTexture = frameBufferController->GetColorTexture();
+
+    ImGui::Image(
+        (ImTextureID)(intptr_t)sceneTexture,
+        viewportSize,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+    );
+
+    ImGui::Separator();
+
+    ImGui::EndChild();
+
+    ImGui::EndChild();
+
+    ImGui::BeginChild("FileBrowser", ImVec2(0, bottomHeight), true);
+    ImGui::Text("Asset Browser");
+    ImGui::Separator();
+
+    static char searchBuffer[128] = "";
+    ImGui::InputText("Search files", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+
+    ImGui::Columns(4, nullptr, false);
+
+    const char* files[] =
+    {
+        "Assets",
+        "Scripts",
+        "Materials",
+        "Textures",
+        "Models",
+        "Scenes",
+        "Shaders",
+        "Audio"
+    };
+
+    for (int i = 0; i < IM_ARRAYSIZE(files); ++i)
+    {
+        ImGui::Button(files[i], ImVec2(120, 60));
+        ImGui::NextColumn();
+    }
+
+    ImGui::Columns(1);
+
+    ImGui::EndChild();
 
     ImGui::End();
 

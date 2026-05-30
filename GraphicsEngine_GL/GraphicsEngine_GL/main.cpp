@@ -7,15 +7,21 @@
 #include "Controllers/Worlds/WorldController.h"
 #include "Controllers/Camera/CameraController.h"
 #include "Controllers/UI/ImguiController.h"
+#include "Controllers/Camera/FrameBufferController.h"
 
 int main()
 {
     Application* App = new Application();;
 
     App->AddController(new WindowController());
-    App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0))));
     App->AddController(new OpenGLController());
-    App->AddController(new WorldController());
+    App->AddController(new FrameBufferController());
+    App->AddController(new WorldController(dynamic_cast<FrameBufferController*>(App->GetController(2))));
+    App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0)), dynamic_cast<FrameBufferController*>(App->GetController(2))));
+
+    auto& controllers = App->GetControllers();
+    std::swap(controllers[1], controllers[4]);
+    std::swap(controllers[4], controllers[2]);
 
     if (!App->Init())
     {
