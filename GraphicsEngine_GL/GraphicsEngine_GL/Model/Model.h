@@ -4,6 +4,7 @@
 #include "../Mesh/Mesh.h"
 #include "../Parameters/Globals.h"
 #include "../Texture/Texture.h"
+#include "Component/Component.h"
 
 class Mesh;
 
@@ -11,7 +12,8 @@ namespace model {
     class Model;
 }
 
-class Model {
+class Model : Component
+{
 public:
     Model();
     ~Model();
