@@ -21,6 +21,14 @@ void Object::AddComponent(std::unique_ptr<Component> _component)
     components.push_back(std::move(_component));
 }
 
+void Object::Start()
+{
+}
+
+void Object::Update(float _deltaTime)
+{
+}
+
 template <typename T>
 const T* Object::GetComponent() const noexcept
 {
@@ -61,4 +69,9 @@ std::vector<const T*> Object::GetComponents() const noexcept
     }
 
     return result;
+}
+
+void Object::Destroy()
+{
+    components.clear();
 }

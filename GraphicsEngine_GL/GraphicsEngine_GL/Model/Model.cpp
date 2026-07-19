@@ -223,3 +223,9 @@ Vector3D Model::GetScale() const
 {
     return Scale;
 }
+
+void Model::Update()
+{
+    Component::Update();
+    Draw(program->GetProgramId());
+}

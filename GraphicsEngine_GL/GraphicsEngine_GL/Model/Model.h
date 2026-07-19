@@ -12,7 +12,7 @@ namespace model {
     class Model;
 }
 
-class Model : Component
+class Model : public Component
 {
 public:
     Model();
@@ -25,7 +25,7 @@ public:
     unsigned int GetTotalTriangles() const { return _totalTriangles; }
     unsigned int GetTotalVertices() const { return _totalVertices; }
 
-    void Destroy();
+    void Destroy() override;
 
     Texture* SetupTexture(const std::string textureName);
     void SetPosition(const Vector3D& newPos);
@@ -37,6 +37,8 @@ public:
     std::vector<Mesh*> _mesh_list;
 
     Texture* _texture_attached;
+
+    void Update() override;
 
 private:
     std::vector<unsigned int> _textures;

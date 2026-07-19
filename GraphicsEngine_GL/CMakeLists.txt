@@ -11,7 +11,9 @@ set(GLAD_SRC GraphicsEngine_GL/glad.c
         GraphicsEngine_GL/Controllers/Camera/FrameBufferController.cpp
         GraphicsEngine_GL/Component/Component.cpp
         GraphicsEngine_GL/Component/Component.h
-        GraphicsEngine_GL/Object/GameObject/GameObject.h)
+        GraphicsEngine_GL/Object/GameObject/GameObject.h
+        GraphicsEngine_GL/Object/GameObject/TestGameObject.cpp
+        GraphicsEngine_GL/Object/GameObject/TestGameObject.h)
 
 add_library(imgui
         GraphicsEngine_GL/ThirdParty/include/imgui/imgui.cpp

@@ -7,6 +7,7 @@
 #include "../Camera/FrameBufferController.h"
 #include "../Camera/CameraController.h"
 
+class GameObject;
 //A world hauria d'existir un array de GameObjects, i hauria de cridar el seu update a cada escena (PEX: dibuixo model si el tinc attachat a update), el món s'hauria de carregar per un XML que declari els objectes, o desde la
 //UI en càs de voler construïr i que gravi en xml, opció de save world també en XML
 //Primer provar de carregar harcodejadament GameObjects i que es puguin gestionar en UI
@@ -21,8 +22,7 @@ public:
     bool CleanUp() override;
 
 private:
-    void DestroyModel();
-    void LoadNewModel(const std::string& fileName, const std::string& textureName = "");
+    void DestroyScene();
     void SetupShaders();
     void UpdateMVP();
 
@@ -30,11 +30,10 @@ private:
     FrameBufferController* frameBufferController;
 
 private:
-    ShaderProgram* program = nullptr;
     Shader* vertexShader = nullptr;
     Shader* fragmentShader = nullptr;
 
-    Model* model = nullptr;
+    GameObject* objectTest = nullptr;
 
     Mat4x4 view;
     Mat4x4 proj;

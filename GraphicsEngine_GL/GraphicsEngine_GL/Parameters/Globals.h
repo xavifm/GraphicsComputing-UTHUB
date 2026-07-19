@@ -3,6 +3,9 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <cstring>
+#include "ShaderProgram.h"
+
+inline ShaderProgram* program;
 
 enum update_status
 {
@@ -97,6 +100,15 @@ struct Vector3D {
             throw std::runtime_error("Divided by zero!");
         }
         return Vector3D(x / scalar, y / scalar, z / scalar);
+    }
+
+    Vector3D& operator+=(const Vector3D& other)
+    {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+
+        return *this;
     }
 
     float dot(const Vector3D& other) const {

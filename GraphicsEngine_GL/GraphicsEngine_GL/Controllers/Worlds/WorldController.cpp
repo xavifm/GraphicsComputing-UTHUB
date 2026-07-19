@@ -7,6 +7,8 @@
 #include <cmath>
 
 #include "FrameBufferController.h"
+#include "Object/GameObject/GameObject.h"
+#include "Object/GameObject/TestGameObject.h"
 
 static std::string ReadTextFile(const std::string& fileName)
 {
@@ -34,7 +36,8 @@ bool WorldController::Init()
     cameraController->Init();
     
     SetupShaders();
-    LoadNewModel("forest_nature_set_all_in.obj", "texture_gradient.png");
+    objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
+    objectTest->Start();
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
@@ -80,11 +83,7 @@ update_status WorldController::Update()
     glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "model"), 1, GL_FALSE, &modelMatrix.m[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "u_MVP"), 1, GL_FALSE, &mvp.m[0][0]);
 
-
-    if (model)
-    {
-        model->Draw(program->GetProgramId());
-    }
+    objectTest->Update(0.0f);
 
     frameBufferController->Unbind();
 
@@ -93,7 +92,7 @@ update_status WorldController::Update()
 
 bool WorldController::CleanUp()
 {
-    DestroyModel();
+    DestroyScene();
     
     if (vertexShader) { delete vertexShader; vertexShader = nullptr; }
     if (fragmentShader) { delete fragmentShader; fragmentShader = nullptr; }
@@ -103,23 +102,13 @@ bool WorldController::CleanUp()
     return true;
 }
 
-void WorldController::DestroyModel()
+void WorldController::DestroyScene()
 {
-    if (model)
+    if (objectTest)
     {
-        model->Destroy();
-        delete model;
-        model = nullptr;
-    }
-}
-
-void WorldController::LoadNewModel(const std::string& fileName, const std::string& textureName)
-{
-    DestroyModel();
-    model = new Model();
-    if (!model->LoadModel(fileName, textureName))
-    {
-        std::cerr << "[WorldController] Error loading the model: " << fileName << std::endl;
+        objectTest->Destroy();
+        delete objectTest;
+        objectTest = nullptr;
     }
 }
 
@@ -145,14 +134,15 @@ void WorldController::SetupShaders()
 
 void WorldController::UpdateMVP()
 {
-    Vector3D position = model->GetPosition();
-    Vector3D scale = model->GetScale();
-    
-    Mat4x4 translation = Mat4x4::Translate(position);
-    Mat4x4 scaleMat = Mat4x4::Scale(scale);
-    
-    modelMatrix = translation * scaleMat;
-    
+    if (!objectTest)
+        return;
+
+    Mat4x4 translation = Mat4x4::Translate(objectTest->position);
+    Mat4x4 scaleMatrix = Mat4x4::Scale(objectTest->size);
+
+    modelMatrix = translation * scaleMatrix;
+
     mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
-    glUniformMatrix4fv(uMVP_Location, 1, GL_FALSE, &mvp.m[0][0]);
+
+    glUniformMatrix4fv(uMVP_Location,1, GL_FALSE, &mvp.m[0][0]);
 }
