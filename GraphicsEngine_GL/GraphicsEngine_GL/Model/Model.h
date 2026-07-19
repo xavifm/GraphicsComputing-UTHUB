@@ -43,7 +43,4 @@ public:
 private:
     std::vector<unsigned int> _textures;
     unsigned int _totalTriangles, _totalVertices;
-
-    Vector3D Position = Vector3D(0.0f, 0.1f, 1.f);
-    Vector3D Scale = Vector3D(0.2f, 0.2f, 0.2f);
 };

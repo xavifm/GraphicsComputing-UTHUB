@@ -249,7 +249,6 @@ struct Mat4x4 {
     float* operator[](int index) { return m[index]; }
     const float* operator[](int index) const { return m[index]; }
 
-
     Mat4x4 Transpose() const {
         Mat4x4 result;
         for (int i = 0; i < 4; ++i) {
@@ -258,6 +257,51 @@ struct Mat4x4 {
             }
         }
         return result;
+    }
+
+    static Mat4x4 RotateX(float angleRadians)
+    {
+        Mat4x4 mat;
+
+        const float c = std::cos(angleRadians);
+        const float s = std::sin(angleRadians);
+
+        mat.m[1][1] = c;
+        mat.m[1][2] = s;
+        mat.m[2][1] = -s;
+        mat.m[2][2] = c;
+
+        return mat;
+    }
+
+    static Mat4x4 RotateY(float angleRadians)
+    {
+        Mat4x4 mat;
+
+        const float c = std::cos(angleRadians);
+        const float s = std::sin(angleRadians);
+
+        mat.m[0][0] = c;
+        mat.m[0][2] = -s;
+        mat.m[2][0] = s;
+        mat.m[2][2] = c;
+
+        return mat;
+    }
+
+    static Mat4x4 RotateZ(float angleRadians)
+    {
+        Mat4x4 mat;
+
+        const float c = std::cos(angleRadians);
+        const float s = std::sin(angleRadians);
+
+        mat.m[0][0] = c;
+        mat.m[0][1] = s;
+        mat.m[1][0] = -s;
+        mat.m[1][1] = c;
+
+        return mat;
     }
 
     Mat4x4 Inverse() const {

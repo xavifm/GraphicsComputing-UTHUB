@@ -180,7 +180,6 @@ void Model::CalcNumVerticesTriangles()
     }
 }
 
-
 void Model::Destroy()
 {
     for (auto* mesh : _mesh_list)
@@ -202,26 +201,6 @@ Texture* Model::SetupTexture(const std::string textureName)
     if (textureName.empty()) return nullptr;
 
     return new Texture(textureName);
-}
-
-void Model::SetPosition(const Vector3D& newPos)
-{
-    Position = newPos;
-}
-
-Vector3D Model::GetPosition() const
-{
-    return Position;
-}
-
-void Model::SetScale(const Vector3D& newScale)
-{
-    Scale = newScale;
-}
-
-Vector3D Model::GetScale() const
-{
-    return Scale;
 }
 
 void Model::Update()

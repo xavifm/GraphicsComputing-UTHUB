@@ -138,9 +138,12 @@ void WorldController::UpdateMVP()
         return;
 
     Mat4x4 translation = Mat4x4::Translate(objectTest->position);
+    Mat4x4 rotationX = Mat4x4::RotateX(objectTest->rotation.x);
+    Mat4x4 rotationY = Mat4x4::RotateY(objectTest->rotation.y);
+    Mat4x4 rotationZ = Mat4x4::RotateZ(objectTest->rotation.z);
     Mat4x4 scaleMatrix = Mat4x4::Scale(objectTest->size);
 
-    modelMatrix = translation * scaleMatrix;
+    modelMatrix = translation * rotationX * rotationY * rotationZ * scaleMatrix;
 
     mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
 

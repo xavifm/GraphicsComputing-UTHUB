@@ -20,5 +20,6 @@ public:
     {
         GameObject::Update(_deltaTime);
         position += Vector3D(0.0f, 0.0f, 0.0f);
+        rotation += Vector3D(0.0f, 0.001f, 0.0f);
     }
 };
