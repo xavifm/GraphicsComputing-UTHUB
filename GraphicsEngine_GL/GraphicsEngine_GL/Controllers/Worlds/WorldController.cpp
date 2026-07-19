@@ -36,8 +36,8 @@ bool WorldController::Init()
     cameraController->Init();
     
     SetupShaders();
-    objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
-    objectTest->Start();
+    //objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
+    //objectTest->Start();
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
@@ -83,7 +83,11 @@ update_status WorldController::Update()
     glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "model"), 1, GL_FALSE, &modelMatrix.m[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "u_MVP"), 1, GL_FALSE, &mvp.m[0][0]);
 
-    objectTest->Update(0.0f);
+    for (auto object : GameObjects)
+    {
+        object->Update(0.0f);
+    }
+    //objectTest->Update(0.0f);
 
     frameBufferController->Unbind();
 
@@ -110,6 +114,11 @@ void WorldController::DestroyScene()
         delete objectTest;
         objectTest = nullptr;
     }
+
+    for (auto object : GameObjects)
+    {
+        object->Destroy();
+    }
 }
 
 void WorldController::SetupShaders()
@@ -134,18 +143,33 @@ void WorldController::SetupShaders()
 
 void WorldController::UpdateMVP()
 {
-    if (!objectTest)
-        return;
+    for (GameObject* gameObject : GameObjects)
+    {
+        if (gameObject == nullptr)
+            continue;
 
-    Mat4x4 translation = Mat4x4::Translate(objectTest->position);
-    Mat4x4 rotationX = Mat4x4::RotateX(objectTest->rotation.x);
-    Mat4x4 rotationY = Mat4x4::RotateY(objectTest->rotation.y);
-    Mat4x4 rotationZ = Mat4x4::RotateZ(objectTest->rotation.z);
-    Mat4x4 scaleMatrix = Mat4x4::Scale(objectTest->size);
+        const Model* model = gameObject->GetComponent<Model>();
 
-    modelMatrix = translation * rotationX * rotationY * rotationZ * scaleMatrix;
+        if (model == nullptr)
+            continue;
 
-    mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
+        Mat4x4 translation = Mat4x4::Translate(gameObject->position);
 
-    glUniformMatrix4fv(uMVP_Location,1, GL_FALSE, &mvp.m[0][0]);
+        Mat4x4 rotationX = Mat4x4::RotateX(gameObject->rotation.x);
+        Mat4x4 rotationY = Mat4x4::RotateY(gameObject->rotation.y);
+        Mat4x4 rotationZ = Mat4x4::RotateZ(gameObject->rotation.z);
+
+        Mat4x4 scale = Mat4x4::Scale(gameObject->size);
+
+        modelMatrix = translation * rotationX * rotationY * rotationZ * scale;
+
+        mvp = modelMatrix * cameraController->GetViewMatrix() * cameraController->GetProjMatrix();
+
+        glUniformMatrix4fv(uMVP_Location, 1, GL_FALSE, &mvp.m[0][0]);
+    }
+}
+
+void WorldController::AddGameObject(GameObject* _gameObject)
+{
+
 }

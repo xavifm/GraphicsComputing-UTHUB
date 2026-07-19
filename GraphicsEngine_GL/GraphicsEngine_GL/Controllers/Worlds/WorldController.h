@@ -21,18 +21,20 @@ public:
     update_status Update() override;
     bool CleanUp() override;
 
+    std::vector<GameObject*> GameObjects;
+
 private:
     void DestroyScene();
     void SetupShaders();
     void UpdateMVP();
 
+    void AddGameObject(GameObject* _gameObject);
+
     CameraController* cameraController;
     FrameBufferController* frameBufferController;
 
-private:
     Shader* vertexShader = nullptr;
     Shader* fragmentShader = nullptr;
-
     GameObject* objectTest = nullptr;
 
     Mat4x4 view;

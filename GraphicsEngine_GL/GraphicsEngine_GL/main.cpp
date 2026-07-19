@@ -17,7 +17,7 @@ int main()
     App->AddController(new OpenGLController());
     App->AddController(new FrameBufferController());
     App->AddController(new WorldController(dynamic_cast<FrameBufferController*>(App->GetController(2))));
-    App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0)), dynamic_cast<FrameBufferController*>(App->GetController(2))));
+    App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0)), dynamic_cast<FrameBufferController*>(App->GetController(2)), dynamic_cast<WorldController*>(App->GetController(3))));
 
     auto& controllers = App->GetControllers();
     std::swap(controllers[1], controllers[4]);
