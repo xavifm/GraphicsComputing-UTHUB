@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include "../Mesh/Mesh.h"
@@ -18,8 +19,11 @@ public:
     Model();
     ~Model();
 
+    bool LoadEmptyModel();
     bool LoadModel(const std::string& fileName, const std::string& textureName = "");
     void Draw(unsigned int program) const;
+
+    bool ModelIsLoaded = false;
 
     void CalcNumVerticesTriangles();
     unsigned int GetTotalTriangles() const { return _totalTriangles; }
@@ -27,7 +31,8 @@ public:
 
     void Destroy() override;
 
-    Texture* SetupTexture(const std::string textureName);
+    std::unique_ptr<Texture> SetupTexture(const std::string &textureName);
+
     void SetPosition(const Vector3D& newPos);
     Vector3D GetPosition() const;
 
@@ -36,7 +41,7 @@ public:
 
     std::vector<Mesh*> _mesh_list;
 
-    Texture* _texture_attached;
+    std::unique_ptr<Texture> _texture_attached;
 
     void Update() override;
 

@@ -1,20 +1,133 @@
 #include "ImguiController.h"
 
-#include <iostream>
-#include "Controllers/Window/WindowController.h"
-#include "Object/GameObject/GameObject.h"
-#include "Model/Model.h"
 #include <algorithm>
+#include <array>
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-ImguiController::ImguiController(WindowController* controller, FrameBufferController* frameBuffer, WorldController* controllerWorld)
+#include "Controllers/Window/WindowController.h"
+#include "Model/Model.h"
+#include "Object/GameObject/GameObject.h"
+
+namespace
 {
-    windowController = controller;
-    frameBufferController = frameBuffer;
-    worldController = controllerWorld;
-    selectedGameObject = nullptr;
+    struct ModelEditorState
+    {
+        std::array<char, 256> modelPath{};
+        std::array<char, 256> texturePath{};
+    };
+
+    std::unordered_map<Model*, ModelEditorState> g_modelEditorStates;
+
+    ModelEditorState& GetModelEditorState(Model* model)
+    {
+        return g_modelEditorStates[model];
+    }
+
+    void RemoveModelEditorState(Model* model)
+    {
+        if (model != nullptr)
+        {
+            g_modelEditorStates.erase(model);
+        }
+    }
+
+    Model* AddModelComponent(GameObject* gameObject)
+    {
+        if (gameObject == nullptr)
+        {
+            return nullptr;
+        }
+
+        Model* component = gameObject->AddComponent<Model>();
+        ModelEditorState& modelEditorState = GetModelEditorState(component);
+        modelEditorState.modelPath[0] = '\0';
+
+        return component;
+    }
+
+    GameObject* CreateGameObject(
+        WorldController* worldController,
+        const std::string& baseName,
+        const bool addModel)
+    {
+        if (worldController == nullptr)
+        {
+            return nullptr;
+        }
+
+        auto* gameObject = new GameObject(
+            Vector3D(0.0f, 0.0f, 0.0f),
+            Vector3D(1.0f, 1.0f, 1.0f));
+
+        const std::size_t objectNumber =
+            worldController->GameObjects.size() + 1;
+
+        gameObject->SetName(
+            baseName + " " + std::to_string(objectNumber));
+
+        if (addModel)
+        {
+            gameObject->AddComponent<Model>();
+        }
+
+        worldController->AddGameObject(gameObject);
+
+        return gameObject;
+    }
+
+    void DestroyGameObject(
+        WorldController* worldController,
+        GameObject*& selectedGameObject,
+        GameObject* gameObject)
+    {
+        if (worldController == nullptr || gameObject == nullptr)
+        {
+            return;
+        }
+
+        if (Model *model = gameObject->GetComponent<Model>())
+        {
+            RemoveModelEditorState(model);
+        }
+
+        auto& gameObjects = worldController->GameObjects;
+        const auto iterator =
+            std::find(gameObjects.begin(), gameObjects.end(), gameObject);
+
+        if (iterator == gameObjects.end())
+        {
+            return;
+        }
+
+        if (selectedGameObject == gameObject)
+        {
+            selectedGameObject = nullptr;
+        }
+
+        (*iterator)->Destroy();
+        delete *iterator;
+        gameObjects.erase(iterator);
+    }
 }
 
-ImguiController::~ImguiController() {}
+ImguiController::ImguiController(
+    WindowController* controller,
+    FrameBufferController* frameBuffer,
+    WorldController* controllerWorld)
+    : windowController(controller),
+      frameBufferController(frameBuffer),
+      worldController(controllerWorld),
+      window(nullptr),
+      selectedGameObject(nullptr)
+{
+}
+
+ImguiController::~ImguiController() = default;
 
 bool ImguiController::Init()
 {
@@ -25,6 +138,7 @@ bool ImguiController::Init()
     }
 
     window = windowController->GetWindow();
+
     if (window == nullptr)
     {
         std::cout << "ImguiController: GLFWwindow nullptr\n";
@@ -43,6 +157,8 @@ bool ImguiController::Init()
 
     if (!ImGui_ImplOpenGL3_Init("#version 330"))
     {
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
         std::cout << "ImguiController: ImGui_ImplOpenGL3_Init failed\n";
         return false;
     }
@@ -75,15 +191,7 @@ update_status ImguiController::PostUpdate()
         ImGuiWindowFlags_NoBringToFrontOnFocus |
         ImGuiWindowFlags_MenuBar;
 
-    ImGui::Begin(
-        "Game Engine Editor",
-        nullptr,
-        editorFlags
-    );
-
-    // ---------------------------------------------------------------------
-    // Barra de menú
-    // ---------------------------------------------------------------------
+    ImGui::Begin("Game Engine Editor", nullptr, editorFlags);
 
     if (ImGui::BeginMenuBar())
     {
@@ -92,28 +200,13 @@ update_status ImguiController::PostUpdate()
             if (ImGui::MenuItem("New Scene"))
             {
                 selectedGameObject = nullptr;
-
-                // Cal implementar la neteja des de WorldController.
                 // worldController->ClearScene();
             }
 
-            if (ImGui::MenuItem("Open Scene"))
-            {
-                // Obrir escena.
-            }
-
-            if (ImGui::MenuItem("Save Scene"))
-            {
-                // Guardar escena.
-            }
-
+            ImGui::MenuItem("Open Scene");
+            ImGui::MenuItem("Save Scene");
             ImGui::Separator();
-
-            if (ImGui::MenuItem("Exit"))
-            {
-                // Tancar aplicació.
-            }
-
+            ImGui::MenuItem("Exit");
             ImGui::EndMenu();
         }
 
@@ -121,54 +214,14 @@ update_status ImguiController::PostUpdate()
         {
             if (ImGui::MenuItem("Create Empty"))
             {
-                if (worldController != nullptr)
-                {
-                    GameObject* newGameObject = new GameObject(
-                        Vector3D(0.0f, 0.0f, 0.0f),
-                        Vector3D(1.0f, 1.0f, 1.0f)
-                    );
-
-                    const std::size_t objectNumber =
-                        worldController->GameObjects.size() + 1;
-
-                    newGameObject->SetName(
-                        "GameObject " + std::to_string(objectNumber)
-                    );
-
-                    worldController->GameObjects.push_back(newGameObject);
-
-                    newGameObject->Start();
-
-                    selectedGameObject = newGameObject;
-                }
+                selectedGameObject =
+                    CreateGameObject(worldController, "GameObject", false);
             }
 
             if (ImGui::MenuItem("Create Model"))
             {
-                if (worldController != nullptr)
-                {
-                    GameObject* newGameObject = new GameObject(
-                        Vector3D(0.0f, 0.0f, 0.0f),
-                        Vector3D(1.0f, 1.0f, 1.0f)
-                    );
-
-                    const std::size_t objectNumber =
-                        worldController->GameObjects.size() + 1;
-
-                    newGameObject->SetName(
-                        "Model " + std::to_string(objectNumber)
-                    );
-
-                    newGameObject->AddComponent(
-                        std::make_unique<Model>()
-                    );
-
-                    worldController->GameObjects.push_back(newGameObject);
-
-                    newGameObject->Start();
-
-                    selectedGameObject = newGameObject;
-                }
+                selectedGameObject =
+                    CreateGameObject(worldController, "Model", true);
             }
 
             ImGui::EndMenu();
@@ -177,36 +230,24 @@ update_status ImguiController::PostUpdate()
         ImGui::EndMenuBar();
     }
 
-    ImVec2 available = ImGui::GetContentRegionAvail();
-
-    const float hierarchyWidth = 260.0f;
-    const float inspectorWidth = 320.0f;
-    const float bottomHeight = 220.0f;
+    const ImVec2 available = ImGui::GetContentRegionAvail();
+    constexpr float hierarchyWidth = 260.0f;
+    constexpr float inspectorWidth = 320.0f;
+    constexpr float bottomHeight = 220.0f;
 
     const float upperHeight =
-        available.y > bottomHeight
-            ? available.y - bottomHeight
-            : 0.0f;
-
-    // ---------------------------------------------------------------------
-    // Zona superior
-    // ---------------------------------------------------------------------
+        available.y > bottomHeight ? available.y - bottomHeight : 0.0f;
 
     ImGui::BeginChild(
         "UpperArea",
         ImVec2(available.x, upperHeight),
-        false
-    );
+        false);
 
-    // ---------------------------------------------------------------------
-    // Scene Hierarchy
-    // ---------------------------------------------------------------------
-
+    // Scene hierarchy
     ImGui::BeginChild(
         "SceneHierarchy",
         ImVec2(hierarchyWidth, 0.0f),
-        true
-    );
+        true);
 
     ImGui::TextUnformatted("Scene Hierarchy");
     ImGui::Separator();
@@ -217,19 +258,12 @@ update_status ImguiController::PostUpdate()
     }
     else
     {
-        std::vector<GameObject*>& gameObjects =
-            worldController->GameObjects;
+        auto& gameObjects = worldController->GameObjects;
 
-        ImGui::Text(
-            "GameObjects: %zu",
-            gameObjects.size()
-        );
-
+        ImGui::Text("GameObjects: %zu", gameObjects.size());
         ImGui::Separator();
 
-        if (ImGui::TreeNodeEx(
-                "Scene",
-                ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen))
         {
             for (std::size_t i = 0; i < gameObjects.size(); ++i)
             {
@@ -240,103 +274,74 @@ update_status ImguiController::PostUpdate()
                     continue;
                 }
 
-                ImGui::PushID(static_cast<int>(i));
+                ImGui::PushID(gameObject);
 
-                const bool isSelected =
-                    selectedGameObject == gameObject;
-
+                const bool isSelected = selectedGameObject == gameObject;
                 std::string visibleName = gameObject->GetName();
 
                 if (visibleName.empty())
                 {
-                    visibleName =
-                        "GameObject " + std::to_string(i);
+                    visibleName = "GameObject " + std::to_string(i + 1);
                 }
 
-                if (ImGui::Selectable(
-                        visibleName.c_str(),
-                        isSelected))
+                if (ImGui::Selectable(visibleName.c_str(), isSelected))
                 {
                     selectedGameObject = gameObject;
                 }
 
-                if (ImGui::BeginPopupContextItem(
-                        "GameObjectContextMenu"))
+                bool deleteRequested = false;
+
+                if (ImGui::BeginPopupContextItem("GameObjectContextMenu"))
                 {
+                    const bool alreadyHasModel =
+                        gameObject->GetComponent<Model>() != nullptr;
+
+                    if (alreadyHasModel)
+                    {
+                        ImGui::BeginDisabled();
+                    }
+
                     if (ImGui::MenuItem("Add Model Component"))
                     {
-                        if (gameObject->GetComponent<Model>() == nullptr)
-                        {
-                            gameObject->AddComponent(
-                                std::make_unique<Model>()
-                            );
-                        }
+                        AddModelComponent(gameObject);
+                    }
+
+                    if (alreadyHasModel)
+                    {
+                        ImGui::EndDisabled();
                     }
 
                     ImGui::Separator();
-
-                    if (ImGui::MenuItem("Delete"))
-                    {
-                        if (selectedGameObject == gameObject)
-                        {
-                            selectedGameObject = nullptr;
-                        }
-
-                        gameObject->Destroy();
-                        delete gameObject;
-
-                        gameObjects.erase(
-                            gameObjects.begin() +
-                            static_cast<std::ptrdiff_t>(i)
-                        );
-
-                        ImGui::EndPopup();
-                        ImGui::PopID();
-
-                        break;
-                    }
-
+                    deleteRequested = ImGui::MenuItem("Delete");
                     ImGui::EndPopup();
                 }
 
                 ImGui::PopID();
+
+                if (deleteRequested)
+                {
+                    DestroyGameObject(
+                        worldController,
+                        selectedGameObject,
+                        gameObject);
+                    break;
+                }
             }
 
             ImGui::TreePop();
         }
 
-        if (ImGui::Button(
-                "Create Empty",
-                ImVec2(-1.0f, 0.0f)))
+        if (ImGui::Button("Create Empty", ImVec2(-1.0f, 0.0f)))
         {
-            GameObject* newGameObject = new GameObject(
-                Vector3D(0.0f, 0.0f, 0.0f),
-                Vector3D(1.0f, 1.0f, 1.0f)
-            );
-
-            const std::size_t objectNumber =
-                gameObjects.size() + 1;
-
-            newGameObject->SetName(
-                "GameObject " + std::to_string(objectNumber)
-            );
-
-            gameObjects.push_back(newGameObject);
-
-            newGameObject->Start();
-
-            selectedGameObject = newGameObject;
+            selectedGameObject =
+                CreateGameObject(worldController, "GameObject", false);
         }
     }
 
     ImGui::EndChild();
-
     ImGui::SameLine();
 
-    // ---------------------------------------------------------------------
     // Viewport
-    // ---------------------------------------------------------------------
-
     float viewportWidth =
         ImGui::GetContentRegionAvail().x - inspectorWidth;
 
@@ -353,24 +358,14 @@ update_status ImguiController::PostUpdate()
         "Viewport",
         ImVec2(viewportWidth, 0.0f),
         true,
-        viewportFlags
-    );
+        viewportFlags);
 
     ImGui::TextUnformatted("Viewport");
     ImGui::Separator();
 
-    ImVec2 viewportSize =
-        ImGui::GetContentRegionAvail();
-
-    if (viewportSize.x < 1.0f)
-    {
-        viewportSize.x = 1.0f;
-    }
-
-    if (viewportSize.y < 1.0f)
-    {
-        viewportSize.y = 1.0f;
-    }
+    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+    viewportSize.x = std::max(viewportSize.x, 1.0f);
+    viewportSize.y = std::max(viewportSize.y, 1.0f);
 
     if (frameBufferController != nullptr)
     {
@@ -386,51 +381,32 @@ update_status ImguiController::PostUpdate()
     }
     else
     {
-        ImGui::TextDisabled(
-            "FrameBufferController no disponible."
-        );
+        ImGui::TextDisabled("FrameBufferController no disponible.");
     }
 
     ImGui::EndChild();
-
     ImGui::SameLine();
 
-    // ---------------------------------------------------------------------
     // Inspector
-    // ---------------------------------------------------------------------
-
-    ImGui::BeginChild(
-        "Inspector",
-        ImVec2(0.0f, 0.0f),
-        true
-    );
+    ImGui::BeginChild("Inspector", ImVec2(0.0f, 0.0f), true);
 
     ImGui::TextUnformatted("Inspector");
     ImGui::Separator();
 
     if (selectedGameObject == nullptr)
     {
-        ImGui::TextDisabled(
-            "No hi ha cap GameObject seleccionat."
-        );
+        ImGui::TextDisabled("No hi ha cap GameObject seleccionat.");
     }
     else
     {
-        // -----------------------------------------------------------------
-        // Nom
-        // -----------------------------------------------------------------
-
-        char nameBuffer[128] = {};
-
-        const std::string& currentName =
-            selectedGameObject->GetName();
+        char nameBuffer[128]{};
+        const std::string& currentName = selectedGameObject->GetName();
 
         std::snprintf(
             nameBuffer,
             sizeof(nameBuffer),
             "%s",
-            currentName.c_str()
-        );
+            currentName.c_str());
 
         ImGui::SetNextItemWidth(-1.0f);
 
@@ -438,12 +414,8 @@ update_status ImguiController::PostUpdate()
                 "##GameObjectName",
                 nameBuffer,
                 sizeof(nameBuffer),
-                ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            selectedGameObject->SetName(nameBuffer);
-        }
-
-        if (ImGui::IsItemDeactivatedAfterEdit())
+                ImGuiInputTextFlags_EnterReturnsTrue) ||
+            ImGui::IsItemDeactivatedAfterEdit())
         {
             selectedGameObject->SetName(nameBuffer);
         }
@@ -451,59 +423,35 @@ update_status ImguiController::PostUpdate()
         ImGui::Spacing();
         ImGui::Separator();
 
-        // -----------------------------------------------------------------
-        // Transform
-        // -----------------------------------------------------------------
-
         if (ImGui::CollapsingHeader(
                 "Transform",
                 ImGuiTreeNodeFlags_DefaultOpen))
         {
-            float position[3] =
-            {
+            float position[3] = {
                 selectedGameObject->position.x,
                 selectedGameObject->position.y,
-                selectedGameObject->position.z
-            };
+                selectedGameObject->position.z};
 
-            float rotation[3] =
-            {
+            float rotation[3] = {
                 selectedGameObject->rotation.x,
                 selectedGameObject->rotation.y,
-                selectedGameObject->rotation.z
-            };
+                selectedGameObject->rotation.z};
 
-            float scale[3] =
-            {
+            float scale[3] = {
                 selectedGameObject->size.x,
                 selectedGameObject->size.y,
-                selectedGameObject->size.z
-            };
+                selectedGameObject->size.z};
 
-            if (ImGui::DragFloat3(
-                    "Position",
-                    position,
-                    0.1f))
+            if (ImGui::DragFloat3("Position", position, 0.1f))
             {
                 selectedGameObject->position =
-                    Vector3D(
-                        position[0],
-                        position[1],
-                        position[2]
-                    );
+                    Vector3D(position[0], position[1], position[2]);
             }
 
-            if (ImGui::DragFloat3(
-                    "Rotation",
-                    rotation,
-                    0.5f))
+            if (ImGui::DragFloat3("Rotation", rotation, 0.5f))
             {
                 selectedGameObject->rotation =
-                    Vector3D(
-                        rotation[0],
-                        rotation[1],
-                        rotation[2]
-                    );
+                    Vector3D(rotation[0], rotation[1], rotation[2]);
             }
 
             if (ImGui::DragFloat3(
@@ -514,17 +462,9 @@ update_status ImguiController::PostUpdate()
                     1000.0f))
             {
                 selectedGameObject->size =
-                    Vector3D(
-                        scale[0],
-                        scale[1],
-                        scale[2]
-                    );
+                    Vector3D(scale[0], scale[1], scale[2]);
             }
         }
-
-        // -----------------------------------------------------------------
-        // Components
-        // -----------------------------------------------------------------
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -536,67 +476,37 @@ update_status ImguiController::PostUpdate()
 
         if (components.empty())
         {
-            ImGui::TextDisabled(
-                "Aquest GameObject no té components."
-            );
+            ImGui::TextDisabled("Aquest GameObject no té components.");
         }
 
-        for (std::size_t i = 0;
-             i < components.size();
-             ++i)
+        for (std::size_t i = 0; i < components.size(); ++i)
         {
-            Component* component =
-                components[i].get();
+            Component* component = components[i];
 
             if (component == nullptr)
             {
                 continue;
             }
 
-            ImGui::PushID(static_cast<int>(i));
+            ImGui::PushID(component);
 
-            Model* modelComponent =
-                dynamic_cast<Model*>(component);
-
-            if (modelComponent != nullptr)
+            if (Model* modelComponent = dynamic_cast<Model*>(component))
             {
-                const bool modelOpen =
-                    ImGui::CollapsingHeader(
+                if (ImGui::CollapsingHeader(
                         "Model",
-                        ImGuiTreeNodeFlags_DefaultOpen
-                    );
-
-                if (modelOpen)
+                        ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGui::Text(
                         "Vertices: %u",
-                        modelComponent->GetTotalVertices()
-                    );
-
+                        modelComponent->GetTotalVertices());
                     ImGui::Text(
                         "Triangles: %u",
-                        modelComponent->GetTotalTriangles()
-                    );
+                        modelComponent->GetTotalTriangles());
 
-                    Vector3D modelPosition =
-                        selectedGameObject->position;
-
-                    float componentPosition[3] =
-                    {
-                        modelPosition.x,
-                        modelPosition.y,
-                        modelPosition.z
-                    };
-
-                    Vector3D modelScale =
-                        selectedGameObject->size;
-
-                    float componentScale[3] =
-                    {
-                        modelScale.x,
-                        modelScale.y,
-                        modelScale.z
-                    };
+                    float componentScale[3] = {
+                        selectedGameObject->size.x,
+                        selectedGameObject->size.y,
+                        selectedGameObject->size.z};
 
                     if (ImGui::DragFloat3(
                             "Model Scale",
@@ -605,54 +515,71 @@ update_status ImguiController::PostUpdate()
                             0.001f,
                             1000.0f))
                     {
-                        selectedGameObject->size =
-                            Vector3D(
-                                componentScale[0],
-                                componentScale[1],
-                                componentScale[2]);
+                        selectedGameObject->size = Vector3D(
+                            componentScale[0],
+                            componentScale[1],
+                            componentScale[2]);
                     }
 
-                    static char modelPath[256] = "";
-                    static char texturePath[256] = "";
+                    ModelEditorState& editorState =
+                        GetModelEditorState(modelComponent);
 
                     ImGui::InputText(
                         "Model file",
-                        modelPath,
-                        IM_ARRAYSIZE(modelPath)
-                    );
+                        editorState.modelPath.data(),
+                        editorState.modelPath.size());
 
                     ImGui::InputText(
                         "Texture file",
-                        texturePath,
-                        IM_ARRAYSIZE(texturePath)
-                    );
+                        editorState.texturePath.data(),
+                        editorState.texturePath.size());
+
+                    const bool hasModelPath =
+                        editorState.modelPath[0] != '\0';
+
+                    if (!hasModelPath)
+                    {
+                        ImGui::BeginDisabled();
+                    }
 
                     if (ImGui::Button("Load Model"))
                     {
-                        if (texturePath[0] != '\0')
+                        try
                         {
-                            modelComponent->LoadModel(
-                                modelPath,
-                                texturePath
-                            );
-                        }
-                        else
-                        {
-                            modelComponent->LoadModel(
-                                modelPath
-                            );
-                        }
+                            if (editorState.texturePath[0] != '\0')
+                            {
+                                modelComponent->LoadModel(
+                                    editorState.modelPath.data(),
+                                    editorState.texturePath.data());
+                            }
+                            else
+                            {
+                                modelComponent->LoadModel(
+                                    editorState.modelPath.data());
+                            }
 
-                        modelComponent
-                            ->CalcNumVerticesTriangles();
+                            modelComponent->CalcNumVerticesTriangles();
+                        }
+                        catch (const std::exception& exception)
+                        {
+                            std::cerr
+                                << "Error loading model: "
+                                << exception.what()
+                                << '\n';
+                        }
+                    }
+
+                    if (!hasModelPath)
+                    {
+                        ImGui::EndDisabled();
+                        ImGui::TextDisabled(
+                            "Selecciona un fitxer de model abans de carregar.");
                     }
                 }
             }
             else
             {
-                ImGui::TextDisabled(
-                    "Component desconegut"
-                );
+                ImGui::TextDisabled("Component desconegut");
             }
 
             ImGui::PopID();
@@ -662,25 +589,15 @@ update_status ImguiController::PostUpdate()
         ImGui::Separator();
         ImGui::Spacing();
 
-        // -----------------------------------------------------------------
-        // Afegir components
-        // -----------------------------------------------------------------
-
-        if (ImGui::Button(
-                "Add Component",
-                ImVec2(-1.0f, 0.0f)))
+        if (ImGui::Button("Add Component", ImVec2(-1.0f, 0.0f)))
         {
-            ImGui::OpenPopup(
-                "AddComponentPopup"
-            );
+            ImGui::OpenPopup("AddComponentPopup");
         }
 
-        if (ImGui::BeginPopup(
-                "AddComponentPopup"))
+        if (ImGui::BeginPopup("AddComponentPopup"))
         {
             const bool alreadyHasModel =
-                selectedGameObject
-                    ->GetComponent<Model>() != nullptr;
+                selectedGameObject->GetComponent<Model>() != nullptr;
 
             if (alreadyHasModel)
             {
@@ -689,9 +606,7 @@ update_status ImguiController::PostUpdate()
 
             if (ImGui::MenuItem("Model"))
             {
-                selectedGameObject->AddComponent(
-                    std::make_unique<Model>()
-                );
+                AddModelComponent(selectedGameObject);
             }
 
             if (alreadyHasModel)
@@ -704,17 +619,11 @@ update_status ImguiController::PostUpdate()
 
         ImGui::Spacing();
 
-        // -----------------------------------------------------------------
-        // Eliminar GameObject
-        // -----------------------------------------------------------------
-
         if (ImGui::Button(
                 "Delete GameObject",
                 ImVec2(-1.0f, 0.0f)))
         {
-            ImGui::OpenPopup(
-                "DeleteGameObjectPopup"
-            );
+            ImGui::OpenPopup("DeleteGameObjectPopup");
         }
 
         if (ImGui::BeginPopupModal(
@@ -724,48 +633,23 @@ update_status ImguiController::PostUpdate()
         {
             ImGui::Text(
                 "Vols eliminar '%s'?",
-                selectedGameObject
-                    ->GetName()
-                    .c_str()
-            );
+                selectedGameObject->GetName().c_str());
 
             ImGui::Spacing();
 
-            if (ImGui::Button(
-                    "Delete",
-                    ImVec2(120.0f, 0.0f)))
+            if (ImGui::Button("Delete", ImVec2(120.0f, 0.0f)))
             {
-                if (worldController != nullptr)
-                {
-                    std::vector<GameObject*>& gameObjects =
-                        worldController->GameObjects;
-
-                    const auto iterator =
-                        std::find(
-                            gameObjects.begin(),
-                            gameObjects.end(),
-                            selectedGameObject
-                        );
-
-                    if (iterator != gameObjects.end())
-                    {
-                        (*iterator)->Destroy();
-                        delete *iterator;
-
-                        gameObjects.erase(iterator);
-                    }
-                }
-
-                selectedGameObject = nullptr;
-
+                GameObject* objectToDelete = selectedGameObject;
+                DestroyGameObject(
+                    worldController,
+                    selectedGameObject,
+                    objectToDelete);
                 ImGui::CloseCurrentPopup();
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button(
-                    "Cancel",
-                    ImVec2(120.0f, 0.0f)))
+            if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f)))
             {
                 ImGui::CloseCurrentPopup();
             }
@@ -775,37 +659,28 @@ update_status ImguiController::PostUpdate()
     }
 
     ImGui::EndChild();
-
     ImGui::EndChild();
 
-    // ---------------------------------------------------------------------
-    // Asset Browser
-    // ---------------------------------------------------------------------
-
+    // Asset browser
     ImGui::BeginChild(
         "FileBrowser",
         ImVec2(0.0f, bottomHeight),
-        true
-    );
+        true);
 
     ImGui::TextUnformatted("Asset Browser");
     ImGui::Separator();
 
     static char searchBuffer[128] = "";
-
     ImGui::SetNextItemWidth(300.0f);
-
     ImGui::InputTextWithHint(
         "##AssetSearch",
         "Search files...",
         searchBuffer,
-        IM_ARRAYSIZE(searchBuffer)
-    );
+        IM_ARRAYSIZE(searchBuffer));
 
     ImGui::Spacing();
 
-    const char* files[] =
-    {
+    const char* files[] = {
         "Assets",
         "Scripts",
         "Materials",
@@ -813,71 +688,47 @@ update_status ImguiController::PostUpdate()
         "Models",
         "Scenes",
         "Shaders",
-        "Audio"
-    };
+        "Audio"};
 
-    const float assetButtonWidth = 120.0f;
-    const float assetButtonHeight = 60.0f;
-    const float spacing =
-        ImGui::GetStyle().ItemSpacing.x;
+    constexpr float assetButtonWidth = 120.0f;
+    constexpr float assetButtonHeight = 60.0f;
+    const float spacing = ImGui::GetStyle().ItemSpacing.x;
+    const float contentWidth = ImGui::GetContentRegionAvail().x;
 
-    const float contentWidth =
-        ImGui::GetContentRegionAvail().x;
+    int columnCount = static_cast<int>(
+        contentWidth / (assetButtonWidth + spacing));
+    columnCount = std::max(columnCount, 1);
 
-    int columnCount =
-        static_cast<int>(
-            contentWidth /
-            (assetButtonWidth + spacing)
-        );
+    ImGui::Columns(columnCount, "AssetBrowserColumns", false);
 
-    if (columnCount < 1)
+    for (const char* file : files)
     {
-        columnCount = 1;
-    }
-
-    ImGui::Columns(
-        columnCount,
-        "AssetBrowserColumns",
-        false
-    );
-
-    for (int i = 0;
-         i < IM_ARRAYSIZE(files);
-         ++i)
-    {
-        if (ImGui::Button(
-                files[i],
-                ImVec2(
-                    assetButtonWidth,
-                    assetButtonHeight
-                )))
-        {
-            // Obrir carpeta.
-        }
-
+        ImGui::Button(
+            file,
+            ImVec2(assetButtonWidth, assetButtonHeight));
         ImGui::NextColumn();
     }
 
     ImGui::Columns(1);
-
     ImGui::EndChild();
-
     ImGui::End();
 
     ImGui::Render();
-
-    ImGui_ImplOpenGL3_RenderDrawData(
-        ImGui::GetDrawData()
-    );
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     return UPDATE_CONTINUE;
 }
 
 bool ImguiController::CleanUp()
 {
+    g_modelEditorStates.clear();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    window = nullptr;
+    selectedGameObject = nullptr;
 
     std::cout << "ImguiController: CleanUp OK\n";
     return true;

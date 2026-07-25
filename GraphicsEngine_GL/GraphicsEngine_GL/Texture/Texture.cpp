@@ -7,11 +7,21 @@ Texture::Texture(const std::string& filePath)
 
 Texture::~Texture() 
 {
-    glDeleteTextures(1, &textureID);
+    if (textureID != 0)
+    {
+        glDeleteTextures(1, &textureID);
+        textureID = 0;
+    }
 }
 
-void Texture::Bind() const 
+void Texture::Bind() const
 {
+    if (textureID == 0)
+    {
+        std::cerr << "[Texture] Intent de Bind amb textureID = 0\n";
+        return;
+    }
+
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 

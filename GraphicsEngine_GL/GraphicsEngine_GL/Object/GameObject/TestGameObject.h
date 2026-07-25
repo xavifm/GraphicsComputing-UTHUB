@@ -7,13 +7,13 @@ class TestGameObject : public GameObject
 public:
     TestGameObject(const Vector3D& position, const Vector3D& size) : GameObject(position, size) {}
 
-    std::unique_ptr<Model> model;
+    Model* model;
 
     void Start() override
     {
-        model = std::make_unique<Model>();
+        model = new Model();
         model->LoadModel("forest_nature_set_all_in.obj", "texture_gradient.png");
-        AddComponent(std::move(model));
+        AddComponent(model);
     }
 
     void Update(float _deltaTime = 0.0f) override

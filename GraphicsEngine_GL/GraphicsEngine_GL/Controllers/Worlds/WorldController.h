@@ -21,14 +21,14 @@ public:
     update_status Update() override;
     bool CleanUp() override;
 
+    void AddGameObject(GameObject* _gameObject);
+
     std::vector<GameObject*> GameObjects;
 
 private:
     void DestroyScene();
     void SetupShaders();
-    void UpdateMVP();
-
-    void AddGameObject(GameObject* _gameObject);
+    void UpdateMVP(GameObject* _gameObject);
 
     CameraController* cameraController;
     FrameBufferController* frameBufferController;

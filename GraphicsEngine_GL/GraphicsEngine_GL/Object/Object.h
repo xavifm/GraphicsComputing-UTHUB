@@ -12,13 +12,33 @@ public:
     Object() = default;
     virtual ~Object() = default;
 
-    const std::string& GetName() const noexcept;
+    std::string& GetName();
     void SetName(std::string _name);
 
-    void AddComponent(std::unique_ptr<Component> _component);
+    void AddComponent(Component* component);
+
+    template<typename T, typename... Args>
+    T* AddComponent(Args&&... args)
+    {
+        static_assert(
+            std::is_base_of_v<Component, T>,
+            "T should inherit from Component"
+        );
+
+        if (T* existing = GetComponent<T>())
+        {
+            return existing;
+        }
+
+        T* component = new T(std::forward<Args>(args)...);
+
+        AddComponent(component);
+
+        return component;
+    }
 
     template <typename T>
-    const T* GetComponent() const noexcept
+    T* GetComponent()
     {
         if (!std::is_base_of_v<Component, T>)
         {
@@ -26,9 +46,9 @@ public:
             return nullptr;
         }
 
-        for (const auto& component : components)
+        for (auto& component : components)
         {
-            if (const T* result = dynamic_cast<const T*>(component.get()))
+            if (T* result = dynamic_cast<T*>(component))
             {
                 return result;
             }
@@ -38,7 +58,7 @@ public:
     }
 
     template <typename T>
-    std::vector<const T*> GetComponents() const noexcept
+    std::vector<T*> GetComponents()
     {
         if (!std::is_base_of_v<Component, T>)
         {
@@ -46,11 +66,11 @@ public:
             return nullptr;
         }
 
-        std::vector<const T*> result;
+        std::vector<T*> result;
 
-        for (const auto& component : components)
+        for (auto& component : components)
         {
-            if (const T* casted = dynamic_cast<const T*>(component.get()))
+            if (T* casted = dynamic_cast<T*>(component))
             {
                 result.push_back(casted);
             }
@@ -59,7 +79,7 @@ public:
         return result;
     }
 
-    const std::vector<std::unique_ptr<Component>>& GetFullComponentsList() { return components; }
+    std::vector<Component*>& GetFullComponentsList() { return components; }
 
     virtual void Start();
 
@@ -69,5 +89,5 @@ public:
 
 private:
     std::string name;
-    std::vector<std::unique_ptr<Component>> components;
+    std::vector<Component*> components;
 };

@@ -16,6 +16,22 @@ Model::~Model()
     Destroy(); 
 }
 
+bool Model::LoadEmptyModel()
+{
+    for (Mesh* mesh : _mesh_list)
+    {
+        delete mesh;
+    }
+
+    _mesh_list.clear();
+
+    _totalVertices = 0;
+    _totalTriangles = 0;
+    _texture_attached = 0;
+
+    return true;
+}
+
 bool Model::LoadModel(const std::string& fileName, const std::string& textureName)
 {
     std::ifstream file(fileName);
@@ -196,11 +212,18 @@ void Model::Destroy()
     _totalVertices = 0;
 }
 
-Texture* Model::SetupTexture(const std::string textureName)
+std::unique_ptr<Texture> Model::SetupTexture(
+    const std::string& textureName)
 {
-    if (textureName.empty()) return nullptr;
+    if (textureName.empty())
+        return nullptr;
 
-    return new Texture(textureName);
+    auto result = std::make_unique<Texture>(textureName);
+
+    if (!result->IsValid())
+        return nullptr;
+
+    return result;
 }
 
 void Model::Update()
