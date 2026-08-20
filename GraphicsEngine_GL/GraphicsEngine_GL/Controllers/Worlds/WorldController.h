@@ -1,4 +1,5 @@
 #pragma once
+#include "WorldLoader.h"
 #include "../Controller.h"
 #include "../../Shader/ShaderProgram.h"
 #include "../../Model/Model.h"
@@ -29,6 +30,10 @@ private:
     void DestroyScene();
     void SetupShaders();
     void UpdateMVP(GameObject* _gameObject);
+
+    bool LoadWorld(std::string _fileName);
+
+    WorldLoader* worldLoader;
 
     CameraController* cameraController;
     FrameBufferController* frameBufferController;

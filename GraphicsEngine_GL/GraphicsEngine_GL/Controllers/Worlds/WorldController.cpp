@@ -210,6 +210,24 @@ void WorldController::UpdateMVP(GameObject* gameObject)
         &mvp.m[0][0]);
 }
 
+bool WorldController::LoadWorld(std::string _fileName)
+{
+    if (!worldLoader)
+        worldLoader = new WorldLoader();
+
+    CleanUp();
+
+    std::vector<Object*> objects = worldLoader->GetWorldObjects(_fileName);
+
+    for (auto Object: objects)
+    {
+        if (GameObject* gameObject = dynamic_cast<GameObject*>(Object))
+        {
+            AddGameObject(gameObject);
+        }
+    }
+}
+
 void WorldController::AddGameObject(GameObject* _gameObject)
 {
     if (_gameObject == nullptr)

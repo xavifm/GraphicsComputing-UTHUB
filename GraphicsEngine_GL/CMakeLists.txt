@@ -13,7 +13,9 @@ set(GLAD_SRC GraphicsEngine_GL/glad.c
         GraphicsEngine_GL/Component/Component.h
         GraphicsEngine_GL/Object/GameObject/GameObject.h
         GraphicsEngine_GL/Object/GameObject/TestGameObject.cpp
-        GraphicsEngine_GL/Object/GameObject/TestGameObject.h)
+        GraphicsEngine_GL/Object/GameObject/TestGameObject.h
+        GraphicsEngine_GL/Controllers/Worlds/WorldLoader.cpp
+        GraphicsEngine_GL/Controllers/Worlds/WorldLoader.h)
 
 add_library(imgui
         GraphicsEngine_GL/ThirdParty/include/imgui/imgui.cpp
