@@ -248,11 +248,18 @@ bool WorldController::LoadWorld(std::string _fileName)
 
 GameObject* WorldController::FindGameObject(std::string _name)
 {
+    GameObject* query = nullptr;
+
     for (auto object : GameObjects)
     {
         if (object->GetName() == _name)
-            return object;
+        {
+            query = object;
+            break;
+        }
     }
+
+    return query;
 }
 
 bool WorldController::SaveWorld(std::string _fileName)
