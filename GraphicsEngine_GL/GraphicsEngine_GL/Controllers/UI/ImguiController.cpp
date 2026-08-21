@@ -290,9 +290,16 @@ update_status ImguiController::PostUpdate()
         ImGui::Text("GameObjects: %zu", gameObjects.size());
         ImGui::Separator();
 
+        // Petició de reparentatge diferida fins que s'hagi acabat
+        // de dibuixar la jerarquia del frame actual.
+        GameObject* objectToReparent = nullptr;
+        GameObject* newParent = nullptr;
+        bool reparentRequested = false;
+
         const bool sceneOpen =
             ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen);
 
+        // Drop sobre Scene = convertir l'objecte en root.
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload* payload =
@@ -305,8 +312,9 @@ update_status ImguiController::PostUpdate()
 
                     if (draggedObject != nullptr)
                     {
-                        draggedObject->parent = nullptr;
-                        selectedGameObject = draggedObject;
+                        objectToReparent = draggedObject;
+                        newParent = nullptr;
+                        reparentRequested = true;
                     }
                 }
             }
@@ -454,8 +462,9 @@ update_status ImguiController::PostUpdate()
 
                                     if (!createsCycle)
                                     {
-                                        draggedObject->parent = gameObject;
-                                        selectedGameObject = draggedObject;
+                                        objectToReparent = draggedObject;
+                                        newParent = gameObject;
+                                        reparentRequested = true;
                                     }
                                 }
                             }
@@ -540,6 +549,13 @@ update_status ImguiController::PostUpdate()
             }
 
             ImGui::TreePop();
+        }
+
+        // Apliquem el canvi quan ja no estem recorrent la jerarquia.
+        if (reparentRequested && objectToReparent != nullptr)
+        {
+            objectToReparent->parent = newParent;
+            selectedGameObject = objectToReparent;
         }
 
         if (ImGui::Button("Create Empty", ImVec2(-1.0f, 0.0f)))

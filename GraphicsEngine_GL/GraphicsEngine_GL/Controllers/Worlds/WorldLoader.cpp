@@ -187,9 +187,12 @@ bool WorldLoader::SaveWorld(
                  << std::quoted(gameObject->GetName())
                  << "\n";
 
-            file << "PARENT_OBJECT "
-                 << std::quoted(gameObject->parent->GetName())
-                 << "\n";
+            if (gameObject->parent != nullptr)
+            {
+                file << "PARENT_OBJECT "
+                     << std::quoted(gameObject->parent->GetName())
+                     << "\n";
+            }
 
             file << "POSITION "
                  << gameObject->position.x << " "
