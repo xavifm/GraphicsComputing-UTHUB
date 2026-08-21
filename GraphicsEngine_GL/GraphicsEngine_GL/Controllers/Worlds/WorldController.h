@@ -24,6 +24,9 @@ public:
 
     void AddGameObject(GameObject* _gameObject);
     bool LoadWorld(std::string _fileName);
+
+    GameObject *FindGameObject(std::string _name);
+
     bool SaveWorld(std::string _fileName);
 
     std::vector<GameObject*> GameObjects;

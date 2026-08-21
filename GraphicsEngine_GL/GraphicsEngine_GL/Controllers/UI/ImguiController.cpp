@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "Controllers/Window/WindowController.h"
@@ -102,6 +103,14 @@ namespace
         if (iterator == gameObjects.end())
         {
             return;
+        }
+
+        for (GameObject* sceneObject : gameObjects)
+        {
+            if (sceneObject != nullptr && sceneObject->parent == gameObject)
+            {
+                sceneObject->parent = nullptr;
+            }
         }
 
         if (selectedGameObject == gameObject)
@@ -281,69 +290,253 @@ update_status ImguiController::PostUpdate()
         ImGui::Text("GameObjects: %zu", gameObjects.size());
         ImGui::Separator();
 
-        if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            for (std::size_t i = 0; i < gameObjects.size(); ++i)
-            {
-                GameObject* gameObject = gameObjects[i];
+        const bool sceneOpen =
+            ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen);
 
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload* payload =
+                    ImGui::AcceptDragDropPayload("GAMEOBJECT_HIERARCHY"))
+            {
+                if (payload->DataSize == sizeof(GameObject*))
+                {
+                    GameObject* draggedObject =
+                        *static_cast<GameObject* const*>(payload->Data);
+
+                    if (draggedObject != nullptr)
+                    {
+                        draggedObject->parent = nullptr;
+                        selectedGameObject = draggedObject;
+                    }
+                }
+            }
+
+            ImGui::EndDragDropTarget();
+        }
+
+        if (sceneOpen)
+        {
+            GameObject* gameObjectToDelete = nullptr;
+
+            auto& sceneObjects = gameObjects;
+
+            auto existsInScene = [&](GameObject* object) -> bool
+            {
+                return object != nullptr &&
+                       std::find(
+                           sceneObjects.begin(),
+                           sceneObjects.end(),
+                           object) != sceneObjects.end();
+            };
+
+            std::unordered_map<GameObject*, std::vector<GameObject*>> children;
+            std::vector<GameObject*> roots;
+
+            for (GameObject* gameObject : sceneObjects)
+            {
                 if (gameObject == nullptr)
                 {
                     continue;
                 }
 
-                ImGui::PushID(gameObject);
-
-                const bool isSelected = selectedGameObject == gameObject;
-                std::string visibleName = gameObject->GetName();
-
-                if (visibleName.empty())
+                if (gameObject->parent != nullptr &&
+                    gameObject->parent != gameObject &&
+                    existsInScene(gameObject->parent))
                 {
-                    visibleName = "GameObject " + std::to_string(i + 1);
+                    children[gameObject->parent].push_back(gameObject);
                 }
-
-                if (ImGui::Selectable(visibleName.c_str(), isSelected))
+                else
                 {
-                    selectedGameObject = gameObject;
+                    roots.push_back(gameObject);
                 }
+            }
 
-                bool deleteRequested = false;
+            std::unordered_set<GameObject*> drawnObjects;
 
-                if (ImGui::BeginPopupContextItem("GameObjectContextMenu"))
+            auto drawGameObject =
+                [&](auto&& self, GameObject* gameObject) -> void
                 {
-                    const bool alreadyHasModel =
-                        gameObject->GetComponent<Model>() != nullptr;
-
-                    if (alreadyHasModel)
+                    if (gameObject == nullptr)
                     {
-                        ImGui::BeginDisabled();
+                        return;
                     }
 
-                    if (ImGui::MenuItem("Add Model Component"))
+                    if (!drawnObjects.insert(gameObject).second)
                     {
-                        AddModelComponent(gameObject);
+                        return;
                     }
 
-                    if (alreadyHasModel)
+                    const auto childrenIt = children.find(gameObject);
+                    const bool hasChildren =
+                        childrenIt != children.end() &&
+                        !childrenIt->second.empty();
+
+                    std::string visibleName = gameObject->GetName();
+
+                    if (visibleName.empty())
                     {
-                        ImGui::EndDisabled();
+                        visibleName = "GameObject";
                     }
 
-                    ImGui::Separator();
-                    deleteRequested = ImGui::MenuItem("Delete");
-                    ImGui::EndPopup();
-                }
+                    ImGui::PushID(gameObject);
 
-                ImGui::PopID();
+                    ImGuiTreeNodeFlags flags =
+                        ImGuiTreeNodeFlags_OpenOnArrow |
+                        ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                        ImGuiTreeNodeFlags_SpanAvailWidth;
 
-                if (deleteRequested)
+                    if (selectedGameObject == gameObject)
+                    {
+                        flags |= ImGuiTreeNodeFlags_Selected;
+                    }
+
+                    if (hasChildren)
+                    {
+                        flags |= ImGuiTreeNodeFlags_DefaultOpen;
+                    }
+                    else
+                    {
+                        flags |= ImGuiTreeNodeFlags_Leaf |
+                                 ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                    }
+
+                    const bool nodeOpen = ImGui::TreeNodeEx(
+                        "##GameObjectHierarchyNode",
+                        flags,
+                        "%s",
+                        visibleName.c_str());
+
+                    // Drag source: permet arrossegar aquest GameObject.
+                    if (ImGui::BeginDragDropSource())
+                    {
+                        GameObject* draggedObject = gameObject;
+
+                        ImGui::SetDragDropPayload(
+                            "GAMEOBJECT_HIERARCHY",
+                            &draggedObject,
+                            sizeof(GameObject*));
+
+                        ImGui::Text(
+                            "Move %s",
+                            visibleName.c_str());
+
+                        ImGui::EndDragDropSource();
+                    }
+
+                    if (ImGui::BeginDragDropTarget())
+                    {
+                        if (const ImGuiPayload* payload =
+                                ImGui::AcceptDragDropPayload(
+                                    "GAMEOBJECT_HIERARCHY"))
+                        {
+                            if (payload->DataSize == sizeof(GameObject*))
+                            {
+                                GameObject* draggedObject =
+                                    *static_cast<GameObject* const*>(
+                                        payload->Data);
+
+                                if (draggedObject != nullptr &&
+                                    draggedObject != gameObject)
+                                {
+                                    bool createsCycle = false;
+                                    GameObject* ancestor = gameObject;
+
+                                    while (ancestor != nullptr)
+                                    {
+                                        if (ancestor == draggedObject)
+                                        {
+                                            createsCycle = true;
+                                            break;
+                                        }
+
+                                        ancestor = ancestor->parent;
+                                    }
+
+                                    if (!createsCycle)
+                                    {
+                                        draggedObject->parent = gameObject;
+                                        selectedGameObject = draggedObject;
+                                    }
+                                }
+                            }
+                        }
+
+                        ImGui::EndDragDropTarget();
+                    }
+
+                    if (ImGui::IsItemClicked() &&
+                        !ImGui::IsItemToggledOpen())
+                    {
+                        selectedGameObject = gameObject;
+                    }
+
+                    if (ImGui::BeginPopupContextItem("GameObjectContextMenu"))
+                    {
+                        const bool alreadyHasModel =
+                            gameObject->GetComponent<Model>() != nullptr;
+
+                        if (alreadyHasModel)
+                        {
+                            ImGui::BeginDisabled();
+                        }
+
+                        if (ImGui::MenuItem("Add Model Component"))
+                        {
+                            AddModelComponent(gameObject);
+                        }
+
+                        if (alreadyHasModel)
+                        {
+                            ImGui::EndDisabled();
+                        }
+
+                        ImGui::Separator();
+
+                        if (ImGui::MenuItem("Delete"))
+                        {
+                            gameObjectToDelete = gameObject;
+                        }
+
+                        ImGui::EndPopup();
+                    }
+
+                    if (hasChildren && nodeOpen)
+                    {
+                        for (GameObject* child : childrenIt->second)
+                        {
+                            self(self, child);
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::PopID();
+                };
+
+            // Primer dibuixem totes les arrels.
+            for (GameObject* root : roots)
+            {
+                drawGameObject(drawGameObject, root);
+            }
+
+            // Fallback de seguretat:
+            // si hi ha dades de parentatge circulars/corruptes, cap objecte
+            // de GameObjects queda completament invisible.
+            for (GameObject* gameObject : sceneObjects)
+            {
+                if (gameObject != nullptr &&
+                    drawnObjects.find(gameObject) == drawnObjects.end())
                 {
-                    DestroyGameObject(
-                        worldController,
-                        selectedGameObject,
-                        gameObject);
-                    break;
+                    drawGameObject(drawGameObject, gameObject);
                 }
+            }
+
+            if (gameObjectToDelete != nullptr)
+            {
+                DestroyGameObject(
+                    worldController,
+                    selectedGameObject,
+                    gameObjectToDelete);
             }
 
             ImGui::TreePop();

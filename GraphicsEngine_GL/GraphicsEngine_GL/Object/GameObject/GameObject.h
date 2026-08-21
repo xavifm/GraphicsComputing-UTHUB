@@ -9,6 +9,7 @@ public:
     Vector3D rotation;
     Vector3D size;
     GameObject* parent;
+    std::string parentName = "";
 
     GameObject(const Vector3D& _position, const Vector3D& _size) { position = _position; size = _size; }
 

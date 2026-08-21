@@ -63,6 +63,13 @@ std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName)
                     gameObject->SetName(name);
                 }
 
+                else if (token == "PARENT_OBJECT")
+                {
+                    std::string parentNameStr;
+                    file >> std::quoted(parentNameStr);
+                    gameObject->parentName = parentNameStr;
+                }
+
                 else if (token == "POSITION")
                 {
                     file >> gameObject->position.x
@@ -178,6 +185,10 @@ bool WorldLoader::SaveWorld(
 
             file << "NAME "
                  << std::quoted(gameObject->GetName())
+                 << "\n";
+
+            file << "PARENT_OBJECT "
+                 << std::quoted(gameObject->parent->GetName())
                  << "\n";
 
             file << "POSITION "

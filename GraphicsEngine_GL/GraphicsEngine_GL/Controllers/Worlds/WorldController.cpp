@@ -231,6 +231,12 @@ bool WorldController::LoadWorld(std::string _fileName)
         }
 
         AddGameObject(Object);
+
+        if (Object->parentName != "")
+        {
+            Object->parent = FindGameObject(Object->parentName);
+        }
+
         Object->Start();
 
         if (!success)
@@ -238,6 +244,15 @@ bool WorldController::LoadWorld(std::string _fileName)
     }
 
     return success;
+}
+
+GameObject* WorldController::FindGameObject(std::string _name)
+{
+    for (auto object : GameObjects)
+    {
+        if (object->GetName() == _name)
+            return object;
+    }
 }
 
 bool WorldController::SaveWorld(std::string _fileName)
