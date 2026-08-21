@@ -8,6 +8,7 @@ public:
     Vector3D position;
     Vector3D rotation;
     Vector3D size;
+    GameObject* parent;
 
     GameObject(const Vector3D& _position, const Vector3D& _size) { position = _position; size = _size; }
 
