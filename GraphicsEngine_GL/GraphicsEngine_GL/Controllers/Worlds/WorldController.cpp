@@ -212,20 +212,31 @@ void WorldController::UpdateMVP(GameObject* gameObject)
 
 bool WorldController::LoadWorld(std::string _fileName)
 {
+    bool success = false;
+
     if (!worldLoader)
         worldLoader = new WorldLoader();
 
     CleanUp();
 
-    std::vector<Object*> objects = worldLoader->GetWorldObjects(_fileName);
+    std::vector<GameObject*> objects = worldLoader->GetWorldObjects(_fileName);
 
     for (auto Object: objects)
     {
-        if (GameObject* gameObject = dynamic_cast<GameObject*>(Object))
-        {
-            AddGameObject(gameObject);
-        }
+        AddGameObject(Object);
+
+        if (!success)
+            success = true;
     }
+
+    return success;
+}
+
+bool WorldController::SaveWorld(std::string _fileName)
+{
+    bool success = worldLoader->SaveWorld(GameObjects, _fileName);
+
+    return success;
 }
 
 void WorldController::AddGameObject(GameObject* _gameObject)

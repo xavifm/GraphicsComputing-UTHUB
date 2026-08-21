@@ -23,6 +23,8 @@ public:
     bool CleanUp() override;
 
     void AddGameObject(GameObject* _gameObject);
+    bool LoadWorld(std::string _fileName);
+    bool SaveWorld(std::string _fileName);
 
     std::vector<GameObject*> GameObjects;
 
@@ -30,8 +32,6 @@ private:
     void DestroyScene();
     void SetupShaders();
     void UpdateMVP(GameObject* _gameObject);
-
-    bool LoadWorld(std::string _fileName);
 
     WorldLoader* worldLoader;
 

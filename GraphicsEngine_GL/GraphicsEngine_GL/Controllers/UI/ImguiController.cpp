@@ -203,8 +203,26 @@ update_status ImguiController::PostUpdate()
                 // worldController->ClearScene();
             }
 
-            ImGui::MenuItem("Open Scene");
-            ImGui::MenuItem("Save Scene");
+            if (ImGui::MenuItem("Open Scene"))
+            {
+                bool LoadedWorld = worldController->LoadWorld("testScene.sav");
+
+                if (!LoadedWorld)
+                {
+                    std::cerr << "Failed to load scene." << std::endl;
+                }
+            }
+
+            if (ImGui::MenuItem("Save Scene"))
+            {
+                bool SavedWorld = worldController->SaveWorld("testScene.sav");
+
+                if (!SavedWorld)
+                {
+                    std::cerr << "Failed to save scene." << std::endl;
+                }
+            }
+
             ImGui::Separator();
             ImGui::MenuItem("Exit");
             ImGui::EndMenu();
