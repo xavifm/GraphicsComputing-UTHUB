@@ -111,6 +111,16 @@ std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName)
                                  >> modelScale.z;
                         }
 
+                        else if (token == "MODEL_FILE")
+                        {
+                            file >> model->FileName;
+                        }
+
+                        else if (token == "MODEL_TEXTURE")
+                        {
+                            file >> model->TextureName;
+                        }
+
                         else if (token == "END_MODEL")
                         {
                             break;
@@ -213,6 +223,12 @@ bool WorldLoader::SaveWorld(
                          << modelScale.x << " "
                          << modelScale.y << " "
                          << modelScale.z << "\n";
+
+                    file << "MODEL_FILE "
+                         << model->FileName << "\n";
+
+                    file << "MODEL_TEXTURE "
+                         << model->TextureName << "\n";
 
                     file << "END_MODEL\n";
                 }

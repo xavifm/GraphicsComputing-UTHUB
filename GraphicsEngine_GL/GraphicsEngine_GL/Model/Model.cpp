@@ -41,6 +41,8 @@ bool Model::LoadModel(const std::string& fileName, const std::string& textureNam
         return false;
     }
 
+    FileName = fileName;
+
     std::vector<float> positions;
     std::vector<float> texCoords;
     std::vector<unsigned int> indices;
@@ -212,8 +214,7 @@ void Model::Destroy()
     _totalVertices = 0;
 }
 
-std::unique_ptr<Texture> Model::SetupTexture(
-    const std::string& textureName)
+std::unique_ptr<Texture> Model::SetupTexture(const std::string& textureName)
 {
     if (textureName.empty())
         return nullptr;
@@ -222,6 +223,8 @@ std::unique_ptr<Texture> Model::SetupTexture(
 
     if (!result->IsValid())
         return nullptr;
+
+    TextureName = textureName;
 
     return result;
 }

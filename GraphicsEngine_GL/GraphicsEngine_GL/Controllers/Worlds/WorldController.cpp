@@ -217,13 +217,21 @@ bool WorldController::LoadWorld(std::string _fileName)
     if (!worldLoader)
         worldLoader = new WorldLoader();
 
-    CleanUp();
+    DestroyScene();
 
     std::vector<GameObject*> objects = worldLoader->GetWorldObjects(_fileName);
 
     for (auto Object: objects)
     {
+        Model* model = Object->GetComponent<Model>();
+
+        if (model)
+        {
+            model->LoadModel(model->FileName, model->TextureName);
+        }
+
         AddGameObject(Object);
+        Object->Start();
 
         if (!success)
             success = true;

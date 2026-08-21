@@ -45,6 +45,9 @@ public:
 
     void Update() override;
 
+    std::string FileName;
+    std::string TextureName;
+
 private:
     std::vector<unsigned int> _textures;
     unsigned int _totalTriangles, _totalVertices;
