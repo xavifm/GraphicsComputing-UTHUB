@@ -6,6 +6,7 @@
 #include <string>
 
 #include "Model.h"
+#include "Component/ComponentRegistry.h"
 #include "Object/Object.h"
 #include "Object/GameObject//GameObject.h"
 #include "Model/Model.h"
@@ -92,50 +93,23 @@ std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName)
                 }
 
                 // -------------------------------------------------
-                // MODEL COMPONENT
+                // COMPONENT
                 // -------------------------------------------------
 
-                else if (token == "MODEL")
+                else if (token == "COMPONENT")
                 {
-                    Model* model = gameObject->AddComponent<Model>();
+                    std::string componentType;
+                    file >> componentType;
 
-                    Vector3D modelPosition = { 0.0f, 0.0f, 0.0f };
-                    Vector3D modelScale    = { 1.0f, 1.0f, 1.0f };
+                    Component* component = ComponentRegistry::Create(componentType, *gameObject);
 
-                    while (file >> token)
+                    component->Load(file);
+
+                    if (!file)
                     {
-                        if (token == "MODEL_POSITION")
-                        {
-                            file >> modelPosition.x
-                                 >> modelPosition.y
-                                 >> modelPosition.z;
-                        }
-
-                        else if (token == "MODEL_SCALE")
-                        {
-                            file >> modelScale.x
-                                 >> modelScale.y
-                                 >> modelScale.z;
-                        }
-
-                        else if (token == "MODEL_FILE")
-                        {
-                            file >> model->FileName;
-                        }
-
-                        else if (token == "MODEL_TEXTURE")
-                        {
-                            file >> model->TextureName;
-                        }
-
-                        else if (token == "END_MODEL")
-                        {
-                            break;
-                        }
+                        throw std::runtime_error(
+                            "Error reading the component: " + componentType);
                     }
-
-                    //model->SetPosition(modelPosition);
-                    //model->SetScale(modelScale);
                 }
 
                 else if (token == "END_OBJECT")
@@ -209,43 +183,17 @@ bool WorldLoader::SaveWorld(
                  << gameObject->size.y << " "
                  << gameObject->size.z << "\n";
 
-
             // -----------------------------------------------------
             // COMPONENTS
             // -----------------------------------------------------
 
-            for (Component* component :
-                 gameObject->GetFullComponentsList())
+            for (Component* component : gameObject->GetFullComponentsList())
             {
-                if (component == nullptr)
+                if (!component)
                     continue;
 
-                // MODEL
-                if (Model* model = dynamic_cast<Model*>(component))
-                {
-                    file << "MODEL\n";
-
-                    Vector3D modelPosition = gameObject->position;
-                    Vector3D modelScale    = gameObject->size;
-
-                    file << "MODEL_POSITION "
-                         << modelPosition.x << " "
-                         << modelPosition.y << " "
-                         << modelPosition.z << "\n";
-
-                    file << "MODEL_SCALE "
-                         << modelScale.x << " "
-                         << modelScale.y << " "
-                         << modelScale.z << "\n";
-
-                    file << "MODEL_FILE "
-                         << model->FileName << "\n";
-
-                    file << "MODEL_TEXTURE "
-                         << model->TextureName << "\n";
-
-                    file << "END_MODEL\n";
-                }
+                file << "COMPONENT " << component->GetTypeName() << "\n";
+                component->Save(file);
             }
 
             file << "END_OBJECT\n\n";

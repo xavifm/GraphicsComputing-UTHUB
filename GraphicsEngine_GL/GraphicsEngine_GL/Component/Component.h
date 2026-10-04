@@ -1,4 +1,5 @@
 #pragma once
+#include <iosfwd>
 
 class Object;
 
@@ -11,6 +12,11 @@ public:
 
     void SetOwner(Object* newOwner);
     Object* GetOwner() const;
+
+    virtual const char* GetTypeName() const = 0;
+
+    virtual void Save(std::ostream& file) const = 0;
+    virtual void Load(std::istream& file) = 0;
 
 protected:
     Object* owner = nullptr;

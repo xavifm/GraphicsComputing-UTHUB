@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Application.h"
+#include "Component/ComponentRegistry.h"
 
 #include "Controllers/Window/WindowController.h"
 #include "Controllers/OpenGL/OpenGLController.h"
@@ -12,6 +13,9 @@
 int main()
 {
     Application* App = new Application();;
+
+    //això caldria que detectés tot el regsitre de classes i l'afegís dinàmicament enlloc de hardcoded, com a unity ho fa
+    ComponentRegistry::Register<Model>("Model");
 
     App->AddController(new WindowController());
     App->AddController(new OpenGLController());

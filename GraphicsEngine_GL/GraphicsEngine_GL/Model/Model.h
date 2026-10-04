@@ -5,7 +5,7 @@
 #include "../Mesh/Mesh.h"
 #include "../Parameters/Globals.h"
 #include "../Texture/Texture.h"
-#include "Component/Component.h"
+#include "Component/SerializableComponent.h"
 
 class Mesh;
 
@@ -13,11 +13,28 @@ namespace model {
     class Model;
 }
 
-class Model : public Component
+class Model : public SerializableComponent<Model>
 {
 public:
     Model();
     ~Model();
+
+    [[nodiscard]] const char* GetTypeName() const override
+    {
+        return "Model";
+    }
+
+    template<class Visitor>
+    void Fields(Visitor& visitor)
+    {
+        VisitFields(*this, visitor);
+    }
+
+    template<class Visitor>
+    void Fields(Visitor& visitor) const
+    {
+        VisitFields(*this, visitor);
+    }
 
     bool LoadEmptyModel();
     bool LoadModel(const std::string& fileName, const std::string& textureName = "");
@@ -51,4 +68,11 @@ public:
 private:
     std::vector<unsigned int> _textures;
     unsigned int _totalTriangles, _totalVertices;
+
+    template<class Self, class Visitor>
+    static void VisitFields(Self& self, Visitor& visitor)
+    {
+        visitor("FileName", self.FileName);
+        visitor("TextureName", self.TextureName);
+    }
 };
