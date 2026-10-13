@@ -14,6 +14,10 @@ int main()
 {
     Application* App = new Application();;
 
+    //Abans obrir una UI diferent de crear projecte, importar
+    //Obrir projecte (.projectFile), detectar totes les classes noves (components) i registrar-les, hauria d'iterar pel fitxer e importar les rutes de fitxers i components
+    //PEX: Model.h, Model.cpp, ComponentRegistry::Register<Model>("Model");
+    //els fitxers que carreguen escenes (.sav) seràn les noves escenes, es carregaràn desde l'editor doble clic i obrirà l'escena
     //això caldria que detectés tot el regsitre de classes i l'afegís dinàmicament enlloc de hardcoded, com a unity ho fa
     ComponentRegistry::Register<Model>("Model");
 
