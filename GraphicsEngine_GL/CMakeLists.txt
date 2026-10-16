@@ -8,7 +8,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(OpenGL REQUIRED)
 
 # --------------------------------------------------
-# Project and generator
+# Read the projectFile components
 # --------------------------------------------------
 
 set(ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsEngine_GL")
@@ -17,9 +17,7 @@ set(GENERATOR_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/generate_components.py")
 
 set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 set(GENERATED_CPP "${GENERATED_DIR}/RegisterComponents.cpp")
-set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h"
-        GraphicsEngine_GL/Controllers/UI/ImGuiFieldVisitor.cpp
-        GraphicsEngine_GL/Controllers/UI/ImGuiFieldVisitor.h)
+set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h")
 
 get_filename_component(PROJECT_DIR "${PROJECT_FILE}" DIRECTORY)
 
@@ -125,13 +123,10 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         "${ENGINE_DIR}/*.cpp"
 )
 
-# ImGui es compila en una biblioteca separada.
 list(FILTER SRC_FILES EXCLUDE REGEX "/ThirdParty/include/imgui/")
 
-# Evita compilar còpies antigues del registre.
 list(FILTER SRC_FILES EXCLUDE REGEX "/RegisterComponents\\.cpp$")
 
-# Inclou també components que estiguin fora d'ENGINE_DIR.
 list(APPEND SRC_FILES ${COMPONENT_SOURCES})
 list(REMOVE_DUPLICATES SRC_FILES)
 
