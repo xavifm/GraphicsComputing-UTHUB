@@ -1,7 +1,6 @@
 #include <iostream>
 #include "Application.h"
-#include "Component/ComponentRegistry.h"
-
+#include <Generated/RegisterComponents.h>
 #include "Controllers/Window/WindowController.h"
 #include "Controllers/OpenGL/OpenGLController.h"
 #include "Controllers/Input/InputController.h"
@@ -19,7 +18,8 @@ int main()
     //PEX: Model.h, Model.cpp, ComponentRegistry::Register<Model>("Model");
     //els fitxers que carreguen escenes (.sav) seràn les noves escenes, es carregaràn desde l'editor doble clic i obrirà l'escena
     //això caldria que detectés tot el regsitre de classes i l'afegís dinàmicament enlloc de hardcoded, com a unity ho fa
-    ComponentRegistry::Register<Model>("Model");
+    //ComponentRegistry::Register<Model>("Model");
+    RegisterProjectComponents();
 
     App->AddController(new WindowController());
     App->AddController(new OpenGLController());
