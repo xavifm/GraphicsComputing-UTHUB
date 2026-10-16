@@ -730,6 +730,39 @@ update_status ImguiController::PostUpdate()
                 }
             }
 
+            //INTERNAL ENGINE FUNCTIONS ONLY
+            if (Model* modelComponent = dynamic_cast<Model*>(component))
+            {
+                if (ImGui::Button("Load Model"))
+                {
+                    try
+                    {
+                        ModelEditorState& editorState = GetModelEditorState(modelComponent);
+
+                        if (editorState.texturePath[0] != '\0')
+                        {
+                            modelComponent->LoadModel(
+                                editorState.modelPath.data(),
+                                editorState.texturePath.data());
+                        }
+                        else
+                        {
+                            modelComponent->LoadModel(
+                                editorState.modelPath.data());
+                        }
+
+                        modelComponent->CalcNumVerticesTriangles();
+                    }
+                    catch (const std::exception& exception)
+                    {
+                        std::cerr
+                            << "Error loading model: "
+                            << exception.what()
+                            << '\n';
+                    }
+                }
+            }
+
             ImGui::PopID();
         }
 
