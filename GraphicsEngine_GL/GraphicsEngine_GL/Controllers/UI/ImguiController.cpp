@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Component/ComponentRegistry.h"
 #include "Controllers/Window/WindowController.h"
 #include "Model/Model.h"
 #include "Object/GameObject/GameObject.h"
@@ -706,6 +707,8 @@ update_status ImguiController::PostUpdate()
             ImGui::TextDisabled("Aquest GameObject no té components.");
         }
 
+        ImGuiFieldVisitor visitor;
+
         for (std::size_t i = 0; i < components.size(); ++i)
         {
             Component* component = components[i];
@@ -717,96 +720,14 @@ update_status ImguiController::PostUpdate()
 
             ImGui::PushID(component);
 
-            if (Model* modelComponent = dynamic_cast<Model*>(component))
+            if (ImGui::CollapsingHeader(
+            component->GetTypeName(),
+            ImGuiTreeNodeFlags_DefaultOpen))
             {
-                if (ImGui::CollapsingHeader(
-                        "Model",
-                        ImGuiTreeNodeFlags_DefaultOpen))
+                if (!ComponentRegistry::VisitFields(*component, visitor))
                 {
-                    ImGui::Text(
-                        "Vertices: %u",
-                        modelComponent->GetTotalVertices());
-                    ImGui::Text(
-                        "Triangles: %u",
-                        modelComponent->GetTotalTriangles());
-
-                    float componentScale[3] = {
-                        selectedGameObject->size.x,
-                        selectedGameObject->size.y,
-                        selectedGameObject->size.z};
-
-                    if (ImGui::DragFloat3(
-                            "Model Scale",
-                            componentScale,
-                            0.05f,
-                            0.001f,
-                            1000.0f))
-                    {
-                        selectedGameObject->size = Vector3D(
-                            componentScale[0],
-                            componentScale[1],
-                            componentScale[2]);
-                    }
-
-                    ModelEditorState& editorState =
-                        GetModelEditorState(modelComponent);
-
-                    ImGui::InputText(
-                        "Model file",
-                        editorState.modelPath.data(),
-                        editorState.modelPath.size());
-
-                    ImGui::InputText(
-                        "Texture file",
-                        editorState.texturePath.data(),
-                        editorState.texturePath.size());
-
-                    const bool hasModelPath =
-                        editorState.modelPath[0] != '\0';
-
-                    if (!hasModelPath)
-                    {
-                        ImGui::BeginDisabled();
-                    }
-
-                    if (ImGui::Button("Load Model"))
-                    {
-                        try
-                        {
-                            if (editorState.texturePath[0] != '\0')
-                            {
-                                modelComponent->LoadModel(
-                                    editorState.modelPath.data(),
-                                    editorState.texturePath.data());
-                            }
-                            else
-                            {
-                                modelComponent->LoadModel(
-                                    editorState.modelPath.data());
-                            }
-
-                            modelComponent->CalcNumVerticesTriangles();
-                        }
-                        catch (const std::exception& exception)
-                        {
-                            std::cerr
-                                << "Error loading model: "
-                                << exception.what()
-                                << '\n';
-                        }
-                    }
-
-                    if (!hasModelPath)
-                    {
-                        ImGui::EndDisabled();
-                        ImGui::TextDisabled(
-                            "Selecciona un fitxer de model abans de carregar.");
-                    }
+                    ImGui::TextDisabled("Component no registrat");
                 }
-            }
-            else
-            {
-                ImGui::TextDisabled("Component desconegut");
             }
 
             ImGui::PopID();
