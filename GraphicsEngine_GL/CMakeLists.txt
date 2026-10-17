@@ -17,7 +17,9 @@ set(GENERATOR_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/generate_components.py")
 
 set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 set(GENERATED_CPP "${GENERATED_DIR}/RegisterComponents.cpp")
-set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h")
+set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h"
+        GraphicsEngine_GL/Component/ExampleComponent.cpp
+        GraphicsEngine_GL/Component/ExampleComponent.h)
 
 get_filename_component(PROJECT_DIR "${PROJECT_FILE}" DIRECTORY)
 

@@ -861,36 +861,8 @@ update_status ImguiController::PostUpdate()
 
     ImGui::Spacing();
 
-    const char* files[] = {
-        "Assets",
-        "Scripts",
-        "Materials",
-        "Textures",
-        "Models",
-        "Scenes",
-        "Shaders",
-        "Audio"};
+    DrawAssetBrowser();
 
-    constexpr float assetButtonWidth = 120.0f;
-    constexpr float assetButtonHeight = 60.0f;
-    const float spacing = ImGui::GetStyle().ItemSpacing.x;
-    const float contentWidth = ImGui::GetContentRegionAvail().x;
-
-    int columnCount = static_cast<int>(
-        contentWidth / (assetButtonWidth + spacing));
-    columnCount = std::max(columnCount, 1);
-
-    ImGui::Columns(columnCount, "AssetBrowserColumns", false);
-
-    for (const char* file : files)
-    {
-        ImGui::Button(
-            file,
-            ImVec2(assetButtonWidth, assetButtonHeight));
-        ImGui::NextColumn();
-    }
-
-    ImGui::Columns(1);
     ImGui::EndChild();
     ImGui::End();
 
@@ -898,6 +870,639 @@ update_status ImguiController::PostUpdate()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     return UPDATE_CONTINUE;
+}
+
+void ImguiController::DrawAssetBrowser()
+{
+    static fs::path rootDir;
+    static fs::path currentDir;
+    static fs::path selectedEntry;
+    static fs::path pendingDelete;
+
+    static char folderName[256] = "";
+    static char componentName[256] = "";
+
+    static std::string errorMessage;
+    static bool initialized = false;
+
+    // Initialize the Assets directory
+    if (!initialized)
+    {
+        std::error_code ec;
+
+        fs::create_directories("./Assets", ec);
+
+        if (!ec)
+            rootDir = fs::canonical("./Assets", ec);
+
+        if (ec)
+        {
+            ImGui::Text("Error: %s", ec.message().c_str());
+            return;
+        }
+
+        currentDir = rootDir;
+        initialized = true;
+    }
+
+    // Check whether a path is inside the Assets directory
+    auto isInsideAssets = [&](const fs::path& path) -> bool
+    {
+        std::error_code ec;
+        fs::path resolved = fs::weakly_canonical(path, ec);
+
+        if (ec)
+            return false;
+
+        auto rootIt = rootDir.begin();
+        auto pathIt = resolved.begin();
+
+        for (; rootIt != rootDir.end(); ++rootIt, ++pathIt)
+        {
+            if (pathIt == resolved.end() || *rootIt != *pathIt)
+                return false;
+        }
+
+        return true;
+    };
+
+    // Validate a C++ class identifier
+    auto isValidClassName = [](const std::string& name) -> bool
+    {
+        if (name.empty())
+            return false;
+
+        unsigned char first = static_cast<unsigned char>(name[0]);
+
+        if (!std::isalpha(first) && first != '_')
+            return false;
+
+        for (unsigned char c : name)
+        {
+            if (!std::isalnum(c) && c != '_')
+                return false;
+        }
+
+        // Reject reserved C++ keywords
+        static const std::vector<std::string> keywords = {
+            "alignas", "alignof", "and", "and_eq", "asm",
+            "auto", "bitand", "bitor", "bool", "break",
+            "case", "catch", "char", "char8_t", "char16_t",
+            "char32_t", "class", "compl", "concept", "const",
+            "consteval", "constexpr", "constinit", "const_cast",
+            "continue", "co_await", "co_return", "co_yield",
+            "decltype", "default", "delete", "do", "double",
+            "dynamic_cast", "else", "enum", "explicit",
+            "export", "extern", "false", "float", "for",
+            "friend", "goto", "if", "inline", "int", "long",
+            "mutable", "namespace", "new", "noexcept", "not",
+            "not_eq", "nullptr", "operator", "or", "or_eq",
+            "private", "protected", "public", "register",
+            "reinterpret_cast", "requires", "return", "short",
+            "signed", "sizeof", "static", "static_assert",
+            "static_cast", "struct", "switch", "template",
+            "this", "thread_local", "throw", "true", "try",
+            "typedef", "typeid", "typename", "union",
+            "unsigned", "using", "virtual", "void",
+            "volatile", "wchar_t", "while", "xor", "xor_eq"
+        };
+
+        if (std::find(keywords.begin(), keywords.end(), name)
+            != keywords.end())
+        {
+            return false;
+        }
+
+        // Reject identifiers reserved for the implementation
+        if (name.find("__") != std::string::npos)
+            return false;
+
+        if (name.size() >= 2 &&
+            name[0] == '_' &&
+            std::isupper(static_cast<unsigned char>(name[1])))
+        {
+            return false;
+        }
+
+        return true;
+    };
+
+    // Keep navigation restricted to Assets
+    if (!isInsideAssets(currentDir))
+        currentDir = rootDir;
+
+    // Navigation toolbar
+    if (ImGui::Button("<"))
+    {
+        if (currentDir != rootDir)
+        {
+            fs::path parent = currentDir.parent_path();
+
+            if (isInsideAssets(parent))
+            {
+                currentDir = parent;
+                selectedEntry.clear();
+            }
+        }
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Assets"))
+    {
+        currentDir = rootDir;
+        selectedEntry.clear();
+    }
+
+    ImGui::SameLine();
+
+    fs::path relativePath = currentDir.lexically_relative(rootDir);
+
+    std::string displayPath =
+        relativePath.empty() || relativePath == "."
+        ? "/"
+        : "/ " + relativePath.generic_string();
+
+    ImGui::TextUnformatted(displayPath.c_str());
+
+    // Create folder button
+    if (ImGui::Button("+ Folder"))
+    {
+        folderName[0] = '\0';
+        ImGui::OpenPopup("CreateFolder");
+    }
+
+    ImGui::SameLine();
+
+    // Create C++ component button
+    if (ImGui::Button("+ Component"))
+    {
+        componentName[0] = '\0';
+        ImGui::OpenPopup("CreateComponent");
+    }
+
+    ImGui::Separator();
+
+    // Create folder dialog
+    if (ImGui::BeginPopupModal(
+        "CreateFolder",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Folder Name:");
+
+        ImGui::InputText(
+            "##FolderName",
+            folderName,
+            sizeof(folderName));
+
+        if (ImGui::Button("Create"))
+        {
+            std::string name = folderName;
+
+            bool validName =
+                !name.empty() &&
+                name != "." &&
+                name != ".." &&
+                name.find('/') == std::string::npos &&
+                name.find('\\') == std::string::npos;
+
+            if (validName)
+            {
+                fs::path newPath = currentDir / name;
+
+                if (isInsideAssets(newPath))
+                {
+                    std::error_code ec;
+
+                    bool created = fs::create_directory(newPath, ec);
+
+                    if (created)
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else
+                    {
+                        errorMessage = ec
+                            ? ec.message()
+                            : "Folder already exists.";
+                    }
+                }
+                else
+                {
+                    errorMessage = "Path is outside Assets.";
+                }
+            }
+            else
+            {
+                errorMessage = "Invalid folder name.";
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+
+        ImGui::EndPopup();
+    }
+
+    // Create component from ExampleComponent.h (in the current Asset Browser folder)
+    if (ImGui::BeginPopupModal(
+        "CreateComponent", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted("Component Class Name:");
+        ImGui::InputText("##ComponentName", componentName, sizeof(componentName));
+        ImGui::TextWrapped("Destination: %s", currentDir.string().c_str());
+
+        if (ImGui::Button("Create Component"))
+        {
+            const std::string name = componentName;
+            if (!isValidClassName(name))
+            {
+                errorMessage = "Invalid C++ class name.";
+            }
+            else if (!isInsideAssets(currentDir) ||
+                     !fs::is_directory(currentDir))
+            {
+                errorMessage = "Invalid destination folder.";
+            }
+            else
+            {
+                // Locate the real header template. Do not generate a hard-coded class.
+                const fs::path projectRoot = rootDir.parent_path();
+                const std::vector<fs::path> templateCandidates = {
+                    projectRoot / "GraphicsEngine_GL" / "Component" / "ExampleComponent.h",
+                    projectRoot / "Component" / "ExampleComponent.h",
+                    projectRoot.parent_path() / "GraphicsEngine_GL" / "Component" / "ExampleComponent.h",
+                    projectRoot / "ExampleComponent.h",
+                    rootDir / "ExampleComponent.h"
+                };
+
+                fs::path templateHeader;
+                for (const fs::path& candidate : templateCandidates)
+                {
+                    std::error_code checkEc;
+                    if (fs::is_regular_file(candidate, checkEc) && !checkEc)
+                    {
+                        templateHeader = candidate;
+                        break;
+                    }
+                }
+
+                if (templateHeader.empty())
+                {
+                    errorMessage = "ExampleComponent.h template not found.";
+                }
+                else
+                {
+                    const fs::path headerPath = currentDir / (name + ".h");
+                    const fs::path templateCpp =
+                        templateHeader.parent_path() / "ExampleComponent.cpp";
+                    std::error_code templateEc;
+                    const bool hasCppTemplate =
+                        fs::is_regular_file(templateCpp, templateEc) && !templateEc;
+                    const fs::path sourcePath = currentDir / (name + ".cpp");
+                    std::error_code ec;
+
+                    const bool headerExists = fs::exists(headerPath, ec);
+                    if (ec)
+                        errorMessage = ec.message();
+                    else
+                    {
+                        const bool sourceExists = fs::exists(sourcePath, ec);
+                        if (ec)
+                            errorMessage = ec.message();
+                        else if (headerExists || (hasCppTemplate && sourceExists))
+                            errorMessage = "Component files already exist.";
+                        else if (!isInsideAssets(headerPath) ||
+                                 (hasCppTemplate && !isInsideAssets(sourcePath)))
+                            errorMessage = "Destination is outside Assets.";
+                        else
+                        {
+                            // Read the template exactly as stored on disk.
+                            auto readFile = [](const fs::path& path,
+                                               std::string& content) -> bool
+                            {
+                                std::ifstream file(path, std::ios::binary);
+                                if (!file)
+                                    return false;
+                                content.assign(
+                                    std::istreambuf_iterator<char>(file),
+                                    std::istreambuf_iterator<char>());
+                                return !file.bad();
+                            };
+
+                            auto replaceAll = [](std::string& content,
+                                                 const std::string& from,
+                                                 const std::string& to)
+                            {
+                                if (from.empty()) return;
+                                std::size_t pos = 0;
+                                while ((pos = content.find(from, pos)) !=
+                                       std::string::npos)
+                                {
+                                    content.replace(pos, from.size(), to);
+                                    pos += to.size();
+                                }
+                            };
+
+                            auto uppercase = [](std::string text)
+                            {
+                                for (char& ch : text)
+                                    ch = static_cast<char>(std::toupper(
+                                        static_cast<unsigned char>(ch)));
+                                return text;
+                            };
+
+                            auto adaptClassName = [&](std::string& content)
+                            {
+                                // Preserve the template's layout, fields,
+                                // methods, inheritance and namespaces.
+                                replaceAll(content, "EXAMPLE_COMPONENT", uppercase(name));
+                                replaceAll(content, "EXAMPLECOMPONENT", uppercase(name));
+                                replaceAll(content, "ExampleComponent", name);
+                            };
+
+                            std::string headerContent;
+                            std::string cppContent;
+                            if (!readFile(templateHeader, headerContent))
+                                errorMessage = "Could not read ExampleComponent.h.";
+                            else if (headerContent.find("ExampleComponent") ==
+                                     std::string::npos)
+                                errorMessage = "Template does not contain ExampleComponent.";
+                            else if (hasCppTemplate &&
+                                     !readFile(templateCpp, cppContent))
+                                errorMessage = "Could not read ExampleComponent.cpp.";
+                            else
+                            {
+                                adaptClassName(headerContent);
+                                if (hasCppTemplate)
+                                    adaptClassName(cppContent);
+
+                                // Roll back only files created by this operation.
+                                auto writeFile = [](const fs::path& path,
+                                                    const std::string& content) -> bool
+                                {
+                                    std::ofstream file(path, std::ios::binary | std::ios::out);
+                                    if (!file) return false;
+                                    file.write(content.data(),
+                                               static_cast<std::streamsize>(content.size()));
+                                    file.close();
+                                    return static_cast<bool>(file);
+                                };
+
+                                // Check was done above; don't overwrite existing files.
+                                if (!writeFile(headerPath, headerContent))
+                                    errorMessage = "Could not write component header.";
+                                else
+                                {
+                                    if (hasCppTemplate)
+                                    {
+                                        if (!writeFile(sourcePath, cppContent))
+                                            errorMessage = "Could not write component source.";
+                                    }
+                                }
+
+                                if (!errorMessage.empty())
+                                {
+                                    std::error_code cleanupEc;
+                                    fs::remove(headerPath, cleanupEc);
+                                    if (hasCppTemplate) fs::remove(sourcePath, cleanupEc);
+                                }
+                                else
+                                {
+                                    componentName[0] = '\0';
+                                    ImGui::CloseCurrentPopup();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            componentName[0] = '\0';
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // Read current directory contents
+    std::vector<fs::directory_entry> entries;
+    std::error_code ec;
+
+    fs::directory_iterator it(
+        currentDir,
+        fs::directory_options::skip_permission_denied,
+        ec);
+
+    fs::directory_iterator end;
+
+    while (!ec && it != end)
+    {
+        const auto& entry = *it;
+
+        std::error_code entryEc;
+
+        // Ignore symbolic links
+        if (!entry.is_symlink(entryEc) &&
+            !entryEc &&
+            isInsideAssets(entry.path()))
+        {
+            entries.push_back(entry);
+        }
+
+        it.increment(ec);
+    }
+
+    if (ec)
+        errorMessage = ec.message();
+
+    // Sort directories first, then files alphabetically
+    std::sort(
+        entries.begin(),
+        entries.end(),
+        [](const fs::directory_entry& a,
+           const fs::directory_entry& b)
+        {
+            std::error_code ecA, ecB;
+
+            bool dirA = a.is_directory(ecA);
+            bool dirB = b.is_directory(ecB);
+
+            if (dirA != dirB)
+                return dirA;
+
+            return a.path().filename().string() <
+                   b.path().filename().string();
+        });
+
+    // Scrollable asset content
+    ImGui::BeginChild("AssetContent", ImVec2(0, 0), false);
+
+    constexpr float buttonWidth = 120.0f;
+    constexpr float buttonHeight = 60.0f;
+
+    float spacing = ImGui::GetStyle().ItemSpacing.x;
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+
+    int columns = std::max(
+        1,
+        static_cast<int>(
+            (availableWidth + spacing) /
+            (buttonWidth + spacing)));
+
+    ImGui::Columns(columns, "AssetColumns", false);
+
+    for (const auto& entry : entries)
+    {
+        fs::path path = entry.path();
+
+        std::error_code typeEc;
+        bool isDirectory = entry.is_directory(typeEc);
+
+        if (typeEc)
+            continue;
+
+        std::string filename = path.filename().string();
+
+        std::string label =
+            std::string(isDirectory ? "[DIR] " : "[FILE] ") +
+            filename;
+
+        ImGui::PushID(filename.c_str());
+
+        bool isSelected = selectedEntry == path;
+
+        if (isSelected)
+        {
+            ImGui::PushStyleColor(
+                ImGuiCol_Button,
+                ImVec4(0.22f, 0.38f, 0.60f, 1.0f));
+        }
+
+        ImGui::Button(
+            label.c_str(),
+            ImVec2(buttonWidth, buttonHeight));
+
+        if (isSelected)
+            ImGui::PopStyleColor();
+
+        // Select an item with a single click
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            selectedEntry = path;
+
+        // Open directories with a double click
+        if (isDirectory &&
+            ImGui::IsItemHovered() &&
+            ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            if (isInsideAssets(path))
+            {
+                currentDir = path;
+                selectedEntry.clear();
+            }
+        }
+
+        // Item context menu
+        if (ImGui::BeginPopupContextItem("FileContext"))
+        {
+            if (isDirectory && ImGui::MenuItem("Open"))
+            {
+                if (isInsideAssets(path))
+                {
+                    currentDir = path;
+                    selectedEntry.clear();
+                }
+            }
+
+            if (ImGui::MenuItem("Delete"))
+            {
+                pendingDelete = path;
+            }
+
+            ImGui::EndPopup();
+        }
+
+        ImGui::PopID();
+        ImGui::NextColumn();
+    }
+
+    ImGui::Columns(1);
+    ImGui::EndChild();
+
+    // Delete confirmation dialog
+    if (!pendingDelete.empty() &&
+        !ImGui::IsPopupOpen("ConfirmDelete"))
+    {
+        ImGui::OpenPopup("ConfirmDelete");
+    }
+
+    if (ImGui::BeginPopupModal(
+        "ConfirmDelete",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextWrapped(
+            "Delete '%s'?",
+            pendingDelete.filename().string().c_str());
+
+        ImGui::TextUnformatted(
+            "Deleting a folder also deletes its contents.");
+
+        if (ImGui::Button("Delete"))
+        {
+            if (!pendingDelete.empty() &&
+                pendingDelete != rootDir &&
+                isInsideAssets(pendingDelete))
+            {
+                std::error_code deleteEc;
+                fs::remove_all(pendingDelete, deleteEc);
+
+                if (deleteEc)
+                    errorMessage = deleteEc.message();
+
+                selectedEntry.clear();
+            }
+
+            pendingDelete.clear();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+        {
+            pendingDelete.clear();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    // Error dialog
+    if (!errorMessage.empty())
+        ImGui::OpenPopup("AssetError");
+
+    if (ImGui::BeginPopupModal(
+        "AssetError",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextWrapped("%s", errorMessage.c_str());
+
+        if (ImGui::Button("OK"))
+        {
+            errorMessage.clear();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 bool ImguiController::CleanUp()
