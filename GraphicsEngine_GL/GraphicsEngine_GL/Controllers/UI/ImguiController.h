@@ -27,6 +27,8 @@ public:
     update_status PreUpdate() override;
     update_status PostUpdate() override;
 
+    Component *AddComponent(const std::string &className, GameObject *gameObject);
+
     void ReplaceAll(std::string &text, const std::string &from, const std::string &to);
 
     void DrawAssetBrowser();

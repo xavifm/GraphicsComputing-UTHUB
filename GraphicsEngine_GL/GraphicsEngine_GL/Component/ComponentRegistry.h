@@ -64,6 +64,18 @@ public:
         return true;
     }
 
+    static std::vector<std::string> GetRegisteredComponents()
+    {
+        std::vector<std::string> names;
+
+        for (const auto& [name, factory] : Types())
+        {
+            names.push_back(name);
+        }
+
+        return names;
+    }
+
 private:
     static std::unordered_map<std::type_index, FieldDrawer>& Drawers()
     {

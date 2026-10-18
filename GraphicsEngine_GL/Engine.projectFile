@@ -6,6 +6,18 @@
       "name": "Model",
       "header": "GraphicsEngine_GL/Model/Model.h",
       "source": "GraphicsEngine_GL/Model/Model.cpp"
+    },
+    {
+      "class": "test",
+      "name": "test",
+      "header": "cmake-build-debug/Assets/a/test.h",
+      "source": "cmake-build-debug/Assets/a/test.cpp"
+    },
+    {
+      "class": "test22",
+      "name": "test22",
+      "header": "cmake-build-debug/Assets/a/test22.h",
+      "source": "cmake-build-debug/Assets/a/test22.cpp"
     }
   ]
 }

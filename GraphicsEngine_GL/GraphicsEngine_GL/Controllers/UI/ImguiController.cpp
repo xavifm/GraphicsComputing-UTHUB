@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
+#include <regex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -36,20 +37,6 @@ namespace
         {
             g_modelEditorStates.erase(model);
         }
-    }
-
-    Model* AddModelComponent(GameObject* gameObject)
-    {
-        if (gameObject == nullptr)
-        {
-            return nullptr;
-        }
-
-        Model* component = gameObject->AddComponent<Model>();
-        ModelEditorState& modelEditorState = GetModelEditorState(component);
-        modelEditorState.modelPath[0] = '\0';
-
-        return component;
     }
 
     GameObject* CreateGameObject(
@@ -490,16 +477,6 @@ update_status ImguiController::PostUpdate()
                             ImGui::BeginDisabled();
                         }
 
-                        if (ImGui::MenuItem("Add Model Component"))
-                        {
-                            AddModelComponent(gameObject);
-                        }
-
-                        if (alreadyHasModel)
-                        {
-                            ImGui::EndDisabled();
-                        }
-
                         ImGui::Separator();
 
                         if (ImGui::MenuItem("Delete"))
@@ -780,19 +757,14 @@ update_status ImguiController::PostUpdate()
             const bool alreadyHasModel =
                 selectedGameObject->GetComponent<Model>() != nullptr;
 
-            if (alreadyHasModel)
-            {
-                ImGui::BeginDisabled();
-            }
+            std::vector<std::string> names = ComponentRegistry::GetRegisteredComponents();
 
-            if (ImGui::MenuItem("Model"))
+            for (std::string comp_name : names)
             {
-                AddModelComponent(selectedGameObject);
-            }
-
-            if (alreadyHasModel)
-            {
-                ImGui::EndDisabled();
+                if (ImGui::MenuItem(comp_name.c_str()))
+                {
+                    AddComponent(comp_name, selectedGameObject);
+                }
             }
 
             ImGui::EndPopup();
@@ -870,6 +842,25 @@ update_status ImguiController::PostUpdate()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     return UPDATE_CONTINUE;
+}
+
+Component* ImguiController::AddComponent(const std::string& className, GameObject* gameObject)
+{
+    if (!gameObject)
+        return nullptr;
+
+    Component* component = ComponentRegistry::Create(className, *gameObject);
+
+    if (!component)
+        return nullptr;
+
+    if (Model* model = dynamic_cast<Model*>(component))
+    {
+        ModelEditorState& state = GetModelEditorState(model);
+        state.modelPath[0] = '\0';
+    }
+
+    return component;
 }
 
 void ImguiController::DrawAssetBrowser()
@@ -1224,9 +1215,232 @@ void ImguiController::DrawAssetBrowser()
                                 replaceAll(content, "ExampleComponent", name);
                             };
 
+                            // Find Engine.projectFile. Keep existing metadata intact.
+                            const std::vector<fs::path> manifestCandidates = {
+                                projectRoot / "Engine.projectFile",
+                                projectRoot.parent_path() / "Engine.projectFile",
+                                projectRoot / "GraphicsEngine_GL" / "Engine.projectFile"
+                            };
+                            fs::path manifestPath;
+                            for (const fs::path& candidate : manifestCandidates)
+                            {
+                                std::error_code manifestEc;
+                                if (fs::is_regular_file(candidate, manifestEc) && !manifestEc)
+                                {
+                                    manifestPath = fs::canonical(candidate, manifestEc);
+                                    if (!manifestEc) break;
+                                    manifestPath.clear();
+                                }
+                            }
+
+                            // Read the project file as plain text. We only edit the
+                            // top-level "components" array, preserving the rest verbatim.
+                            std::string manifestText;
+                            std::size_t componentsClose = std::string::npos;
+                            std::size_t componentsOpen = std::string::npos;
+                            bool componentsEmpty = false;
+
+                            if (manifestPath.empty())
+                            {
+                                errorMessage = "Engine.projectFile not found.";
+                            }
+                            else
+                            {
+                                std::ifstream input(manifestPath, std::ios::binary);
+                                if (!input)
+                                {
+                                    errorMessage = "Could not open Engine.projectFile.";
+                                }
+                                else
+                                {
+                                    manifestText.assign(
+                                        std::istreambuf_iterator<char>(input),
+                                        std::istreambuf_iterator<char>());
+                                    if (input.bad())
+                                        errorMessage = "Could not read Engine.projectFile.";
+                                }
+                            }
+
+                            // Find the JSON array at root level, correctly skipping
+                            // quoted strings, escapes and nested objects/arrays.
+                            if (errorMessage.empty())
+                            {
+                                auto skipWhitespace = [&](std::size_t& pos)
+                                {
+                                    while (pos < manifestText.size() &&
+                                           std::isspace(static_cast<unsigned char>(manifestText[pos])))
+                                        ++pos;
+                                };
+
+                                auto readJsonString = [&](std::size_t& pos, std::string& out) -> bool
+                                {
+                                    if (pos >= manifestText.size() || manifestText[pos] != '"')
+                                        return false;
+                                    ++pos;
+                                    out.clear();
+                                    while (pos < manifestText.size())
+                                    {
+                                        const char ch = manifestText[pos++];
+                                        if (ch == '"') return true;
+                                        if (ch == '\\')
+                                        {
+                                            if (pos >= manifestText.size()) return false;
+                                            const char escaped = manifestText[pos++];
+                                            if (escaped == '"' || escaped == '\\' || escaped == '/')
+                                                out += escaped;
+                                            else if (escaped == 'n') out += '\n';
+                                            else if (escaped == 'r') out += '\r';
+                                            else if (escaped == 't') out += '\t';
+                                            else if (escaped == 'b') out += '\b';
+                                            else if (escaped == 'f') out += '\f';
+                                            else if (escaped == 'u')
+                                            {
+                                                // Not needed for the ASCII key "components".
+                                                if (pos + 4 > manifestText.size()) return false;
+                                                for (int i = 0; i < 4; ++i)
+                                                    if (!std::isxdigit(static_cast<unsigned char>(manifestText[pos+i])))
+                                                        return false;
+                                                pos += 4;
+                                                out += '?';
+                                            }
+                                            else return false;
+                                        }
+                                        else
+                                        {
+                                            if (static_cast<unsigned char>(ch) < 0x20) return false;
+                                            out += ch;
+                                        }
+                                    }
+                                    return false;
+                                };
+
+                                auto skipJsonValue = [&](std::size_t& pos) -> bool
+                                {
+                                    skipWhitespace(pos);
+                                    if (pos >= manifestText.size()) return false;
+                                    // Find the end of this value (for nested structures,
+                                    // track all brackets while ignoring strings).
+                                    if (manifestText[pos] == '"')
+                                    {
+                                        std::string ignored;
+                                        return readJsonString(pos, ignored);
+                                    }
+                                    if (manifestText[pos] == '{' || manifestText[pos] == '[')
+                                    {
+                                        std::vector<char> stack;
+                                        while (pos < manifestText.size())
+                                        {
+                                            const char ch = manifestText[pos];
+                                            if (ch == '"')
+                                            {
+                                                std::string ignored;
+                                                if (!readJsonString(pos, ignored)) return false;
+                                                continue;
+                                            }
+                                            if (ch == '{' || ch == '[')
+                                                stack.push_back(ch);
+                                            else if (ch == '}' || ch == ']')
+                                            {
+                                                if (stack.empty()) return false;
+                                                if ((ch == '}' && stack.back() != '{') ||
+                                                    (ch == ']' && stack.back() != '[')) return false;
+                                                stack.pop_back();
+                                                ++pos;
+                                                if (stack.empty()) return true;
+                                                continue;
+                                            }
+                                            ++pos;
+                                        }
+                                        return false;
+                                    }
+                                    while (pos < manifestText.size() &&
+                                           manifestText[pos] != ',' && manifestText[pos] != '}' &&
+                                           manifestText[pos] != ']' &&
+                                           !std::isspace(static_cast<unsigned char>(manifestText[pos])))
+                                        ++pos;
+                                    return true;
+                                };
+
+                                std::size_t pos = 0;
+                                skipWhitespace(pos);
+                                if (pos >= manifestText.size() || manifestText[pos++] != '{')
+                                    errorMessage = "Engine.projectFile must be a JSON object.";
+                                else
+                                {
+                                    bool found = false;
+                                    while (errorMessage.empty())
+                                    {
+                                        skipWhitespace(pos);
+                                        if (pos >= manifestText.size() || manifestText[pos] == '}') break;
+                                        std::string key;
+                                        if (!readJsonString(pos, key))
+                                        {
+                                            errorMessage = "Invalid key in Engine.projectFile.";
+                                            break;
+                                        }
+                                        skipWhitespace(pos);
+                                        if (pos >= manifestText.size() || manifestText[pos++] != ':')
+                                        {
+                                            errorMessage = "Invalid Engine.projectFile: missing colon.";
+                                            break;
+                                        }
+                                        skipWhitespace(pos);
+                                        if (key == "components")
+                                        {
+                                            found = true;
+                                            if (pos >= manifestText.size() || manifestText[pos] != '[')
+                                                errorMessage = "The components field must be an array.";
+                                            else
+                                            {
+                                                const std::size_t arrayOpen = pos;
+                                                componentsOpen = arrayOpen;
+                                                if (!skipJsonValue(pos))
+                                                    errorMessage = "Invalid components array.";
+                                                else
+                                                {
+                                                    componentsClose = pos - 1;
+                                                    std::size_t first = arrayOpen + 1;
+                                                    skipWhitespace(first);
+                                                    componentsEmpty = first == componentsClose;
+                                                }
+                                            }
+                                            break;
+                                        }
+                                        if (!skipJsonValue(pos))
+                                        {
+                                            errorMessage = "Invalid Engine.projectFile value.";
+                                            break;
+                                        }
+                                        skipWhitespace(pos);
+                                        if (pos < manifestText.size() && manifestText[pos] == ',')
+                                            ++pos;
+                                        else if (pos >= manifestText.size() || manifestText[pos] != '}')
+                                            errorMessage = "Invalid Engine.projectFile object.";
+                                    }
+                                    if (!found && errorMessage.empty())
+                                        errorMessage = "Missing components array in Engine.projectFile.";
+                                }
+                            }
+
+                            if (errorMessage.empty())
+                            {
+                                // Class names are validated C++ identifiers, so the
+                                // name cannot contain JSON quotation/escape characters.
+                                const std::regex duplicate(
+                                    "\\\"class\\\"[[:space:]]*:[[:space:]]*\\\"" + name + "\\\"");
+                                // Search ONLY inside the components array (not elsewhere).
+                                if (componentsOpen != std::string::npos &&
+                                    std::regex_search(manifestText.substr(componentsOpen, componentsClose - componentsOpen), duplicate))
+                                    errorMessage = "Component is already registered in Engine.projectFile.";
+                            }
+
                             std::string headerContent;
                             std::string cppContent;
-                            if (!readFile(templateHeader, headerContent))
+                            if (!errorMessage.empty())
+                            {
+                                // Report the manifest validation error.
+                            }
+                            else if (!readFile(templateHeader, headerContent))
                                 errorMessage = "Could not read ExampleComponent.h.";
                             else if (headerContent.find("ExampleComponent") ==
                                      std::string::npos)
@@ -1261,6 +1475,124 @@ void ImguiController::DrawAssetBrowser()
                                     {
                                         if (!writeFile(sourcePath, cppContent))
                                             errorMessage = "Could not write component source.";
+                                    }
+                                }
+
+                                if (errorMessage.empty())
+                                {
+                                    // Paths in the manifest are relative to its folder.
+                                    const fs::path manifestDir = manifestPath.parent_path();
+                                    const std::string relativeHeader =
+                                        headerPath.lexically_relative(manifestDir).generic_string();
+                                    const std::string relativeSource =
+                                        sourcePath.lexically_relative(manifestDir).generic_string();
+
+                                    if (relativeHeader.empty() ||
+                                        (hasCppTemplate && relativeSource.empty()))
+                                    {
+                                        errorMessage = "Could not calculate project-relative paths.";
+                                    }
+                                    else
+                                    {
+                                        // Append an object to the existing array without a JSON library.
+                                        // File names can include spaces and other characters.
+                                        // Escape JSON-sensitive characters in string values.
+                                        auto jsonEscape = [](const std::string& value)
+                                        {
+                                            std::string result;
+                                            for (unsigned char ch : value)
+                                            {
+                                                if (ch == '"') result += "\\\"";
+                                                else if (ch == '\\') result += "\\\\";
+                                                else if (ch == '\n') result += "\\n";
+                                                else if (ch == '\r') result += "\\r";
+                                                else if (ch == '\t') result += "\\t";
+                                                else if (ch < 0x20)
+                                                {
+                                                    const char* hex = "0123456789abcdef";
+                                                    result += "\\u00";
+                                                    result += hex[ch >> 4];
+                                                    result += hex[ch & 15];
+                                                }
+                                                else result += static_cast<char>(ch);
+                                            }
+                                            return result;
+                                        };
+                                        //json class message
+                                        std::string entry =
+                                            "{\n      \"class\": \"" + jsonEscape(name) + "\",\n" +
+                                            "      \"name\": \"" + jsonEscape(name) + "\",\n" +
+                                            "      \"header\": \"" + jsonEscape(relativeHeader) + "\"";
+                                        if (hasCppTemplate)
+                                            entry += ",\n      \"source\": \"" + jsonEscape(relativeSource) + "\"";
+                                        entry += "\n    }";
+
+                                        std::size_t insertAt = componentsClose;
+                                        while (insertAt > componentsOpen + 1 &&
+                                               std::isspace(static_cast<unsigned char>(manifestText[insertAt - 1])))
+                                            --insertAt;
+                                        manifestText.insert(insertAt,
+                                            (componentsEmpty ? "\n    " : ",\n    ") + entry);
+
+                                        // Write a temporary file before replacing the manifest.
+                                        const fs::path tempManifest =
+                                            manifestPath.string() + ".tmp";
+                                        std::error_code tempEc;
+                                        if (fs::exists(tempManifest, tempEc) || tempEc)
+                                        {
+                                            errorMessage = "Temporary project file already exists or cannot be checked.";
+                                        }
+                                        else
+                                        {
+                                            const std::string& jsonText = manifestText;
+                                            if (!writeFile(tempManifest, jsonText))
+                                            {
+                                                errorMessage = "Could not write temporary Engine.projectFile.";
+                                                fs::remove(tempManifest, tempEc);
+                                            }
+                                            else
+                                            {
+                                                // Use a backup so replacement works on Windows too.
+                                                const fs::path backupManifest =
+                                                    manifestPath.string() + ".bak";
+                                                std::error_code backupEc;
+                                                if (fs::exists(backupManifest, backupEc) || backupEc)
+                                                {
+                                                    errorMessage = "Project backup file already exists or cannot be checked.";
+                                                    fs::remove(tempManifest, tempEc);
+                                                }
+                                                else
+                                                {
+                                                    fs::rename(manifestPath, backupManifest, backupEc);
+                                                    if (backupEc)
+                                                    {
+                                                        errorMessage = "Could not back up Engine.projectFile: " + backupEc.message();
+                                                        fs::remove(tempManifest, tempEc);
+                                                    }
+                                                    else
+                                                    {
+                                                        std::error_code renameEc;
+                                                        fs::rename(tempManifest, manifestPath, renameEc);
+                                                        if (renameEc)
+                                                        {
+                                                            // Restore the original project file.
+                                                            std::error_code restoreEc;
+                                                            fs::rename(backupManifest, manifestPath, restoreEc);
+                                                            errorMessage = "Could not update Engine.projectFile: " + renameEc.message();
+                                                            if (restoreEc)
+                                                                errorMessage += " Original file remains at: " + backupManifest.string();
+                                                            fs::remove(tempManifest, tempEc);
+                                                        }
+                                                        else
+                                                        {
+                                                            std::error_code cleanupEc;
+                                                            fs::remove(backupManifest, cleanupEc);
+                                                            // A failed backup cleanup does not invalidate the update.
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 
