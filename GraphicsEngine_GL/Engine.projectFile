@@ -8,34 +8,10 @@
       "source": "GraphicsEngine_GL/Model/Model.cpp"
     },
     {
-      "class": "ggfdgfdgfd",
-      "name": "ggfdgfdgfd",
-      "header": "cmake-build-debug/Assets/ggfdgfdgfd.h",
-      "source": "cmake-build-debug/Assets/ggfdgfdgfd.cpp"
-    },
-    {
-      "class": "gggg",
-      "name": "gggg",
-      "header": "cmake-build-debug/Assets/gggg.h",
-      "source": "cmake-build-debug/Assets/gggg.cpp"
-    },
-    {
-      "class": "AAAAAAAAAAA",
-      "name": "AAAAAAAAAAA",
-      "header": "cmake-build-debug/Assets/AAAAAAAAAAA.h",
-      "source": "cmake-build-debug/Assets/AAAAAAAAAAA.cpp"
-    },
-    {
-      "class": "DCCCCCC",
-      "name": "DCCCCCC",
-      "header": "cmake-build-debug/Assets/DCCCCCC.h",
-      "source": "cmake-build-debug/Assets/DCCCCCC.cpp"
-    },
-    {
-      "class": "CCCCCCCCC",
-      "name": "CCCCCCCCC",
-      "header": "cmake-build-debug/Assets/CCCCCCCCC.h",
-      "source": "cmake-build-debug/Assets/CCCCCCCCC.cpp"
+      "class": "gfddfgfdg",
+      "name": "gfddfgfdg",
+      "header": "cmake-build-debug/Assets/gfddfgfdg.h",
+      "source": "cmake-build-debug/Assets/gfddfgfdg.cpp"
     }
   ]
 }

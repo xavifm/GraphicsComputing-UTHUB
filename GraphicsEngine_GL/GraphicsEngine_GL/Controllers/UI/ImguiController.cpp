@@ -664,14 +664,6 @@ update_status ImguiController::PostUpdate()
 
                     if (ImGui::BeginPopupContextItem("GameObjectContextMenu"))
                     {
-                        const bool alreadyHasModel =
-                            gameObject->GetComponent<Model>() != nullptr;
-
-                        if (alreadyHasModel)
-                        {
-                            ImGui::BeginDisabled();
-                        }
-
                         ImGui::Separator();
 
                         if (ImGui::MenuItem("Delete"))
@@ -880,6 +872,7 @@ update_status ImguiController::PostUpdate()
         }
 
         ImGuiFieldVisitor visitor;
+        Component* componentToDelete = nullptr;
 
         for (std::size_t i = 0; i < components.size(); ++i)
         {
@@ -933,6 +926,23 @@ update_status ImguiController::PostUpdate()
                             << '\n';
                     }
                 }
+            }
+
+            ImGui::Spacing();
+
+            if (ImGui::Button("Remove Component"))
+            {
+                componentToDelete = component;
+            }
+
+            if (componentToDelete != nullptr)
+            {
+                if (Model* model = dynamic_cast<Model*>(componentToDelete))
+                {
+                    RemoveModelEditorState(model);
+                }
+
+                selectedGameObject->RemoveComponent(componentToDelete);
             }
 
             ImGui::PopID();
@@ -2097,9 +2107,10 @@ void ImguiController::DrawAssetBrowser()
                     }
                 }
             }
-
             pendingDelete.clear();
             ImGui::CloseCurrentPopup();
+
+            RestartEngine = true;
         }
 
         ImGui::SameLine();

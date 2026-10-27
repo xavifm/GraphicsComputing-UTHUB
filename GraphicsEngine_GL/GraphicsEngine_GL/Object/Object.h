@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "Component/Component.h"
 
 class Object
@@ -35,6 +36,30 @@ public:
         AddComponent(component);
 
         return component;
+    }
+
+    bool RemoveComponent(Component* component)
+    {
+        if (component == nullptr)
+            return false;
+
+        auto it = std::find(
+            components.begin(),
+            components.end(),
+            component
+        );
+
+        if (it == components.end())
+            return false;
+
+        Component* componentToDelete = *it;
+
+        components.erase(it);
+
+        componentToDelete->Destroy();
+        delete componentToDelete;
+
+        return true;
     }
 
     template <typename T>
