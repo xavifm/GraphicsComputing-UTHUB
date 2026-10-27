@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <cctype>
+#include <fstream>
+#include <iterator>
 #include <iostream>
 #include <memory>
 #include <regex>
@@ -67,6 +70,198 @@ namespace
         worldController->AddGameObject(gameObject);
 
         return gameObject;
+    }
+
+    // Read a JSON string, including escaped quotes and backslashes.
+    bool ReadManifestString(const std::string& json, std::size_t& pos, std::string& value)
+    {
+        if (pos >= json.size() || json[pos++] != '"') return false;
+        value.clear();
+        while (pos < json.size())
+        {
+            const char c = json[pos++];
+            if (c == '"') return true;
+            if (static_cast<unsigned char>(c) < 0x20) return false;
+            if (c != '\\') { value += c; continue; }
+            if (pos >= json.size()) return false;
+            const char escape = json[pos++];
+            if (escape == '"' || escape == '\\' || escape == '/') value += escape;
+            else if (escape == 'n') value += '\n';
+            else if (escape == 'r') value += '\r';
+            else if (escape == 't') value += '\t';
+            else if (escape == 'b') value += '\b';
+            else if (escape == 'f') value += '\f';
+            else if (escape == 'u')
+            {
+                if (pos + 4 > json.size()) return false;
+                for (int i = 0; i < 4; ++i)
+                    if (!std::isxdigit(static_cast<unsigned char>(json[pos + i]))) return false;
+                pos += 4;
+                value += '?'; // Escaped Unicode isn't expected in component paths.
+            }
+            else return false;
+        }
+        return false;
+    }
+
+    void SkipManifestWhitespace(const std::string& json, std::size_t& pos)
+    {
+        while (pos < json.size() &&
+               std::isspace(static_cast<unsigned char>(json[pos]))) ++pos;
+    }
+
+    // Advance over a complete JSON value; don't interpret brackets inside strings.
+    bool SkipManifestValue(const std::string& json, std::size_t& pos)
+    {
+        SkipManifestWhitespace(json, pos);
+        if (pos >= json.size()) return false;
+        if (json[pos] == '"')
+        {
+            std::string unused;
+            return ReadManifestString(json, pos, unused);
+        }
+        if (json[pos] == '{' || json[pos] == '[')
+        {
+            std::vector<char> stack;
+            while (pos < json.size())
+            {
+                if (json[pos] == '"')
+                {
+                    std::string unused;
+                    if (!ReadManifestString(json, pos, unused)) return false;
+                    continue;
+                }
+                const char c = json[pos++];
+                if (c == '{' || c == '[') stack.push_back(c);
+                else if (c == '}' || c == ']')
+                {
+                    if (stack.empty() || (c == '}' && stack.back() != '{') ||
+                        (c == ']' && stack.back() != '[')) return false;
+                    stack.pop_back();
+                    if (stack.empty()) return true;
+                }
+            }
+            return false;
+        }
+        const std::size_t start = pos;
+        while (pos < json.size() && json[pos] != ',' && json[pos] != '}' &&
+               json[pos] != ']' && !std::isspace(static_cast<unsigned char>(json[pos]))) ++pos;
+        return pos > start;
+    }
+
+    // Locate the top-level components array without altering any other JSON fields.
+    bool FindManifestComponents(const std::string& json, std::size_t& open,
+                                std::size_t& close)
+    {
+        std::size_t pos = 0;
+        SkipManifestWhitespace(json, pos);
+        if (pos >= json.size() || json[pos++] != '{') return false;
+        while (true)
+        {
+            SkipManifestWhitespace(json, pos);
+            if (pos >= json.size() || json[pos] == '}') return false;
+            std::string key;
+            if (!ReadManifestString(json, pos, key)) return false;
+            SkipManifestWhitespace(json, pos);
+            if (pos >= json.size() || json[pos++] != ':') return false;
+            SkipManifestWhitespace(json, pos);
+            if (key == "components")
+            {
+                if (pos >= json.size() || json[pos] != '[') return false;
+                open = pos;
+                if (!SkipManifestValue(json, pos)) return false;
+                close = pos - 1;
+                return true;
+            }
+            if (!SkipManifestValue(json, pos)) return false;
+            SkipManifestWhitespace(json, pos);
+            if (pos >= json.size() || json[pos] != ',') return false;
+            ++pos;
+        }
+    }
+
+    // Inspect only direct fields of a component object.
+    bool ComponentReferencesDeletedPath(const std::string& json, std::size_t start,
+                                         std::size_t end, const fs::path& manifestDir,
+                                         const fs::path& deletedPath, bool deletingDirectory)
+    {
+        std::size_t pos = start;
+        SkipManifestWhitespace(json, pos);
+        if (pos >= end || json[pos++] != '{') return false;
+        while (pos < end)
+        {
+            SkipManifestWhitespace(json, pos);
+            if (pos >= end || json[pos] == '}') break;
+            std::string key, value;
+            if (!ReadManifestString(json, pos, key)) break;
+            SkipManifestWhitespace(json, pos);
+            if (pos >= end || json[pos++] != ':') break;
+            SkipManifestWhitespace(json, pos);
+            if (key == "header" || key == "source")
+            {
+                if (!ReadManifestString(json, pos, value)) break;
+                const fs::path referenced = (manifestDir / fs::path(value)).lexically_normal();
+                if (referenced == deletedPath) return true;
+                if (deletingDirectory)
+                {
+                    const fs::path relative = referenced.lexically_relative(deletedPath);
+                    if (!relative.empty() && relative != "." &&
+                        *relative.begin() != "..") return true;
+                }
+            }
+            else if (!SkipManifestValue(json, pos)) break;
+            SkipManifestWhitespace(json, pos);
+            if (pos < end && json[pos] == ',') ++pos;
+            else break;
+        }
+        return false;
+    }
+
+    // Produce updated manifest text. A false return means no safe change is possible.
+    bool BuildManifestAfterDeletion(const std::string& original, const fs::path& manifestDir,
+                                    const fs::path& deletedPath, bool deletingDirectory,
+                                    std::string& updated, bool& changed)
+    {
+        std::size_t open = 0, close = 0;
+        if (!FindManifestComponents(original, open, close)) return false;
+        std::vector<std::string> kept;
+        std::size_t pos = open + 1;
+        changed = false;
+        while (true)
+        {
+            SkipManifestWhitespace(original, pos);
+            if (pos == close) break;
+            if (pos > close) return false;
+            const std::size_t start = pos;
+            if (!SkipManifestValue(original, pos) || pos > close) return false;
+            if (ComponentReferencesDeletedPath(original, start, pos, manifestDir,
+                                               deletedPath, deletingDirectory))
+                changed = true;
+            else
+                kept.push_back(original.substr(start, pos - start));
+            SkipManifestWhitespace(original, pos);
+            if (pos == close) break;
+            if (pos >= close || original[pos++] != ',') return false;
+        }
+        if (!changed) { updated = original; return true; }
+        // Preserve all metadata outside components, including its indentation.
+        std::string replacement;
+        const std::size_t lineStart = original.rfind('\n', open);
+        std::string indent;
+        if (lineStart != std::string::npos)
+        {
+            std::size_t j = lineStart + 1;
+            while (j < open && (original[j] == ' ' || original[j] == '\t'))
+                indent += original[j++];
+        }
+        for (const std::string& entry : kept)
+        {
+            replacement += (replacement.empty() ? "\n" : ",\n");
+            replacement += indent + "  " + entry;
+        }
+        if (!kept.empty()) replacement += "\n" + indent;
+        updated = original.substr(0, open + 1) + replacement + original.substr(close);
+        return true;
     }
 
     void DestroyGameObject(
@@ -1792,13 +1987,114 @@ void ImguiController::DrawAssetBrowser()
                 pendingDelete != rootDir &&
                 isInsideAssets(pendingDelete))
             {
-                std::error_code deleteEc;
-                fs::remove_all(pendingDelete, deleteEc);
+                // Locate the same manifest used by Create Component.
+                const fs::path projectRoot = rootDir.parent_path();
+                const std::vector<fs::path> manifestCandidates = {
+                    projectRoot / "Engine.projectFile",
+                    projectRoot.parent_path() / "Engine.projectFile",
+                    projectRoot / "GraphicsEngine_GL" / "Engine.projectFile"
+                };
+                fs::path manifestPath;
+                for (const fs::path& candidate : manifestCandidates)
+                {
+                    std::error_code ec;
+                    if (fs::is_regular_file(candidate, ec) && !ec)
+                    {
+                        manifestPath = candidate;
+                        break;
+                    }
+                }
 
-                if (deleteEc)
-                    errorMessage = deleteEc.message();
-
-                selectedEntry.clear();
+                std::error_code typeEc;
+                const bool deletingDirectory = fs::is_directory(pendingDelete, typeEc);
+                if (typeEc)
+                    errorMessage = typeEc.message();
+                else if (manifestPath.empty())
+                    errorMessage = "Engine.projectFile not found. Nothing was deleted.";
+                else
+                {
+                    std::ifstream input(manifestPath, std::ios::binary);
+                    std::string original((std::istreambuf_iterator<char>(input)),
+                                         std::istreambuf_iterator<char>());
+                    std::string updated;
+                    bool changed = false;
+                    if (!input.is_open() || input.bad())
+                        errorMessage = "Could not read Engine.projectFile.";
+                    else if (!BuildManifestAfterDeletion(
+                                 original, manifestPath.parent_path(),
+                                 pendingDelete.lexically_normal(), deletingDirectory,
+                                 updated, changed))
+                        errorMessage = "Invalid components array in Engine.projectFile.";
+                    else
+                    {
+                        // Save a backup before touching disk, to restore on failure.
+                        const fs::path backup = manifestPath.string() + ".delete.bak";
+                        const fs::path temp = manifestPath.string() + ".delete.tmp";
+                        std::error_code ec;
+                        if (changed && (fs::exists(backup, ec) || ec ||
+                                        fs::exists(temp, ec) || ec))
+                            errorMessage = "A project backup/temp file already exists.";
+                        else
+                        {
+                            bool manifestUpdated = !changed;
+                            if (changed)
+                            {
+                                std::ofstream output(temp, std::ios::binary | std::ios::trunc);
+                                output.write(updated.data(), static_cast<std::streamsize>(updated.size()));
+                                output.close();
+                                if (!output)
+                                    errorMessage = "Could not write temporary Engine.projectFile.";
+                                else
+                                {
+                                    fs::rename(manifestPath, backup, ec);
+                                    if (!ec)
+                                    {
+                                        fs::rename(temp, manifestPath, ec);
+                                        if (!ec) manifestUpdated = true;
+                                        else
+                                        {
+                                            std::error_code restoreEc;
+                                            fs::rename(backup, manifestPath, restoreEc);
+                                            if (restoreEc)
+                                                errorMessage = "Could not restore Engine.projectFile. Backup: " + backup.string();
+                                        }
+                                    }
+                                    if (!manifestUpdated && errorMessage.empty())
+                                        errorMessage = "Could not update Engine.projectFile: " + ec.message();
+                                }
+                                std::error_code cleanupEc;
+                                fs::remove(temp, cleanupEc);
+                            }
+                            if (manifestUpdated)
+                            {
+                                std::error_code deleteEc;
+                                fs::remove_all(pendingDelete, deleteEc);
+                                if (deleteEc)
+                                {
+                                    errorMessage = deleteEc.message();
+                                    // Restore the manifest if deleting assets failed.
+                                    if (changed)
+                                    {
+                                        std::error_code restoreEc;
+                                        fs::remove(manifestPath, restoreEc);
+                                        fs::rename(backup, manifestPath, restoreEc);
+                                        if (restoreEc)
+                                            errorMessage += " Manifest backup: " + backup.string();
+                                    }
+                                }
+                                else
+                                {
+                                    if (changed)
+                                    {
+                                        std::error_code cleanupEc;
+                                        fs::remove(backup, cleanupEc);
+                                    }
+                                    selectedEntry.clear();
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             pendingDelete.clear();
