@@ -35,6 +35,8 @@ public:
 
     bool CleanUp() override;
 
+    bool RestartEngine;
+
 private:
     bool contextCreated = false;
     WindowController* windowController;

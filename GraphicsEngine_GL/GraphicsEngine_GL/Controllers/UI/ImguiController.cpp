@@ -1801,6 +1801,7 @@ void ImguiController::DrawAssetBrowser()
                                 {
                                     componentName[0] = '\0';
                                     ImGui::CloseCurrentPopup();
+                                    RestartEngine = true;
                                 }
                             }
                         }

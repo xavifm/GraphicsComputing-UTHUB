@@ -8,6 +8,7 @@
 #include "Controllers/Camera/CameraController.h"
 #include "Controllers/UI/ImguiController.h"
 #include "Controllers/Camera/FrameBufferController.h"
+#include "Engine/EngineController.h"
 
 int main()
 {
@@ -26,6 +27,7 @@ int main()
     App->AddController(new FrameBufferController());
     App->AddController(new WorldController(dynamic_cast<FrameBufferController*>(App->GetController(2))));
     App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0)), dynamic_cast<FrameBufferController*>(App->GetController(2)), dynamic_cast<WorldController*>(App->GetController(3))));
+    App->AddController(new EngineController(dynamic_cast<ImguiController*>(App->GetController(4))));
 
     auto& controllers = App->GetControllers();
     std::swap(controllers[1], controllers[4]);
