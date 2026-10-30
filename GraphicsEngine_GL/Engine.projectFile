@@ -12,6 +12,12 @@
       "name": "gfddfgfdg",
       "header": "cmake-build-debug/Assets/gfddfgfdg.h",
       "source": "cmake-build-debug/Assets/gfddfgfdg.cpp"
+    },
+    {
+      "class": "move",
+      "name": "move",
+      "header": "cmake-build-debug/Assets/move.h",
+      "source": "cmake-build-debug/Assets/move.cpp"
     }
   ]
 }

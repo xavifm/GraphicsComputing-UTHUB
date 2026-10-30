@@ -2,7 +2,8 @@
 
 Texture::Texture(const std::string& filePath) 
 {
-    LoadTexture(filePath);
+    std::string fullPathTexture = "./Assets/" + filePath;
+    LoadTexture(fullPathTexture);
 }
 
 Texture::~Texture() 

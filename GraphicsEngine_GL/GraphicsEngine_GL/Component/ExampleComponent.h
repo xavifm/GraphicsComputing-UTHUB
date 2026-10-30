@@ -29,6 +29,8 @@ public:
         VisitFields(*this, visitor);
     }
 
+    void Update();
+
 private:
     template<class Self, class Visitor>
     //Here you should list all the variables visible to the editor

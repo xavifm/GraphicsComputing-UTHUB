@@ -34,7 +34,9 @@ bool Model::LoadEmptyModel()
 
 bool Model::LoadModel(const std::string& fileName, const std::string& textureName)
 {
-    std::ifstream file(fileName);
+
+    std::string fullPathModel = "./Assets/" + fileName;
+    std::ifstream file(fullPathModel);
     if (!file.is_open())
     {
         std::cerr << "[Model] File cannot be opened: " << fileName << std::endl;

@@ -902,18 +902,16 @@ update_status ImguiController::PostUpdate()
                 {
                     try
                     {
-                        ModelEditorState& editorState = GetModelEditorState(modelComponent);
-
-                        if (editorState.texturePath[0] != '\0')
+                        if (modelComponent->FileName != "")
                         {
                             modelComponent->LoadModel(
-                                editorState.modelPath.data(),
-                                editorState.texturePath.data());
+                                modelComponent->FileName,
+                                modelComponent->TextureName);
                         }
                         else
                         {
                             modelComponent->LoadModel(
-                                editorState.modelPath.data());
+                                modelComponent->FileName);
                         }
 
                         modelComponent->CalcNumVerticesTriangles();

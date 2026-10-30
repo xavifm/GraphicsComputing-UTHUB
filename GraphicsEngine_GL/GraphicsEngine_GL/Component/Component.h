@@ -2,6 +2,7 @@
 #include <iosfwd>
 
 class Object;
+class GameObject;
 
 class Component
 {
@@ -12,6 +13,7 @@ public:
 
     void SetOwner(Object* newOwner);
     Object* GetOwner() const;
+    GameObject* GetAttachedGameObject() const;
 
     virtual const char* GetTypeName() const = 0;
 

@@ -1,6 +1,8 @@
 #include "Component.h"
 #include <iomanip>
 
+#include "Object/GameObject/GameObject.h"
+
 struct Reader
 {
     std::istream& file;
@@ -41,7 +43,12 @@ void Component::SetOwner(Object *newOwner)
     this->owner = newOwner;
 }
 
-Object * Component::GetOwner() const
+Object* Component::GetOwner() const
 {
     return this->owner;
+}
+
+GameObject* Component::GetAttachedGameObject() const
+{
+    return (GameObject*) this->owner;
 }
