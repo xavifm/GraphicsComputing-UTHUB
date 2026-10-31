@@ -68,6 +68,115 @@ namespace
 
     std::unordered_map<Model*, ModelEditorState> g_modelEditorStates;
 
+    // Appearance: consistent dark slate with cool-blue accents.
+    void ApplyEditorStyle()
+    {
+        ImGuiStyle& st = ImGui::GetStyle();
+        st.WindowPadding = ImVec2(13, 12);
+        st.FramePadding = ImVec2(10, 7);
+        st.ItemSpacing = ImVec2(9, 8);
+        st.ItemInnerSpacing = ImVec2(8, 5);
+        st.WindowRounding = 9.0f;
+        st.ChildRounding = 8.0f;
+        st.FrameRounding = 6.0f;
+        st.PopupRounding = 8.0f;
+        st.ScrollbarRounding = 7.0f;
+        st.GrabRounding = 6.0f;
+        st.WindowBorderSize = 0.0f;
+        st.ChildBorderSize = 1.0f;
+        st.FrameBorderSize = 0.0f;
+        st.ScrollbarSize = 11.0f;
+        ImVec4* c = st.Colors;
+        c[ImGuiCol_Text] = ImVec4(.90f,.93f,.97f,1);
+        c[ImGuiCol_TextDisabled] = ImVec4(.50f,.56f,.66f,1);
+        c[ImGuiCol_WindowBg] = ImVec4(.075f,.090f,.125f,1);
+        c[ImGuiCol_ChildBg] = ImVec4(.094f,.113f,.153f,1);
+        c[ImGuiCol_PopupBg] = ImVec4(.11f,.13f,.18f,1);
+        c[ImGuiCol_Border] = ImVec4(.18f,.22f,.30f,1);
+        c[ImGuiCol_FrameBg] = ImVec4(.14f,.17f,.23f,1);
+        c[ImGuiCol_FrameBgHovered] = ImVec4(.20f,.25f,.34f,1);
+        c[ImGuiCol_FrameBgActive] = ImVec4(.24f,.30f,.41f,1);
+        c[ImGuiCol_TitleBg] = ImVec4(.09f,.11f,.16f,1);
+        c[ImGuiCol_TitleBgActive] = ImVec4(.12f,.16f,.23f,1);
+        c[ImGuiCol_MenuBarBg] = ImVec4(.10f,.13f,.18f,1);
+        c[ImGuiCol_Button] = ImVec4(.17f,.21f,.29f,1);
+        c[ImGuiCol_ButtonHovered] = ImVec4(.23f,.32f,.46f,1);
+        c[ImGuiCol_ButtonActive] = ImVec4(.24f,.41f,.66f,1);
+        c[ImGuiCol_Header] = ImVec4(.17f,.27f,.40f,1);
+        c[ImGuiCol_HeaderHovered] = ImVec4(.23f,.36f,.53f,1);
+        c[ImGuiCol_HeaderActive] = ImVec4(.28f,.44f,.65f,1);
+        c[ImGuiCol_Separator] = ImVec4(.18f,.22f,.30f,1);
+        c[ImGuiCol_CheckMark] = ImVec4(.43f,.71f,.98f,1);
+        c[ImGuiCol_SliderGrab] = ImVec4(.35f,.60f,.91f,1);
+        c[ImGuiCol_SliderGrabActive] = ImVec4(.49f,.73f,1,1);
+        c[ImGuiCol_ResizeGrip] = ImVec4(.32f,.55f,.87f,.3f);
+        c[ImGuiCol_ResizeGripHovered] = ImVec4(.32f,.55f,.87f,.7f);
+        c[ImGuiCol_ResizeGripActive] = ImVec4(.32f,.55f,.87f,1);
+        c[ImGuiCol_ScrollbarBg] = ImVec4(.08f,.10f,.14f,1);
+        c[ImGuiCol_ScrollbarGrab] = ImVec4(.24f,.28f,.37f,1);
+    }
+
+    ImU32 AssetColor(const fs::path& path, bool directory)
+    {
+        if (directory) return IM_COL32(248,186,90,255);
+        std::string ext = path.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](unsigned char c){return static_cast<char>(std::tolower(c));});
+        if (ext==".png" || ext==".jpg" || ext==".jpeg" || ext==".bmp" || ext==".dds" || ext==".tga") return IM_COL32(107,208,165,255);
+        if (ext==".obj" || ext==".fbx" || ext==".gltf" || ext==".glb" || ext==".dae" || ext==".stl" || ext==".3ds") return IM_COL32(130,170,255,255);
+        if (ext==".sav") return IM_COL32(189,151,248,255);
+        if (ext==".h" || ext==".cpp" || ext==".hpp" || ext==".c") return IM_COL32(113,192,243,255);
+        return IM_COL32(174,184,200,255);
+    }
+
+    // Vector pictograms rendered by ImDrawList; no image/font dependency.
+    void DrawAssetIcon(ImDrawList* d, ImVec2 center, float size,
+                       const fs::path& path, bool directory)
+    {
+        const ImU32 color = AssetColor(path, directory);
+        const float h = size * .5f;
+        if (directory)
+        {
+            d->AddRectFilled(ImVec2(center.x-h, center.y-h*.55f),
+                ImVec2(center.x+h*.10f, center.y-h*.15f), color, 3);
+            d->AddRectFilled(ImVec2(center.x-h, center.y-h*.30f),
+                ImVec2(center.x+h, center.y+h*.72f), color, 4);
+            d->AddLine(ImVec2(center.x-h*.75f,center.y+h*.02f),
+                       ImVec2(center.x+h*.75f,center.y+h*.02f),IM_COL32(98,72,43,100),1.4f);
+            return;
+        }
+        std::string ext = path.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](unsigned char c){return static_cast<char>(std::tolower(c));});
+        if (ext==".obj" || ext==".fbx" || ext==".gltf" || ext==".glb" || ext==".dae" || ext==".stl" || ext==".3ds")
+        {
+            const ImVec2 a(center.x,center.y-h*.90f), b(center.x+h*.77f,center.y-h*.42f),
+                c(center.x+h*.77f,center.y+h*.50f), e(center.x,center.y+h*.95f),
+                f(center.x-h*.77f,center.y+h*.50f),g(center.x-h*.77f,center.y-h*.42f);
+            d->AddLine(a,b,color,2.5f); d->AddLine(b,c,color,2.5f);
+            d->AddLine(c,e,color,2.5f); d->AddLine(e,f,color,2.5f);
+            d->AddLine(f,g,color,2.5f); d->AddLine(g,a,color,2.5f);
+            d->AddLine(g,center,color,2); d->AddLine(b,center,color,2);
+            d->AddLine(center,e,color,2);
+        }
+        else if (ext==".png" || ext==".jpg" || ext==".jpeg" || ext==".bmp" || ext==".dds" || ext==".tga")
+        {
+            d->AddRect(ImVec2(center.x-h,center.y-h*.72f),ImVec2(center.x+h,center.y+h*.72f),color,3,0,2.4f);
+            d->AddCircleFilled(ImVec2(center.x+h*.47f,center.y-h*.35f),h*.15f,color,12);
+            d->AddLine(ImVec2(center.x-h*.78f,center.y+h*.48f),ImVec2(center.x-h*.20f,center.y-h*.08f),color,2);
+            d->AddLine(ImVec2(center.x-h*.20f,center.y-h*.08f),ImVec2(center.x+h*.10f,center.y+h*.24f),color,2);
+            d->AddLine(ImVec2(center.x+h*.10f,center.y+h*.24f),ImVec2(center.x+h*.41f,center.y-h*.02f),color,2);
+            d->AddLine(ImVec2(center.x+h*.41f,center.y-h*.02f),ImVec2(center.x+h*.80f,center.y+h*.48f),color,2);
+        }
+        else
+        {
+            d->AddRect(ImVec2(center.x-h*.72f,center.y-h),ImVec2(center.x+h*.72f,center.y+h),color,3,0,2.2f);
+            d->AddLine(ImVec2(center.x-h*.43f,center.y-h*.30f),ImVec2(center.x+h*.39f,center.y-h*.30f),color,2);
+            d->AddLine(ImVec2(center.x-h*.43f,center.y),ImVec2(center.x+h*.39f,center.y),color,2);
+            d->AddLine(ImVec2(center.x-h*.43f,center.y+h*.30f),ImVec2(center.x+h*.15f,center.y+h*.30f),color,2);
+        }
+    }
+
     // Copiem la ruta al payload: no depenem de la vida d'una variable temporal.
     constexpr const char* kAssetPathPayload = "ENGINE_ASSET_PATH";
 
@@ -469,6 +578,7 @@ bool ImguiController::Init()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
+    ApplyEditorStyle();
 
     if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
     {
@@ -578,9 +688,9 @@ update_status ImguiController::PostUpdate()
     }
 
     const ImVec2 available = ImGui::GetContentRegionAvail();
-    constexpr float hierarchyWidth = 260.0f;
-    constexpr float inspectorWidth = 320.0f;
-    constexpr float bottomHeight = 220.0f;
+    constexpr float hierarchyWidth = 275.0f;
+    constexpr float inspectorWidth = 340.0f;
+    constexpr float bottomHeight = 265.0f;
 
     const float upperHeight =
         available.y > bottomHeight ? available.y - bottomHeight : 0.0f;
@@ -600,7 +710,8 @@ update_status ImguiController::PostUpdate()
     const std::string activeSceneName = g_activeScenePath.empty()
         ? "Cap escena oberta"
         : g_activeScenePath.filename().string();
-    ImGui::Text("Scene Hierarchy - %s", activeSceneName.c_str());
+    ImGui::TextColored(ImVec4(.52f,.74f,1,1), "SCENE HIERARCHY");
+    ImGui::TextDisabled("%s", activeSceneName.c_str());
     if (!g_activeScenePath.empty() && ImGui::IsItemHovered())
         ImGui::SetTooltip("%s", g_activeScenePath.string().c_str());
     ImGui::Separator();
@@ -895,7 +1006,7 @@ update_status ImguiController::PostUpdate()
         true,
         viewportFlags);
 
-    ImGui::TextUnformatted("Viewport");
+    ImGui::TextColored(ImVec4(.52f,.74f,1,1), "SCENE VIEWPORT");
     ImGui::Separator();
 
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
@@ -925,7 +1036,7 @@ update_status ImguiController::PostUpdate()
     // Inspector
     ImGui::BeginChild("Inspector", ImVec2(0.0f, 0.0f), true);
 
-    ImGui::TextUnformatted("Inspector");
+    ImGui::TextColored(ImVec4(.52f,.74f,1,1), "INSPECTOR");
     ImGui::Separator();
 
     if (selectedGameObject == nullptr)
@@ -1003,7 +1114,7 @@ update_status ImguiController::PostUpdate()
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::TextUnformatted("Components");
+        ImGui::TextColored(ImVec4(.52f,.74f,1,1), "COMPONENTS");
         ImGui::Spacing();
 
         const auto& components =
@@ -1191,7 +1302,9 @@ update_status ImguiController::PostUpdate()
         ImVec2(0.0f, bottomHeight),
         true);
 
-    ImGui::TextUnformatted("Asset Browser");
+    ImGui::TextColored(ImVec4(.52f,.74f,1,1), "ASSET BROWSER");
+    ImGui::SameLine();
+    ImGui::TextDisabled("  /  Project files");
     ImGui::Separator();
 
     static char searchBuffer[128] = "";
@@ -1273,7 +1386,7 @@ void ImguiController::DrawAssetBrowser()
         initialized = true;
     }
 
-    ImGui::TextDisabled("Deixa anar fitxers externs a la finestra per importar-los aqui.");
+    ImGui::TextDisabled("Drop files from your desktop to import into this folder.");
 
     // Importa fitxers externs a la carpeta actual, sense tocar els originals.
     for (const auto& drop : g_externalFileDrops)
@@ -2195,53 +2308,48 @@ void ImguiController::DrawAssetBrowser()
     // Scrollable asset content
     ImGui::BeginChild("AssetContent", ImVec2(0, 0), false);
 
-    constexpr float buttonWidth = 120.0f;
-    constexpr float buttonHeight = 60.0f;
+    constexpr float buttonWidth = 132.0f;
+    constexpr float buttonHeight = 102.0f;
 
-    float spacing = ImGui::GetStyle().ItemSpacing.x;
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-
-    int columns = std::max(
-        1,
-        static_cast<int>(
-            (availableWidth + spacing) /
-            (buttonWidth + spacing)));
-
+    const float spacing = ImGui::GetStyle().ItemSpacing.x;
+    const float availableWidth = ImGui::GetContentRegionAvail().x;
+    const int columns = std::max(1, static_cast<int>((availableWidth + spacing) / (buttonWidth + spacing)));
     ImGui::Columns(columns, "AssetColumns", false);
 
     for (const auto& entry : entries)
     {
         fs::path path = entry.path();
-
         std::error_code typeEc;
         bool isDirectory = entry.is_directory(typeEc);
-
-        if (typeEc)
-            continue;
-
-        std::string filename = path.filename().string();
-
-        std::string label =
-            std::string(isDirectory ? "[DIR] " : "[FILE] ") +
-            filename;
-
+        if (typeEc) continue;
+        const std::string filename = path.filename().string();
         ImGui::PushID(filename.c_str());
+        const bool isSelected = selectedEntry == path;
 
-        bool isSelected = selectedEntry == path;
+        // The same ImGui button provides click, context menu and drag source.
+        ImGui::PushStyleColor(ImGuiCol_Button, isSelected ?
+            ImVec4(.19f,.32f,.48f,1) : ImVec4(.12f,.15f,.21f,1));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(.20f,.28f,.39f,1));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 9.0f);
+        ImGui::Button("##AssetTile", ImVec2(buttonWidth,buttonHeight));
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(2);
 
-        if (isSelected)
-        {
-            ImGui::PushStyleColor(
-                ImGuiCol_Button,
-                ImVec4(0.22f, 0.38f, 0.60f, 1.0f));
-        }
-
-        ImGui::Button(
-            label.c_str(),
-            ImVec2(buttonWidth, buttonHeight));
-
-        if (isSelected)
-            ImGui::PopStyleColor();
+        const ImVec2 tileMin = ImGui::GetItemRectMin();
+        const ImVec2 tileMax = ImGui::GetItemRectMax();
+        ImDrawList* draw = ImGui::GetWindowDrawList();
+        const ImU32 border = isSelected ? IM_COL32(91,160,243,255) : IM_COL32(52,64,85,255);
+        draw->AddRect(tileMin, tileMax, border, 9.0f, 0, isSelected ? 2.0f : 1.0f);
+        DrawAssetIcon(draw, ImVec2((tileMin.x+tileMax.x)*.5f, tileMin.y+35.0f), 37.0f, path, isDirectory);
+        std::string displayName = filename;
+        // Clip long names so they cannot overflow the neighbouring tiles.
+        while (displayName.size() > 3 && ImGui::CalcTextSize(displayName.c_str()).x > buttonWidth-14.0f)
+            displayName.pop_back();
+        if (displayName != filename) displayName += "...";
+        const ImVec2 textSize = ImGui::CalcTextSize(displayName.c_str());
+        draw->AddText(ImVec2(tileMin.x+(buttonWidth-textSize.x)*.5f,tileMin.y+72.0f),
+            IM_COL32(221,230,241,255), displayName.c_str());
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s",path.filename().string().c_str());
 
         // Drag source: exporta la ruta del fitxer a l'Inspector.
         if (!isDirectory && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
