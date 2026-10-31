@@ -14,6 +14,14 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <shellapi.h>
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#endif
+
 #include "Component/ComponentRegistry.h"
 #include "Controllers/Window/WindowController.h"
 #include "Model/Model.h"
@@ -1877,6 +1885,38 @@ void ImguiController::DrawAssetBrowser()
                    b.path().filename().string();
         });
 
+    // Open code files with the operating system's default application.
+    auto openExternalEditor = [&](const fs::path& filePath)
+    {
+        std::error_code checkEc;
+        if (!isInsideAssets(filePath) || !fs::is_regular_file(filePath, checkEc) || checkEc)
+        {
+            errorMessage = "Invalid file path: " + filePath.string();
+            return;
+        }
+#ifdef _WIN32
+        const std::wstring nativePath = filePath.wstring();
+        HINSTANCE result = ShellExecuteW(nullptr, L"open", nativePath.c_str(),
+                                         nullptr, nullptr, SW_SHOWNORMAL);
+        if (reinterpret_cast<INT_PTR>(result) <= 32)
+            errorMessage = "Could not open the default application for: " + filePath.string();
+#else
+        const std::string nativePath = filePath.string();
+        const pid_t child = fork();
+        if (child == 0)
+        {
+#ifdef __APPLE__
+            execlp("open", "open", nativePath.c_str(), static_cast<char*>(nullptr));
+#else
+            execlp("xdg-open", "xdg-open", nativePath.c_str(), static_cast<char*>(nullptr));
+#endif
+            _exit(127);
+        }
+        else if (child < 0)
+            errorMessage = "Could not launch the default application: " + filePath.string();
+#endif
+    };
+
     // Scrollable asset content
     ImGui::BeginChild("AssetContent", ImVec2(0, 0), false);
 
@@ -1928,9 +1968,34 @@ void ImguiController::DrawAssetBrowser()
         if (isSelected)
             ImGui::PopStyleColor();
 
-        // Select an item with a single click
+        // Un clic selecciona l'asset i obre els fitxers compatibles.
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+        {
             selectedEntry = path;
+            if (!isDirectory && isInsideAssets(path))
+            {
+                std::string extension = path.extension().string();
+                std::transform(extension.begin(), extension.end(), extension.begin(),
+                    [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+
+                if (extension == ".cpp" || extension == ".h")
+                {
+                    openExternalEditor(path);
+                }
+                else if (extension == ".sav")
+                {
+                    if (worldController != nullptr)
+                    {
+                        if (worldController->LoadWorld(path.string()))
+                            selectedGameObject = nullptr;
+                        else
+                            errorMessage = "Could not load scene: " + path.string();
+                    }
+                    else
+                        errorMessage = "WorldController is not available.";
+                }
+            }
+        }
 
         // Open directories with a double click
         if (isDirectory &&
@@ -2099,6 +2164,7 @@ void ImguiController::DrawAssetBrowser()
                                         fs::remove(backup, cleanupEc);
                                     }
                                     selectedEntry.clear();
+
                                 }
                             }
                         }

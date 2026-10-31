@@ -18,6 +18,12 @@
       "name": "move",
       "header": "cmake-build-debug/Assets/move.h",
       "source": "cmake-build-debug/Assets/move.cpp"
+    },
+    {
+      "class": "kkkk",
+      "name": "kkkk",
+      "header": "cmake-build-debug/Assets/kkkk.h",
+      "source": "cmake-build-debug/Assets/kkkk.cpp"
     }
   ]
 }
