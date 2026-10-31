@@ -21,7 +21,9 @@ set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h"
         GraphicsEngine_GL/Component/ExampleComponent.cpp
         GraphicsEngine_GL/Component/ExampleComponent.h
         GraphicsEngine_GL/Controllers/Engine/EngineController.cpp
-        GraphicsEngine_GL/Controllers/Engine/EngineController.h)
+        GraphicsEngine_GL/Controllers/Engine/EngineController.h
+        GraphicsEngine_GL/Light/Light.cpp
+        GraphicsEngine_GL/Light/Light.h)
 
 get_filename_component(PROJECT_DIR "${PROJECT_FILE}" DIRECTORY)
 

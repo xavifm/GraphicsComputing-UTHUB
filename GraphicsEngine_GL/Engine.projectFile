@@ -6,6 +6,12 @@
       "name": "Model",
       "header": "GraphicsEngine_GL/Model/Model.h",
       "source": "GraphicsEngine_GL/Model/Model.cpp"
+    },
+    {
+      "class": "Light",
+      "name": "Light",
+      "header": "GraphicsEngine_GL/Light/Light.h",
+      "source": "GraphicsEngine_GL/Light/Light.cpp"
     }
   ]
 }

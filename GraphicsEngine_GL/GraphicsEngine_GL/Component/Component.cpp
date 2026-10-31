@@ -1,8 +1,6 @@
 #include "Component.h"
 #include <iomanip>
 
-#include "Object/GameObject/GameObject.h"
-
 struct Reader
 {
     std::istream& file;

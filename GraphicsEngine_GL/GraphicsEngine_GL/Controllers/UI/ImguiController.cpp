@@ -14,6 +14,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "WorldController.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #include <shellapi.h>
@@ -264,7 +266,7 @@ namespace
 
         auto* gameObject = new GameObject(
             Vector3D(0.0f, 0.0f, 0.0f),
-            Vector3D(1.0f, 1.0f, 1.0f));
+            Vector3D(1.0f, 1.0f, 1.0f), worldController);
 
         const std::size_t objectNumber =
             worldController->GameObjects.size() + 1;

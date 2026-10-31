@@ -156,6 +156,18 @@ struct Vector3D {
     }
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Vector3D& v)
+{
+    os << v.x << " " << v.y << " " << v.z;
+    return os;
+}
+
+inline std::istream& operator>>(std::istream& is, Vector3D& v)
+{
+    is >> v.x >> v.y >> v.z;
+    return is;
+}
+
 struct Quaternion {
     float w, x, y, z;
 

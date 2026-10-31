@@ -12,7 +12,7 @@
 #include "Model/Model.h"
 
 
-std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName)
+std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName, WorldController* _worldController)
 {
     std::vector<GameObject*> objects;
 
@@ -52,7 +52,7 @@ std::vector<GameObject*> WorldLoader::GetWorldObjects(std::string _fileName)
             rotation = { 0.0f, 0.0f, 0.0f };
             size     = { 1.0f, 1.0f, 1.0f };
 
-            GameObject* gameObject = new GameObject(position, size);
+            GameObject* gameObject = new GameObject(position, size, _worldController);
 
             while (file >> token)
             {

@@ -6,7 +6,6 @@
 #include "ThirdParty/include/imgui/imgui_impl_glfw.h"
 #include "ThirdParty/include/imgui/imgui_impl_opengl3.h"
 #include "WindowController.h"
-#include "WorldController.h"
 #include "../Controller.h"
 #include <filesystem>
 #include <algorithm>
@@ -14,6 +13,10 @@
 #include <string>
 #include <cstring>
 #include <system_error>
+
+class GameObject;
+class Component;
+class WorldController;
 
 namespace fs = std::filesystem;
 
@@ -34,6 +37,8 @@ public:
     void DrawAssetBrowser();
 
     bool CleanUp() override;
+
+    WorldController* GetWorldController() { return worldController; }
 
     bool RestartEngine;
 

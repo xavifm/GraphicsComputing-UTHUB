@@ -5,7 +5,7 @@
 class TestGameObject : public GameObject
 {
 public:
-    TestGameObject(const Vector3D& position, const Vector3D& size) : GameObject(position, size) {}
+    //TestGameObject(const Vector3D& position, const Vector3D& size) {}
 
     Model* model;
 

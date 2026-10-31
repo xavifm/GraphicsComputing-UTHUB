@@ -7,7 +7,7 @@
 
 class WorldLoader {
 public:
-    std::vector<GameObject*> GetWorldObjects(std::string _fileName);
+    std::vector<GameObject*> GetWorldObjects(std::string _fileName, WorldController* _worldController);
     bool SaveWorld(std::vector<GameObject*> _objects, std::string _fileName);
 };
 

@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "FrameBufferController.h"
+#include "WorldLoader.h"
 #include "Object/GameObject/GameObject.h"
 #include "Object/GameObject/TestGameObject.h"
 
@@ -45,6 +46,57 @@ bool WorldController::Init()
     return true;
 }
 
+void WorldController::UpdateLights()
+{
+    if (!program)
+        return;
+
+    const GLuint programID = program->GetProgramId();
+
+    const int lightCount = static_cast<int>(
+        std::min(worldLights.size(), size_t(MAX_LIGHTS))
+    );
+
+    glUniform1i(
+        glGetUniformLocation(programID, "numLights"),
+        lightCount
+    );
+
+    if (lightCount == 0)
+        return;
+
+    std::vector<float> positions;
+    std::vector<float> colors;
+
+    positions.reserve(lightCount * 3);
+    colors.reserve(lightCount * 3);
+
+    for (int i = 0; i < lightCount; ++i)
+    {
+        const WorldLights* light = worldLights[i];
+
+        positions.push_back(light->lightPosition.x);
+        positions.push_back(light->lightPosition.y);
+        positions.push_back(light->lightPosition.z);
+
+        colors.push_back(light->lightColor.x);
+        colors.push_back(light->lightColor.y);
+        colors.push_back(light->lightColor.z);
+    }
+
+    glUniform3fv(
+        glGetUniformLocation(programID, "lightPos[0]"),
+        lightCount,
+        positions.data()
+    );
+
+    glUniform3fv(
+        glGetUniformLocation(programID, "lightColor[0]"),
+        lightCount,
+        colors.data()
+    );
+}
+
 update_status WorldController::Update()
 {
     if (!program)
@@ -54,43 +106,49 @@ update_status WorldController::Update()
 
     glViewport(0, 0, 1280, 720);
     glEnable(GL_DEPTH_TEST);
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     cameraController->Update();
     program->Use();
 
+    const GLuint programID = program->GetProgramId();
+
+    UpdateLights();
+
+    Vector3D cameraPos = cameraController->GetCameraPosition();
+
+    glUniform3f(
+        glGetUniformLocation(programID, "viewPos"),
+        cameraPos.x,
+        cameraPos.y,
+        cameraPos.z
+    );
+
+    glUniform1f(
+        glGetUniformLocation(programID, "ambientStrength"),
+        0.1f
+    );
+
+    glUniform1f(
+        glGetUniformLocation(programID, "specularStrength"),
+        0.7f
+    );
+
+    glUniform1f(
+        glGetUniformLocation(programID, "shininess"),
+        32.0f
+    );
+
     for (GameObject* object : GameObjects)
     {
-        if (object == nullptr)
+        if (!object)
             continue;
 
         UpdateMVP(object);
         object->Update(0.0f);
     }
-
-    Vector3D lightOffset(5.0f, 5.0f, 5.0f);
-    Vector3D lightPosition = lightOffset;
-
-    glUniform3f(glGetUniformLocation(program->GetProgramId(), "lightPos"), lightPosition.x, lightPosition.y, lightPosition.z);
-    glUniform3f(glGetUniformLocation(program->GetProgramId(), "lightColor"), 1.0f, 1.0f, 1.0f);
-    glUniform3f(glGetUniformLocation(program->GetProgramId(), "viewPos"),
-        cameraController->GetCameraPosition().x,
-        cameraController->GetCameraPosition().y,
-        cameraController->GetCameraPosition().z);
-
-    glUniform1f(glGetUniformLocation(program->GetProgramId(), "ambientStrength"), 1.f);
-    glUniform1f(glGetUniformLocation(program->GetProgramId(), "specularStrength"), 0.7f);
-    glUniform1f(glGetUniformLocation(program->GetProgramId(), "shininess"), 32.0f);
-
-
-    Mat4x4 normalMatrix = modelMatrix.Inverse().Transpose();
-    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "normalMatrix"), 1, GL_FALSE, &normalMatrix.m[0][0]);
-
-    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "model"), 1, GL_FALSE, &modelMatrix.m[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(program->GetProgramId(), "u_MVP"), 1, GL_FALSE, &mvp.m[0][0]);
-
-    //objectTest->Update(0.0f);
 
     frameBufferController->Unbind();
 
@@ -219,7 +277,7 @@ bool WorldController::LoadWorld(std::string _fileName)
 
     DestroyScene();
 
-    std::vector<GameObject*> objects = worldLoader->GetWorldObjects(_fileName);
+    std::vector<GameObject*> objects = worldLoader->GetWorldObjects(_fileName, this);
 
     for (auto Object: objects)
     {
@@ -276,4 +334,36 @@ void WorldController::AddGameObject(GameObject* _gameObject)
 
     GameObjects.push_back(_gameObject);
     _gameObject->Start();
+}
+
+void WorldController::RemoveLight(int _id)
+{
+    for (auto it = worldLights.begin(); it != worldLights.end(); ++it)
+    {
+        if ((*it)->id == _id)
+        {
+            delete *it;
+            worldLights.erase(it);
+            break;
+        }
+    }
+}
+
+
+void WorldController::AddLight(int _id, Vector3D _lightPosition, Vector3D _lightColor)
+{
+    worldLights.push_back(new WorldLights(_id, _lightPosition, _lightColor));
+}
+
+void WorldController::UpdateLight(int _id, Vector3D _lightPosition, Vector3D _lightColor)
+{
+    for (auto it = worldLights.begin(); it != worldLights.end(); ++it)
+    {
+        if ((*it)->id == _id)
+        {
+            (*it)->lightPosition = _lightPosition;
+            (*it)->lightColor = _lightColor;
+            break;
+        }
+    }
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "WorldLoader.h"
 #include "../Controller.h"
 #include "../../Shader/ShaderProgram.h"
 #include "../../Model/Model.h"
@@ -9,6 +8,22 @@
 #include "../Camera/CameraController.h"
 
 class GameObject;
+class WorldLoader;
+
+struct WorldLights
+{
+    WorldLights(int _id, Vector3D _lightPosition, Vector3D _lightColor)
+    {
+        id = _id;
+        lightPosition = _lightPosition;
+        lightColor = _lightColor;
+    }
+
+    int id;
+    Vector3D lightPosition;
+    Vector3D lightColor;
+};
+
 //A world hauria d'existir un array de GameObjects, i hauria de cridar el seu update a cada escena (PEX: dibuixo model si el tinc attachat a update), el món s'hauria de carregar per un XML que declari els objectes, o desde la
 //UI en càs de voler construïr i que gravi en xml, opció de save world també en XML
 //Primer provar de carregar harcodejadament GameObjects i que es puguin gestionar en UI
@@ -19,10 +34,18 @@ public:
     ~WorldController();
 
     bool Init() override;
+
+    void UpdateLights();
+
     update_status Update() override;
     bool CleanUp() override;
 
     void AddGameObject(GameObject* _gameObject);
+    void AddLight(int _id, Vector3D _lightPosition, Vector3D _lightColor);
+
+    void UpdateLight(int _id, Vector3D _lightPosition, Vector3D _lightColor);
+
+    void RemoveLight(int _id);
     bool LoadWorld(std::string _fileName);
 
     GameObject* FindGameObject(std::string _name);
@@ -53,6 +76,10 @@ private:
     unsigned int uMVP_Location = 0;
     float yaw;
     float pitch;
+
+    const int MAX_LIGHTS = 100;
+
+    std::vector<WorldLights*> worldLights;
 
     Vector3D cameraPosition{ 0.0f, 2.0f, 20.f };
     Vector3D cameraTarget{ 0.0f, 0.0f, 0.0f };
