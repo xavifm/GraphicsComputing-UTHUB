@@ -40,6 +40,68 @@ namespace
 
     std::unordered_map<Model*, ModelEditorState> g_modelEditorStates;
 
+    // Copiem la ruta al payload: no depenem de la vida d'una variable temporal.
+    constexpr const char* kAssetPathPayload = "ENGINE_ASSET_PATH";
+
+    bool HasAssetExtension(const fs::path& path, bool texture)
+    {
+        std::string ext = path.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (texture)
+            return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                   ext == ".tga" || ext == ".bmp" || ext == ".dds";
+        return ext == ".obj" || ext == ".fbx" || ext == ".gltf" ||
+               ext == ".glb" || ext == ".dae" || ext == ".3ds" ||
+               ext == ".stl";
+    }
+
+    // El payload només conté rutes de fitxers originades a l'Asset Browser.
+    bool AcceptAssetPath(std::string& target, bool texture)
+    {
+        bool changed = false;
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload* payload =
+                    ImGui::AcceptDragDropPayload(kAssetPathPayload))
+            {
+                if (payload->Data != nullptr && payload->DataSize > 1 &&
+                    payload->DataSize <= 4096)
+                {
+                    const char* data = static_cast<const char*>(payload->Data);
+                    const std::size_t size = static_cast<std::size_t>(payload->DataSize);
+                    if (data[size - 1] == '\0')
+                    {
+                        const fs::path path(std::string(data, size - 1));
+                        std::error_code ec;
+                        if (HasAssetExtension(path, texture) &&
+                            fs::is_regular_file(path, ec) && !ec)
+                        {
+                            // Desa la ruta relativa a l'interior d'Assets/.
+                            // Ex.: Assets/test.obj -> test.obj
+                            //      Assets/Models/test.obj -> Models/test.obj
+                            std::error_code rootEc;
+                            const fs::path assetsRoot = fs::weakly_canonical("./Assets", rootEc);
+                            if (!rootEc)
+                            {
+                                const fs::path relative = path.lexically_normal().lexically_relative(assetsRoot);
+                                if (!relative.empty() && relative != "." &&
+                                    *relative.begin() != "..")
+                                {
+                                    target = relative.generic_string();
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+        return changed;
+    }
+
+
     ModelEditorState& GetModelEditorState(Model* model)
     {
         return g_modelEditorStates[model];
@@ -938,26 +1000,51 @@ update_status ImguiController::PostUpdate()
                 }
             }
 
-            //INTERNAL ENGINE FUNCTIONS ONLY
+            // Paths del component Model: arrossega fitxers des de l'Asset Browser.
             if (Model* modelComponent = dynamic_cast<Model*>(component))
             {
+                ModelEditorState& assetState = GetModelEditorState(modelComponent);
+                // Evita perdre les modificacions mentre s'edita el text.
+                ImGui::TextUnformatted("Model file (drag & drop)");
+                if (!ImGui::IsAnyItemActive())
+                    std::snprintf(assetState.modelPath.data(), assetState.modelPath.size(),
+                                  "%s", modelComponent->FileName.c_str());
+                if (ImGui::InputText("##ModelAsset", assetState.modelPath.data(),
+                                     assetState.modelPath.size()))
+                    modelComponent->FileName = assetState.modelPath.data();
+                if (AcceptAssetPath(modelComponent->FileName, false))
+                    std::snprintf(assetState.modelPath.data(), assetState.modelPath.size(),
+                                  "%s", modelComponent->FileName.c_str());
+
+                ImGui::TextUnformatted("Texture file (drag & drop)");
+                if (!ImGui::IsAnyItemActive())
+                    std::snprintf(assetState.texturePath.data(), assetState.texturePath.size(),
+                                  "%s", modelComponent->TextureName.c_str());
+                if (ImGui::InputText("##TextureAsset", assetState.texturePath.data(),
+                                     assetState.texturePath.size()))
+                    modelComponent->TextureName = assetState.texturePath.data();
+                if (AcceptAssetPath(modelComponent->TextureName, true))
+                    std::snprintf(assetState.texturePath.data(), assetState.texturePath.size(),
+                                  "%s", modelComponent->TextureName.c_str());
+
                 if (ImGui::Button("Load Model"))
                 {
                     try
                     {
-                        if (modelComponent->FileName != "")
+                        if (modelComponent->FileName.empty())
                         {
-                            modelComponent->LoadModel(
-                                modelComponent->FileName,
-                                modelComponent->TextureName);
+                            std::cerr << "Select a 3D model first.\n";
                         }
                         else
                         {
-                            modelComponent->LoadModel(
-                                modelComponent->FileName);
+                            if (!modelComponent->TextureName.empty())
+                                modelComponent->LoadModel(modelComponent->FileName,
+                                                          modelComponent->TextureName);
+                            else
+                                modelComponent->LoadModel(modelComponent->FileName);
+                            modelComponent->CalcNumVerticesTriangles();
                         }
 
-                        modelComponent->CalcNumVerticesTriangles();
                     }
                     catch (const std::exception& exception)
                     {
@@ -2080,6 +2167,16 @@ void ImguiController::DrawAssetBrowser()
 
         if (isSelected)
             ImGui::PopStyleColor();
+
+        // Drag source: exporta la ruta del fitxer a l'Inspector.
+        if (!isDirectory && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+        {
+            const std::string assetPath = path.string();
+            ImGui::SetDragDropPayload(kAssetPathPayload,
+                assetPath.c_str(), assetPath.size() + 1);
+            ImGui::TextUnformatted(filename.c_str());
+            ImGui::EndDragDropSource();
+        }
 
         // Un clic selecciona l'asset i obre els fitxers compatibles.
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
