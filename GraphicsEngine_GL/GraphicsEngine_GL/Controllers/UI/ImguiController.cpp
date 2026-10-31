@@ -29,6 +29,9 @@
 
 namespace
 {
+    // Ruta de l'escena carregada o creada actualment.
+    fs::path g_activeScenePath;
+
     struct ModelEditorState
     {
         std::array<char, 256> modelPath{};
@@ -272,6 +275,34 @@ namespace
         return true;
     }
 
+    // Desa una escena buida sense modificar ni destruir l'escena que tenim oberta.
+    // Intercanviem temporalment els GameObjects, de manera que SaveWorld
+    // serialitza una escena amb zero objectes, i els restaurem sempre.
+    bool SaveEmptyScene(WorldController* world, const fs::path& path)
+    {
+        if (world == nullptr) return false;
+
+        decltype(world->GameObjects) existingObjects;
+        existingObjects.swap(world->GameObjects);
+
+        bool saved = false;
+        try
+        {
+            saved = world->SaveWorld(path.string());
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error creating empty scene: " << e.what() << '\n';
+        }
+        catch (...)
+        {
+            std::cerr << "Unknown error creating empty scene.\n";
+        }
+
+        existingObjects.swap(world->GameObjects);
+        return saved;
+    }
+
     void DestroyGameObject(
         WorldController* worldController,
         GameObject*& selectedGameObject,
@@ -397,29 +428,33 @@ update_status ImguiController::PostUpdate()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("New Scene"))
+            if (ImGui::MenuItem("Reload Scene"))
             {
-                selectedGameObject = nullptr;
-                // worldController->ClearScene();
-            }
-
-            if (ImGui::MenuItem("Open Scene"))
-            {
-                bool LoadedWorld = worldController->LoadWorld("testScene.sav");
-
-                if (!LoadedWorld)
+                if (worldController != nullptr)
                 {
-                    std::cerr << "Failed to load scene." << std::endl;
+                    if (g_activeScenePath.string() != "")
+                    {
+                        const fs::path scenePath = g_activeScenePath.string();
+                        if (worldController->LoadWorld(scenePath.string()))
+                        {
+                            g_activeScenePath = fs::absolute(scenePath).lexically_normal();
+                            selectedGameObject = nullptr;
+                        }
+                        else
+                            std::cerr << "Failed to load scene: " << scenePath << '\n';
+                    }
                 }
             }
 
             if (ImGui::MenuItem("Save Scene"))
             {
-                bool SavedWorld = worldController->SaveWorld("testScene.sav");
-
-                if (!SavedWorld)
+                if (worldController == nullptr || g_activeScenePath.empty())
                 {
-                    std::cerr << "Failed to save scene." << std::endl;
+                    std::cerr << "No active scene to save. Open or create a scene first.\n";
+                }
+                else if (!worldController->SaveWorld(g_activeScenePath.string()))
+                {
+                    std::cerr << "Failed to save scene: " << g_activeScenePath << '\n';
                 }
             }
 
@@ -1083,6 +1118,7 @@ void ImguiController::DrawAssetBrowser()
 
     static char folderName[256] = "";
     static char componentName[256] = "";
+    static char sceneName[256] = "";
 
     static std::string errorMessage;
     static bool initialized = false;
@@ -1243,7 +1279,84 @@ void ImguiController::DrawAssetBrowser()
         ImGui::OpenPopup("CreateComponent");
     }
 
+    ImGui::SameLine();
+
+    // Create a .sav scene asset in the selected Assets folder.
+    if (ImGui::Button("+ Scene"))
+    {
+        sceneName[0] = '\0';
+        ImGui::OpenPopup("CreateScene");
+    }
+
     ImGui::Separator();
+
+    // Create scene dialog. SaveWorld writes the engine's actual scene format.
+    if (ImGui::BeginPopupModal("CreateScene", nullptr,
+                               ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted("Scene name:");
+        ImGui::InputText("##SceneName", sceneName, sizeof(sceneName));
+        ImGui::TextWrapped("Folder: %s", currentDir.string().c_str());
+
+        if (ImGui::Button("Create Scene"))
+        {
+            std::string name = sceneName;
+            // Accept either MyScene or MyScene.sav, but no other extension.
+            fs::path inputName(name);
+            if (inputName.extension() == ".sav")
+                name = inputName.stem().string();
+
+            const bool validName =
+                !name.empty() && name != "." && name != ".." &&
+                name.back() != ' ' && name.back() != '.' &&
+                name.find_first_of("/\\:*?\"<>|") == std::string::npos &&
+                name.find_first_of("\r\n\t") == std::string::npos;
+
+            if (!validName)
+                errorMessage = "Invalid scene name.";
+            else if (worldController == nullptr)
+                errorMessage = "WorldController is not available.";
+            else
+            {
+                const fs::path scenePath = currentDir / (name + ".sav");
+                std::error_code sceneEc;
+                if (!isInsideAssets(scenePath))
+                    errorMessage = "Scene path is outside Assets.";
+                else if (fs::exists(scenePath, sceneEc))
+                    errorMessage = "A scene with this name already exists.";
+                else if (sceneEc)
+                    errorMessage = sceneEc.message();
+                else if (!SaveEmptyScene(worldController, scenePath))
+                    errorMessage = "Could not create empty scene: " + scenePath.string();
+                else
+                {
+                    // Un cop el nou .sav buit ja existeix, canviem a aquesta
+                    // escena. Els GameObjects de l'escena anterior no es copien.
+                    while (!worldController->GameObjects.empty())
+                    {
+                        GameObject* object = worldController->GameObjects.back();
+                        if (object != nullptr)
+                            DestroyGameObject(worldController, selectedGameObject, object);
+                        else
+                            worldController->GameObjects.pop_back();
+                    }
+                    selectedGameObject = nullptr;
+                    selectedEntry = scenePath;
+                    g_activeScenePath = fs::absolute(scenePath).lexically_normal();
+                    sceneName[0] = '\0';
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            sceneName[0] = '\0';
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 
     // Create folder dialog
     if (ImGui::BeginPopupModal(
@@ -1987,7 +2100,10 @@ void ImguiController::DrawAssetBrowser()
                     if (worldController != nullptr)
                     {
                         if (worldController->LoadWorld(path.string()))
+                        {
                             selectedGameObject = nullptr;
+                            g_activeScenePath = fs::absolute(path).lexically_normal();
+                        }
                         else
                             errorMessage = "Could not load scene: " + path.string();
                     }
@@ -2052,8 +2168,27 @@ void ImguiController::DrawAssetBrowser()
             "Delete '%s'?",
             pendingDelete.filename().string().c_str());
 
-        ImGui::TextUnformatted(
-            "Deleting a folder also deletes its contents.");
+        // C++ class files are a pair: Class.h and Class.cpp.
+        const std::string deleteExtension = pendingDelete.extension().string();
+        const bool deletingClassFile =
+            deleteExtension == ".h" || deleteExtension == ".cpp";
+        fs::path pairedFile = pendingDelete;
+        if (deletingClassFile)
+            pairedFile.replace_extension(deleteExtension == ".h" ? ".cpp" : ".h");
+
+        if (deletingClassFile)
+        {
+            ImGui::TextWrapped("Both class files will be deleted:");
+            ImGui::BulletText("%s", pendingDelete.filename().string().c_str());
+            std::error_code pairEc;
+            if (fs::is_regular_file(pairedFile, pairEc) && !pairEc)
+                ImGui::BulletText("%s", pairedFile.filename().string().c_str());
+            ImGui::TextUnformatted("The component will also be removed from Engine.projectFile.");
+        }
+        else
+        {
+            ImGui::TextUnformatted("Deleting a folder also deletes its contents.");
+        }
 
         if (ImGui::Button("Delete"))
         {
@@ -2081,6 +2216,12 @@ void ImguiController::DrawAssetBrowser()
 
                 std::error_code typeEc;
                 const bool deletingDirectory = fs::is_directory(pendingDelete, typeEc);
+                // Only delete the matching counterpart inside Assets, never a symlink.
+                std::error_code pairEc;
+                const bool hasPair = deletingClassFile &&
+                    isInsideAssets(pairedFile) &&
+                    !fs::is_symlink(pairedFile, pairEc) && !pairEc &&
+                    fs::is_regular_file(pairedFile, pairEc) && !pairEc;
                 if (typeEc)
                     errorMessage = typeEc.message();
                 else if (manifestPath.empty())
@@ -2101,6 +2242,23 @@ void ImguiController::DrawAssetBrowser()
                         errorMessage = "Invalid components array in Engine.projectFile.";
                     else
                     {
+                        if (hasPair)
+                        {
+                            std::string pairUpdated;
+                            bool pairChanged = false;
+                            if (!BuildManifestAfterDeletion(updated,
+                                    manifestPath.parent_path(),
+                                    pairedFile.lexically_normal(), false,
+                                    pairUpdated, pairChanged))
+                                errorMessage = "Invalid components array in Engine.projectFile.";
+                            else
+                            {
+                                updated = std::move(pairUpdated);
+                                changed = changed || pairChanged;
+                            }
+                        }
+                        if (errorMessage.empty())
+                        {
                         // Save a backup before touching disk, to restore on failure.
                         const fs::path backup = manifestPath.string() + ".delete.bak";
                         const fs::path temp = manifestPath.string() + ".delete.tmp";
@@ -2141,12 +2299,39 @@ void ImguiController::DrawAssetBrowser()
                             }
                             if (manifestUpdated)
                             {
+                                // Stage both files before final removal, so a failed
+                                // rename can roll back without losing one of the pair.
+                                std::vector<fs::path> targets{pendingDelete};
+                                if (hasPair) targets.push_back(pairedFile);
+                                std::vector<std::pair<fs::path, fs::path>> staged;
                                 std::error_code deleteEc;
-                                fs::remove_all(pendingDelete, deleteEc);
-                                if (deleteEc)
+                                for (const fs::path& target : targets)
                                 {
-                                    errorMessage = deleteEc.message();
-                                    // Restore the manifest if deleting assets failed.
+                                    fs::path stagedPath = target;
+                                    stagedPath += ".engine_delete_pending";
+                                    std::error_code checkEc;
+                                    if (fs::exists(stagedPath, checkEc) || checkEc)
+                                    {
+                                        errorMessage = "Temporary deletion path already exists: " + stagedPath.string();
+                                        break;
+                                    }
+                                    fs::rename(target, stagedPath, deleteEc);
+                                    if (deleteEc)
+                                    {
+                                        errorMessage = "Could not stage deletion: " + deleteEc.message();
+                                        break;
+                                    }
+                                    staged.emplace_back(target, stagedPath);
+                                }
+                                if (!errorMessage.empty())
+                                {
+                                    for (auto it = staged.rbegin(); it != staged.rend(); ++it)
+                                    {
+                                        std::error_code restoreEc;
+                                        fs::rename(it->second, it->first, restoreEc);
+                                        if (restoreEc)
+                                            errorMessage += " Could not restore: " + it->second.string();
+                                    }
                                     if (changed)
                                     {
                                         std::error_code restoreEc;
@@ -2164,9 +2349,17 @@ void ImguiController::DrawAssetBrowser()
                                         fs::remove(backup, cleanupEc);
                                     }
                                     selectedEntry.clear();
-
+                                    RestartEngine = true;
+                                    for (const auto& item : staged)
+                                    {
+                                        std::error_code cleanupEc;
+                                        fs::remove_all(item.second, cleanupEc);
+                                        if (cleanupEc)
+                                            errorMessage += " Could not remove: " + item.second.string() + " (" + cleanupEc.message() + ")";
+                                    }
                                 }
                             }
+                        }
                         }
                     }
                 }
@@ -2174,7 +2367,6 @@ void ImguiController::DrawAssetBrowser()
             pendingDelete.clear();
             ImGui::CloseCurrentPopup();
 
-            RestartEngine = true;
         }
 
         ImGui::SameLine();

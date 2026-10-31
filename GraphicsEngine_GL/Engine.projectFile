@@ -6,24 +6,6 @@
       "name": "Model",
       "header": "GraphicsEngine_GL/Model/Model.h",
       "source": "GraphicsEngine_GL/Model/Model.cpp"
-    },
-    {
-      "class": "gfddfgfdg",
-      "name": "gfddfgfdg",
-      "header": "cmake-build-debug/Assets/gfddfgfdg.h",
-      "source": "cmake-build-debug/Assets/gfddfgfdg.cpp"
-    },
-    {
-      "class": "move",
-      "name": "move",
-      "header": "cmake-build-debug/Assets/move.h",
-      "source": "cmake-build-debug/Assets/move.cpp"
-    },
-    {
-      "class": "kkkk",
-      "name": "kkkk",
-      "header": "cmake-build-debug/Assets/kkkk.h",
-      "source": "cmake-build-debug/Assets/kkkk.cpp"
     }
   ]
 }
