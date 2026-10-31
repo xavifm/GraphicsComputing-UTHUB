@@ -596,7 +596,13 @@ update_status ImguiController::PostUpdate()
         ImVec2(hierarchyWidth, 0.0f),
         true);
 
-    ImGui::TextUnformatted("Scene Hierarchy");
+    // Mostra sempre el nom del fitxer .sav que tenim obert.
+    const std::string activeSceneName = g_activeScenePath.empty()
+        ? "Cap escena oberta"
+        : g_activeScenePath.filename().string();
+    ImGui::Text("Scene Hierarchy - %s", activeSceneName.c_str());
+    if (!g_activeScenePath.empty() && ImGui::IsItemHovered())
+        ImGui::SetTooltip("%s", g_activeScenePath.string().c_str());
     ImGui::Separator();
 
     if (worldController == nullptr)
