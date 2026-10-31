@@ -32,7 +32,7 @@ WorldController::WorldController(FrameBufferController* frameBuffer) {
 WorldController::~WorldController() {}
 
 bool WorldController::Init()
-{   
+{
     cameraController = new CameraController();
     cameraController->Init();
     
@@ -115,8 +115,6 @@ update_status WorldController::Update()
 
     const GLuint programID = program->GetProgramId();
 
-    UpdateLights();
-
     Vector3D cameraPos = cameraController->GetCameraPosition();
 
     glUniform3f(
@@ -132,6 +130,11 @@ update_status WorldController::Update()
     );
 
     glUniform1f(
+        glGetUniformLocation(programID, "diffuseStrength"),
+        1.0f
+    );
+
+    glUniform1f(
         glGetUniformLocation(programID, "specularStrength"),
         0.7f
     );
@@ -140,6 +143,8 @@ update_status WorldController::Update()
         glGetUniformLocation(programID, "shininess"),
         32.0f
     );
+
+    UpdateLights();
 
     for (GameObject* object : GameObjects)
     {
