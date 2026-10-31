@@ -32,6 +32,34 @@ namespace
     // Ruta de l'escena carregada o creada actualment.
     fs::path g_activeScenePath;
 
+    // GLFW rep fitxers arrossegats des del gestor de fitxers del sistema.
+    struct ExternalFileDrop
+    {
+        std::vector<fs::path> files;
+        double x = 0.0, y = 0.0;
+    };
+    std::vector<ExternalFileDrop> g_externalFileDrops;
+    GLFWdropfun g_previousDropCallback = nullptr;
+
+    void OnExternalFilesDropped(GLFWwindow* glfwWindow, int count, const char** paths)
+    {
+        if (count > 0 && paths != nullptr)
+        {
+            ExternalFileDrop drop;
+            glfwGetCursorPos(glfwWindow, &drop.x, &drop.y);
+            for (int i = 0; i < count; ++i)
+                if (paths[i] != nullptr) drop.files.emplace_back(paths[i]);
+            if (!drop.files.empty())
+            {
+                std::cerr << "[Asset Browser] GLFW ha rebut " << drop.files.size()
+                          << " fitxer(s) extern(s).\n";
+                g_externalFileDrops.push_back(std::move(drop));
+            }
+        }
+        if (g_previousDropCallback != nullptr)
+            g_previousDropCallback(glfwWindow, count, paths);
+    }
+
     struct ModelEditorState
     {
         std::array<char, 256> modelPath{};
@@ -455,6 +483,10 @@ bool ImguiController::Init()
         std::cout << "ImguiController: ImGui_ImplOpenGL3_Init failed\n";
         return false;
     }
+
+    g_previousDropCallback = glfwSetDropCallback(window, OnExternalFilesDropped);
+    if (g_previousDropCallback == OnExternalFilesDropped)
+        g_previousDropCallback = nullptr;
 
     std::cout << "ImguiController: Init OK\n";
     return true;
@@ -1166,7 +1198,12 @@ update_status ImguiController::PostUpdate()
 
     ImGui::Spacing();
 
+    // Els drops externs els lliura GLFW a nivell de finestra.
+    // No comprovem glfwGetCursorPos(): durant un drag extern (especialment a
+    // Linux/Wayland) pot contenir una posicio antiga i descartar el fitxer.
+    // Qualsevol drop rebut a la finestra s'importa al directori obert.
     DrawAssetBrowser();
+    g_externalFileDrops.clear();
 
     ImGui::EndChild();
     ImGui::End();
@@ -1228,6 +1265,38 @@ void ImguiController::DrawAssetBrowser()
 
         currentDir = rootDir;
         initialized = true;
+    }
+
+    ImGui::TextDisabled("Deixa anar fitxers externs a la finestra per importar-los aqui.");
+
+    // Importa fitxers externs a la carpeta actual, sense tocar els originals.
+    for (const auto& drop : g_externalFileDrops)
+    {
+        for (const fs::path& source : drop.files)
+        {
+            std::error_code ec;
+            if (fs::is_symlink(source, ec) || ec || !fs::is_regular_file(source, ec) || ec)
+            {
+                errorMessage = "Només es poden importar fitxers regulars: " + source.string();
+                continue;
+            }
+
+            const fs::path base = source.filename();
+            if (base.empty() || base == "." || base == "..") continue;
+            fs::path destination = currentDir / base;
+            const fs::path stem = base.stem();
+            const fs::path extension = base.extension();
+            // Evita sobreescriure fitxers existents; crea nom (1), nom (2), etc.
+            for (unsigned int n = 1; fs::exists(destination, ec) && !ec; ++n)
+                destination = currentDir / (stem.string() + " (" + std::to_string(n) + ")" + extension.string());
+            if (ec || !fs::copy_file(source, destination, fs::copy_options::none, ec) || ec)
+            {
+                errorMessage = "No s'ha pogut copiar " + source.string() + ": " + ec.message();
+                continue;
+            }
+            selectedEntry = destination;
+            std::cerr << "[Asset Browser] Importat: " << destination << '\n';
+        }
     }
 
     // Check whether a path is inside the Assets directory
@@ -2501,6 +2570,12 @@ void ImguiController::DrawAssetBrowser()
 bool ImguiController::CleanUp()
 {
     g_modelEditorStates.clear();
+    g_externalFileDrops.clear();
+    if (window != nullptr)
+    {
+        glfwSetDropCallback(window, g_previousDropCallback);
+        g_previousDropCallback = nullptr;
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
