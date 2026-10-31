@@ -474,31 +474,46 @@ namespace
         return true;
     }
 
-    // Desa una escena buida sense modificar ni destruir l'escena que tenim oberta.
-    // Intercanviem temporalment els GameObjects, de manera que SaveWorld
-    // serialitza una escena amb zero objectes, i els restaurem sempre.
-    bool SaveEmptyScene(WorldController* world, const fs::path& path)
+    // Crea el fitxer d'una escena nova amb un GameObject inicial vàlid.
+    // Conserva intacta l'escena actual mentre SaveWorld serialitza la nova.
+    // Això evita generar un .sav amb zero GameObjects quan el carregador
+    // del motor encara no gestiona correctament aquest cas.
+    bool SaveNewSceneWithDefaultGameObject(WorldController* world, const fs::path& path)
     {
         if (world == nullptr) return false;
 
-        decltype(world->GameObjects) existingObjects;
-        existingObjects.swap(world->GameObjects);
+        decltype(world->GameObjects) previousObjects;
+        previousObjects.swap(world->GameObjects);
 
+        GameObject* initialObject = nullptr;
         bool saved = false;
         try
         {
-            saved = world->SaveWorld(path.string());
+            initialObject = CreateGameObject(world, "GameObject", false);
+            if (initialObject != nullptr)
+                saved = world->SaveWorld(path.string());
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Error creating empty scene: " << e.what() << '\n';
+            std::cerr << "Error creating new scene: " << e.what() << '\n';
         }
         catch (...)
         {
-            std::cerr << "Unknown error creating empty scene.\n";
+            std::cerr << "Unknown error creating new scene.\n";
         }
 
-        existingObjects.swap(world->GameObjects);
+        // Neteja l'escena temporal abans de restaurar l'anterior.
+        // L'objecte que es mostra després de crear l'escena és una nova instància.
+        for (GameObject* object : world->GameObjects)
+        {
+            if (object != nullptr)
+            {
+                object->Destroy();
+                delete object;
+            }
+        }
+        world->GameObjects.clear();
+        previousObjects.swap(world->GameObjects);
         return saved;
     }
 
@@ -639,13 +654,26 @@ update_status ImguiController::PostUpdate()
                     if (g_activeScenePath.string() != "")
                     {
                         const fs::path scenePath = g_activeScenePath.string();
-                        if (worldController->LoadWorld(scenePath.string()))
+                        // Invalida la selecció i la memòria cau abans de substituir
+                        // els GameObjects: LoadWorld pot destruir els anteriors.
+                        selectedGameObject = nullptr;
+                        g_modelEditorStates.clear();
+                        try
                         {
-                            g_activeScenePath = fs::absolute(scenePath).lexically_normal();
-                            selectedGameObject = nullptr;
+                            if (worldController->LoadWorld(scenePath.string()))
+                            {
+                                g_activeScenePath = fs::absolute(scenePath).lexically_normal();
+                                std::cout << "[Scene] Reloaded: " << scenePath << '\n';
+                            }
+                            else
+                            {
+                                std::cerr << "Failed to reload scene: " << scenePath << '\n';
+                            }
                         }
-                        else
-                            std::cerr << "Failed to load scene: " << scenePath << '\n';
+                        catch (const std::exception& e)
+                        {
+                            std::cerr << "Error reloading scene: " << e.what() << '\n';
+                        }
                     }
                 }
             }
@@ -1601,7 +1629,7 @@ void ImguiController::DrawAssetBrowser()
                     errorMessage = "A scene with this name already exists.";
                 else if (sceneEc)
                     errorMessage = sceneEc.message();
-                else if (!SaveEmptyScene(worldController, scenePath))
+                else if (!SaveNewSceneWithDefaultGameObject(worldController, scenePath))
                     errorMessage = "Could not create empty scene: " + scenePath.string();
                 else
                 {
@@ -1616,6 +1644,10 @@ void ImguiController::DrawAssetBrowser()
                             worldController->GameObjects.pop_back();
                     }
                     selectedGameObject = nullptr;
+                    g_modelEditorStates.clear();
+                    // La nova escena comença amb un GameObject sense components.
+                    // El fitxer .sav ja conté el mateix objecte de base.
+                    selectedGameObject = CreateGameObject(worldController, "GameObject", false);
                     selectedEntry = scenePath;
                     g_activeScenePath = fs::absolute(scenePath).lexically_normal();
                     sceneName[0] = '\0';
@@ -2379,13 +2411,28 @@ void ImguiController::DrawAssetBrowser()
                 {
                     if (worldController != nullptr)
                     {
-                        if (worldController->LoadWorld(path.string()))
+                        // Els components de l'escena anterior poden ser destruïts
+                        // durant LoadWorld. No conservem punters de l'Inspector.
+                        selectedGameObject = nullptr;
+                        g_modelEditorStates.clear();
+                        try
                         {
-                            selectedGameObject = nullptr;
-                            g_activeScenePath = fs::absolute(path).lexically_normal();
+                            std::cout << "[Scene] Loading: " << path << '\n';
+                            if (worldController->LoadWorld(path.string()))
+                            {
+                                g_activeScenePath = fs::absolute(path).lexically_normal();
+                                std::cout << "[Scene] Loaded: " << path << '\n';
+                            }
+                            else
+                            {
+                                errorMessage = "Could not load scene: " + path.string();
+                            }
                         }
-                        else
-                            errorMessage = "Could not load scene: " + path.string();
+                        catch (const std::exception& e)
+                        {
+                            errorMessage = "Error loading scene: " + std::string(e.what());
+                            std::cerr << errorMessage << '\n';
+                        }
                     }
                     else
                         errorMessage = "WorldController is not available.";
