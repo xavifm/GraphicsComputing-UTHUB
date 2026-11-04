@@ -12,6 +12,18 @@
       "name": "Light",
       "header": "GraphicsEngine_GL/Light/Light.h",
       "source": "GraphicsEngine_GL/Light/Light.cpp"
+    },
+    {
+      "class": "newcomponent",
+      "name": "newcomponent",
+      "header": "cmake-build-debug/Assets/newcomponent.h",
+      "source": "cmake-build-debug/Assets/newcomponent.cpp"
+    },
+    {
+      "class": "caca",
+      "name": "caca",
+      "header": "cmake-build-debug/Assets/caca.h",
+      "source": "cmake-build-debug/Assets/caca.cpp"
     }
   ]
 }

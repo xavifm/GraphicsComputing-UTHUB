@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.19)
 project(GraphicsEngine_GL LANGUAGES C CXX)
 
@@ -8,7 +9,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(OpenGL REQUIRED)
 
 # --------------------------------------------------
-# Read the projectFile components
+# Engine directories
 # --------------------------------------------------
 
 set(ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/GraphicsEngine_GL")
@@ -17,13 +18,39 @@ set(GENERATOR_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/generate_components.py")
 
 set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 set(GENERATED_CPP "${GENERATED_DIR}/RegisterComponents.cpp")
-set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h"
-        GraphicsEngine_GL/Component/ExampleComponent.cpp
-        GraphicsEngine_GL/Component/ExampleComponent.h
-        GraphicsEngine_GL/Controllers/Engine/EngineController.cpp
-        GraphicsEngine_GL/Controllers/Engine/EngineController.h
-        GraphicsEngine_GL/Light/Light.cpp
-        GraphicsEngine_GL/Light/Light.h)
+set(GENERATED_HEADER "${GENERATED_DIR}/RegisterComponents.h")
+
+# --------------------------------------------------
+# Bullet Physics
+# --------------------------------------------------
+
+set(BULLET_DIR "${ENGINE_DIR}/ThirdParty/include/bullet3")
+
+if(NOT EXISTS "${BULLET_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+            "Bullet Physics no existeix a: ${BULLET_DIR}"
+    )
+endif()
+
+set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
+set(BUILD_PYBULLET OFF CACHE BOOL "" FORCE)
+set(BUILD_BULLET3 OFF CACHE BOOL "" FORCE)
+set(BUILD_ENET OFF CACHE BOOL "" FORCE)
+set(BUILD_CLSOCKET OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+        "${BULLET_DIR}"
+        "${CMAKE_CURRENT_BINARY_DIR}/bullet"
+)
+
+# --------------------------------------------------
+# Read the projectFile components
+# --------------------------------------------------
 
 get_filename_component(PROJECT_DIR "${PROJECT_FILE}" DIRECTORY)
 
@@ -38,10 +65,6 @@ endif()
 set_property(DIRECTORY APPEND PROPERTY
         CMAKE_CONFIGURE_DEPENDS "${PROJECT_FILE}"
 )
-
-# --------------------------------------------------
-# Read the projectFile components
-# --------------------------------------------------
 
 file(READ "${PROJECT_FILE}" PROJECT_JSON)
 string(JSON COMPONENT_COUNT LENGTH "${PROJECT_JSON}" components)
@@ -122,17 +145,44 @@ add_custom_command(
 )
 
 # --------------------------------------------------
-# Engine fonts
+# stb_image
+# --------------------------------------------------
+
+set(STB_IMAGE_HEADER
+        "${ENGINE_DIR}/ThirdParty/include/Texture/stb_image.h"
+)
+
+if(NOT EXISTS "${STB_IMAGE_HEADER}")
+    message(FATAL_ERROR
+            "No existeix stb_image.h a: ${STB_IMAGE_HEADER}"
+    )
+endif()
+
+# Generar una unica implementacio de stb_image
+set(STB_IMAGE_CPP
+        "${GENERATED_DIR}/stb_image_impl.cpp"
+)
+
+file(WRITE "${STB_IMAGE_CPP}"
+        "#define STB_IMAGE_IMPLEMENTATION\n"
+        "#include \"ThirdParty/include/Texture/stb_image.h\"\n"
+)
+
+# --------------------------------------------------
+# Engine sources
 # --------------------------------------------------
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         "${ENGINE_DIR}/*.cpp"
 )
 
-list(FILTER SRC_FILES EXCLUDE REGEX "/ThirdParty/include/imgui/")
+# Excloure dependencies externes
+list(FILTER SRC_FILES EXCLUDE REGEX "/ThirdParty/")
 
+# Evitar duplicats del codi generat
 list(FILTER SRC_FILES EXCLUDE REGEX "/RegisterComponents\\.cpp$")
 
+# Components definits al projectFile
 list(APPEND SRC_FILES ${COMPONENT_SOURCES})
 list(REMOVE_DUPLICATES SRC_FILES)
 
@@ -168,13 +218,21 @@ target_link_libraries(imgui PUBLIC
 
 add_executable(GraphicsEngine_GL
         ${SRC_FILES}
+
+        # OpenGL
         "${ENGINE_DIR}/glad.c"
+
+        # stb_image implementation
+        "${STB_IMAGE_CPP}"
+
+        # Generated components
         "${GENERATED_CPP}"
         "${GENERATED_HEADER}"
 )
 
 target_include_directories(GraphicsEngine_GL BEFORE PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}"
+        "${GENERATED_DIR}"
         "${PROJECT_DIR}"
 
         ${COMPONENT_INCLUDE_DIRS}
@@ -192,6 +250,9 @@ target_include_directories(GraphicsEngine_GL BEFORE PRIVATE
         "${ENGINE_DIR}/Shader"
         "${ENGINE_DIR}/Texture"
         "${ENGINE_DIR}/ThirdParty/include"
+
+        # Bullet Physics
+        "${BULLET_DIR}/src"
 )
 
 target_link_libraries(GraphicsEngine_GL PRIVATE
@@ -199,4 +260,9 @@ target_link_libraries(GraphicsEngine_GL PRIVATE
         glfw
         ${CMAKE_DL_LIBS}
         imgui
+
+        # Bullet Physics
+        BulletDynamics
+        BulletCollision
+        LinearMath
 )

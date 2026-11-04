@@ -1,0 +1,3 @@
+[submodule "GraphicsEngine_GL/external/bullet3"]
+	path = GraphicsEngine_GL/external/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
