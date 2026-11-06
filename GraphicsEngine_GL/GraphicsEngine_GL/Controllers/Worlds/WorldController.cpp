@@ -117,17 +117,6 @@ update_status WorldController::Update()
     if (!program)
         return UPDATE_CONTINUE;
 
-    const double currentTime = glfwGetTime();
-
-    float deltaTime =
-        static_cast<float>(currentTime - lastFrameTime);
-
-    lastFrameTime = currentTime;
-
-    deltaTime = std::clamp(deltaTime, 0.0f, 0.1f);
-
-    UpdatePhysics(deltaTime);
-
     frameBufferController->Bind();
 
     glViewport(0, 0, 1280, 720);
@@ -180,6 +169,17 @@ update_status WorldController::Update()
         UpdateMVP(object);
         object->Update(0.0f);
     }
+
+    const double currentTime = glfwGetTime();
+
+    float deltaTime =
+        static_cast<float>(currentTime - lastFrameTime);
+
+    lastFrameTime = currentTime;
+
+    deltaTime = std::clamp(deltaTime, 0.0f, 0.1f);
+
+    UpdatePhysics(deltaTime);
 
     frameBufferController->Unbind();
 

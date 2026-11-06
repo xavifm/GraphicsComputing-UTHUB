@@ -237,6 +237,7 @@ void RigidBody::StopPhysics()
     body->setAngularFactor(btVector3(0, 0, 0));
 }
 
+
 void RigidBody::RebuildPhysics()
 {
     if (!body)
@@ -245,7 +246,14 @@ void RigidBody::RebuildPhysics()
         return;
     }
 
-    const btTransform transform = body->getWorldTransform();
+    if (!physicsWorld || !physicsWorld->GetWorld())
+        return;
+
+    btDiscreteDynamicsWorld* world =
+        physicsWorld->GetWorld();
+
+    const btTransform transform =
+        body->getWorldTransform();
 
     const bool wasDynamic =
         !body->isStaticOrKinematicObject();
@@ -260,14 +268,11 @@ void RigidBody::RebuildPhysics()
             ? body->getAngularVelocity()
             : btVector3(0, 0, 0);
 
-    if (LockObject)
-        StopPhysics();
-
-    auto* world = physicsWorld;
+    PhysicsWorld* savedWorld = physicsWorld;
 
     CleanUpPhysics();
 
-    physicsWorld = world;
+    physicsWorld = savedWorld;
 
     if (!CreateBody(transform))
     {
@@ -275,21 +280,46 @@ void RigidBody::RebuildPhysics()
         return;
     }
 
-    if (LockObject)
-    {
-        StopPhysics();
-        return;
-    }
-
-    if (!body->isStaticOrKinematicObject())
+    if (!LockObject &&
+        !body->isStaticOrKinematicObject())
     {
         body->setLinearFactor(btVector3(1, 1, 1));
         body->setAngularFactor(btVector3(1, 1, 1));
 
         body->setLinearVelocity(linearVelocity);
         body->setAngularVelocity(angularVelocity);
-        body->activate(true);
     }
+
+    world->updateSingleAabb(body.get());
+
+    const int numObjects =
+        world->getNumCollisionObjects();
+
+    for (int i = 0; i < numObjects; ++i)
+    {
+        btCollisionObject* collisionObject =
+            world->getCollisionObjectArray()[i];
+
+        btRigidBody* otherBody =
+            btRigidBody::upcast(collisionObject);
+
+        if (!otherBody)
+            continue;
+
+        if (otherBody == body.get())
+            continue;
+
+        if (otherBody->isStaticOrKinematicObject())
+            continue;
+
+        otherBody->activate(true);
+    }
+
+    if (!body->isStaticOrKinematicObject())
+        body->activate(true);
+
+    lastSyncedPosition = transform.getOrigin();
+    hasSyncedPosition = true;
 }
 
 void RigidBody::CleanUpPhysics()
@@ -308,6 +338,7 @@ void RigidBody::CleanUpPhysics()
     lastSyncedPosition = btVector3(0, 0, 0);
     hasSyncedPosition = false;
 }
+
 
 void RigidBody::SyncEditorTransform()
 {
@@ -355,12 +386,63 @@ void RigidBody::SyncEditorTransform()
 
     if (physicsWorld && physicsWorld->GetWorld())
     {
-        physicsWorld->GetWorld()->updateSingleAabb(body.get());
+        auto* world = physicsWorld->GetWorld();
+
+        world->updateSingleAabb(body.get());
+
+        btBroadphaseProxy* proxy =
+            body->getBroadphaseHandle();
+
+        if (proxy)
+        {
+            auto* pairCache =
+                world->getBroadphase()
+                     ->getOverlappingPairCache();
+
+            btBroadphasePairArray& pairs =
+                pairCache->getOverlappingPairArray();
+
+            for (int i = 0; i < pairs.size(); ++i)
+            {
+                const btBroadphasePair& pair = pairs[i];
+
+                btBroadphaseProxy* otherProxy = nullptr;
+
+                if (pair.m_pProxy0 == proxy)
+                {
+                    otherProxy = pair.m_pProxy1;
+                }
+                else if (pair.m_pProxy1 == proxy)
+                {
+                    otherProxy = pair.m_pProxy0;
+                }
+
+                if (!otherProxy)
+                    continue;
+
+                auto* collisionObject =
+                    static_cast<btCollisionObject*>(
+                        otherProxy->m_clientObject
+                    );
+
+                btRigidBody* otherBody =
+                    btRigidBody::upcast(collisionObject);
+
+                if (!otherBody || otherBody == body.get())
+                    continue;
+
+                if (!otherBody->isStaticOrKinematicObject())
+                {
+                    otherBody->activate(true);
+                }
+            }
+        }
     }
 
     body->activate(true);
 
     lastSyncedPosition = editorPosition;
+    hasSyncedPosition = true;
 }
 
 void RigidBody::SyncTransform()
