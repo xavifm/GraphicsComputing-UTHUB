@@ -481,6 +481,29 @@ void RigidBody::AddForce(const btVector3& force)
     body->applyCentralForce(force);
 }
 
+void RigidBody::SetVelocity(const btVector3 &velocity)
+{
+    if (!body || body->isStaticOrKinematicObject())
+        return;
+
+    body->activate(true);
+    body->setLinearVelocity(velocity);
+}
+
+void RigidBody::LockRigidbody(bool lock)
+{
+    if (!body || body->isStaticOrKinematicObject())
+        return;
+
+    body->activate(true);
+    lock = true;
+}
+
+Vector3D RigidBody::transformDirection(const btVector3& direction)
+{
+
+}
+
 void RigidBody::AddImpulse(const btVector3& impulse)
 {
     if (!body || body->isStaticOrKinematicObject())

@@ -5,6 +5,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <memory>
 
+#include "Globals.h"
+
 namespace Assets {
     class RigidBody;
 }
@@ -50,6 +52,12 @@ public:
     void SyncEditorTransform();
 
     void AddForce(const btVector3& force);
+    void SetVelocity(const btVector3& velocity);
+
+    void LockRigidbody(bool lock);
+
+    Vector3D transformDirection(const btVector3 &direction);
+
     void AddImpulse(const btVector3& impulse);
 
     btRigidBody* GetBody() const
