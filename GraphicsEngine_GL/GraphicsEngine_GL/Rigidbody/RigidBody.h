@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Component/SerializableComponent.h"
-
 #include <btBulletDynamicsCommon.h>
 #include <memory>
 
@@ -10,9 +9,7 @@ namespace Assets {
     class RigidBody;
 }
 
-class GameObject;
 class PhysicsWorld;
-class BoxCollider;
 
 class RigidBody : public SerializableComponent<RigidBody>
 {
@@ -23,7 +20,8 @@ public:
     float mass = 1.0f;
     float friction = 0.5f;
     float restitution = 0.0f;
-    bool useGravity = false;
+
+    bool useGravity = true;
     bool LockObject = false;
 
     [[nodiscard]] const char* GetTypeName() const override
@@ -64,6 +62,22 @@ private:
     std::unique_ptr<btDefaultMotionState> motionState;
     std::unique_ptr<btRigidBody> body;
 
+    float lastMass = -1.0f;
+    float lastWidth = -1.0f;
+    float lastHeight = -1.0f;
+    float lastDepth = -1.0f;
+
+    bool lastLockObject = false;
+    bool lastUseGravity = true;
+
+    bool CreateBody(const btTransform& transform);
+    void RebuildPhysics();
+
+    void ApplyProperties();
+    void UpdateGravity();
+    bool NeedsRebuild();
+    void CacheProperties();
+
     template<class Self, class Visitor>
     static void VisitFields(Self& self, Visitor& visitor)
     {
@@ -71,6 +85,6 @@ private:
         visitor("friction", self.friction);
         visitor("restitution", self.restitution);
         visitor("useGravity", self.useGravity);
-        visitor("fixedObject", self.LockObject);
+        visitor("LockObject", self.LockObject);
     }
 };

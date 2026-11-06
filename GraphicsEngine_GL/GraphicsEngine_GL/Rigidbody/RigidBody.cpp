@@ -1,5 +1,6 @@
 
 #include "RigidBody.h"
+
 #include "../BoxCollider/BoxCollider.h"
 #include "Object/GameObject/GameObject.h"
 #include "Controllers/Worlds/WorldController.h"
@@ -25,30 +26,13 @@ bool RigidBody::InitializePhysics()
     if (!object || !object->worldController)
         return false;
 
-    auto* physics =
-        object->worldController->GetPhysicsWorld();
+    physicsWorld = object->worldController->GetPhysicsWorld();
 
-    if (!physics || !physics->GetWorld())
+    if (!physicsWorld || !physicsWorld->GetWorld())
+    {
+        physicsWorld = nullptr;
         return false;
-
-    BoxCollider* collider =
-        object->GetComponent<BoxCollider>();
-
-    if (!collider)
-        return false;
-
-    const float halfWidth =
-        std::max(0.001f, collider->width * 0.5f);
-
-    const float halfHeight =
-        std::max(0.001f, collider->height * 0.5f);
-
-    const float halfDepth =
-        std::max(0.001f, collider->depth * 0.5f);
-
-    collisionShape = std::make_unique<btBoxShape>(
-        btVector3(halfWidth, halfHeight, halfDepth)
-    );
+    }
 
     btTransform transform;
     transform.setIdentity();
@@ -59,9 +43,42 @@ bool RigidBody::InitializePhysics()
         object->position.z
     ));
 
-    motionState = std::make_unique<btDefaultMotionState>(transform);
+    if (!CreateBody(transform))
+    {
+        physicsWorld = nullptr;
+        return false;
+    }
 
-    const btScalar bodyMass = std::max(0.0f, mass);
+    return true;
+}
+
+bool RigidBody::CreateBody(const btTransform& transform)
+{
+    GameObject* object = GetAttachedGameObject();
+
+    if (!object || !physicsWorld || !physicsWorld->GetWorld())
+        return false;
+
+    auto* collider = object->GetComponent<BoxCollider>();
+
+    if (!collider)
+        return false;
+
+    collisionShape = std::make_unique<btBoxShape>(
+        btVector3(
+            std::max(0.001f, collider->width * 0.5f),
+            std::max(0.001f, collider->height * 0.5f),
+            std::max(0.001f, collider->depth * 0.5f)
+        )
+    );
+
+    motionState = std::make_unique<btDefaultMotionState>(
+        transform
+    );
+
+    const btScalar bodyMass =
+        LockObject ? btScalar(0.0f)
+                   : btScalar(std::max(0.0f, mass));
 
     btVector3 inertia(0, 0, 0);
 
@@ -82,35 +99,11 @@ bool RigidBody::InitializePhysics()
 
     body = std::make_unique<btRigidBody>(info);
 
-    body->setFriction(friction);
-    body->setRestitution(restitution);
+    ApplyProperties();
 
-    physics->AddRigidBody(body.get());
-    physicsWorld = physics;
+    physicsWorld->AddRigidBody(body.get());
 
-    if (!useGravity)
-    {
-        body->setGravity(btVector3(0, 0, 0));
-        body->setFlags(
-            body->getFlags() | BT_DISABLE_WORLD_GRAVITY
-        );
-    }
-
-    if (LockObject)
-    {
-        body->setLinearVelocity(btVector3(0, 0, 0));
-        body->setAngularVelocity(btVector3(0, 0, 0));
-
-        body->setLinearFactor(btVector3(0, 0, 0));
-        body->setAngularFactor(btVector3(0, 0, 0));
-
-        body->clearForces();
-    }
-    else
-    {
-        body->setLinearFactor(btVector3(1, 1, 1));
-        body->setAngularFactor(btVector3(1, 1, 1));
-    }
+    CacheProperties();
 
     return true;
 }
@@ -119,21 +112,156 @@ void RigidBody::Update()
 {
     SerializableComponent<RigidBody>::Update();
 
-    //paràmetres s'han d'actualitzar cada frame
-
     if (!body)
-        InitializePhysics();
-
-    if (body)
     {
-        body->setFriction(friction);
-        body->setRestitution(restitution);
+        InitializePhysics();
+        return;
+    }
+
+    GameObject* object = GetAttachedGameObject();
+
+    if (!object || !object->GetComponent<BoxCollider>())
+    {
+        CleanUpPhysics();
+        return;
+    }
+
+    if (NeedsRebuild())
+    {
+        RebuildPhysics();
+        return;
+    }
+
+    ApplyProperties();
+}
+
+void RigidBody::ApplyProperties()
+{
+    if (!body)
+        return;
+
+    body->setFriction(friction);
+    body->setRestitution(restitution);
+
+    if (useGravity != lastUseGravity)
+    {
+        UpdateGravity();
+        lastUseGravity = useGravity;
+    }
+}
+
+void RigidBody::UpdateGravity()
+{
+    if (!body || !physicsWorld || !physicsWorld->GetWorld())
+        return;
+
+    if (useGravity)
+    {
+        body->setFlags(
+            body->getFlags() & ~BT_DISABLE_WORLD_GRAVITY
+        );
+
+        body->setGravity(
+            physicsWorld->GetWorld()->getGravity()
+        );
+    }
+    else
+    {
+        body->setFlags(
+            body->getFlags() | BT_DISABLE_WORLD_GRAVITY
+        );
+
+        body->setGravity(btVector3(0, 0, 0));
+    }
+
+    if (!body->isStaticOrKinematicObject())
+        body->activate(true);
+}
+
+bool RigidBody::NeedsRebuild()
+{
+    GameObject* object = GetAttachedGameObject();
+
+    if (!object)
+        return false;
+
+    auto* collider = object->GetComponent<BoxCollider>();
+
+    if (!collider)
+        return false;
+
+    return mass != lastMass ||
+           LockObject != lastLockObject ||
+           collider->width != lastWidth ||
+           collider->height != lastHeight ||
+           collider->depth != lastDepth;
+}
+
+void RigidBody::CacheProperties()
+{
+    GameObject* object = GetAttachedGameObject();
+
+    if (!object)
+        return;
+
+    auto* collider = object->GetComponent<BoxCollider>();
+
+    if (!collider)
+        return;
+
+    lastMass = mass;
+    lastLockObject = LockObject;
+    lastUseGravity = useGravity;
+
+    lastWidth = collider->width;
+    lastHeight = collider->height;
+    lastDepth = collider->depth;
+}
+
+void RigidBody::RebuildPhysics()
+{
+    if (!body)
+    {
+        InitializePhysics();
+        return;
+    }
+
+    const btTransform transform = body->getWorldTransform();
+
+    const bool wasDynamic =
+        !body->isStaticOrKinematicObject();
+
+    const btVector3 linearVelocity =
+        wasDynamic ? body->getLinearVelocity()
+                   : btVector3(0, 0, 0);
+
+    const btVector3 angularVelocity =
+        wasDynamic ? body->getAngularVelocity()
+                   : btVector3(0, 0, 0);
+
+    auto* world = physicsWorld;
+
+    CleanUpPhysics();
+
+    physicsWorld = world;
+
+    if (!CreateBody(transform))
+    {
+        physicsWorld = nullptr;
+        return;
+    }
+
+    if (wasDynamic && !body->isStaticOrKinematicObject())
+    {
+        body->setLinearVelocity(linearVelocity);
+        body->setAngularVelocity(angularVelocity);
+        body->activate(true);
     }
 }
 
 void RigidBody::CleanUpPhysics()
 {
-    if (body && physicsWorld)
+    if (body && physicsWorld && physicsWorld->GetWorld())
     {
         physicsWorld->RemoveRigidBody(body.get());
     }
@@ -159,9 +287,7 @@ void RigidBody::SyncTransform()
 
     if (body->getMotionState())
     {
-        body->getMotionState()->getWorldTransform(
-            transform
-        );
+        body->getMotionState()->getWorldTransform(transform);
     }
     else
     {
