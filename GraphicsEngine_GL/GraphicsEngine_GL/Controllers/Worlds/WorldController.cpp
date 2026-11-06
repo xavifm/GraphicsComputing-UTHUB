@@ -325,7 +325,6 @@ void WorldController::UpdatePhysics(float deltaTime)
         if (!collider)
         {
             rigidBody->CleanUpPhysics();
-            continue;
         }
     }
 

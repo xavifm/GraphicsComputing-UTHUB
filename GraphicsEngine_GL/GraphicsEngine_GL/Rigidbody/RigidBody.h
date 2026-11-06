@@ -45,7 +45,9 @@ public:
 
     bool InitializePhysics();
     void CleanUpPhysics();
+
     void SyncTransform();
+    void SyncEditorTransform();
 
     void AddForce(const btVector3& force);
     void AddImpulse(const btVector3& impulse);
@@ -69,6 +71,9 @@ private:
 
     bool lastLockObject = false;
     bool lastUseGravity = true;
+
+    btVector3 lastSyncedPosition{0, 0, 0};
+    bool hasSyncedPosition = false;
 
     bool CreateBody(const btTransform& transform);
     void RebuildPhysics();
