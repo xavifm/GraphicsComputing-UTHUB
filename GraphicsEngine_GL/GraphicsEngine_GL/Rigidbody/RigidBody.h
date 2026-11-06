@@ -77,9 +77,11 @@ private:
 
     bool CreateBody(const btTransform& transform);
     void RebuildPhysics();
+    void StopPhysics();
 
     void ApplyProperties();
     void UpdateGravity();
+    void ReloadForces(bool stop);
     bool NeedsRebuild();
     void CacheProperties();
 

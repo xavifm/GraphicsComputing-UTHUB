@@ -5,6 +5,7 @@
 #include "Object/GameObject/GameObject.h"
 #include "Controllers/Worlds/WorldController.h"
 
+
 #include <algorithm>
 
 RigidBody::RigidBody()
@@ -197,11 +198,9 @@ bool RigidBody::NeedsRebuild()
     if (!collider)
         return false;
 
-    return mass != lastMass ||
-           LockObject != lastLockObject ||
-           collider->width != lastWidth ||
-           collider->height != lastHeight ||
-           collider->depth != lastDepth;
+    bool colliderModified = (collider->width != lastWidth || collider->height != lastHeight || collider->depth != lastDepth);
+
+    return mass != lastMass || LockObject != lastLockObject || colliderModified;
 }
 
 void RigidBody::CacheProperties()
@@ -225,6 +224,19 @@ void RigidBody::CacheProperties()
     lastDepth = collider->depth;
 }
 
+void RigidBody::StopPhysics()
+{
+    if (!body)
+        return;
+
+    body->setLinearVelocity(btVector3(0, 0, 0));
+    body->setAngularVelocity(btVector3(0, 0, 0));
+    body->clearForces();
+
+    body->setLinearFactor(btVector3(0, 0, 0));
+    body->setAngularFactor(btVector3(0, 0, 0));
+}
+
 void RigidBody::RebuildPhysics()
 {
     if (!body)
@@ -239,12 +251,17 @@ void RigidBody::RebuildPhysics()
         !body->isStaticOrKinematicObject();
 
     const btVector3 linearVelocity =
-        wasDynamic ? body->getLinearVelocity()
-                   : btVector3(0, 0, 0);
+        wasDynamic && !LockObject
+            ? body->getLinearVelocity()
+            : btVector3(0, 0, 0);
 
     const btVector3 angularVelocity =
-        wasDynamic ? body->getAngularVelocity()
-                   : btVector3(0, 0, 0);
+        wasDynamic && !LockObject
+            ? body->getAngularVelocity()
+            : btVector3(0, 0, 0);
+
+    if (LockObject)
+        StopPhysics();
 
     auto* world = physicsWorld;
 
@@ -258,8 +275,17 @@ void RigidBody::RebuildPhysics()
         return;
     }
 
-    if (wasDynamic && !body->isStaticOrKinematicObject())
+    if (LockObject)
     {
+        StopPhysics();
+        return;
+    }
+
+    if (!body->isStaticOrKinematicObject())
+    {
+        body->setLinearFactor(btVector3(1, 1, 1));
+        body->setAngularFactor(btVector3(1, 1, 1));
+
         body->setLinearVelocity(linearVelocity);
         body->setAngularVelocity(angularVelocity);
         body->activate(true);
