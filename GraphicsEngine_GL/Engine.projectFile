@@ -8,10 +8,22 @@
       "source": "GraphicsEngine_GL/Model/Model.cpp"
     },
     {
+      "class": "RigidBody",
+      "name": "RigidBody",
+      "header": "GraphicsEngine_GL/Rigidbody/RigidBody.h",
+      "source": "GraphicsEngine_GL/Rigidbody/RigidBody.cpp"
+    },
+    {
       "class": "Light",
       "name": "Light",
       "header": "GraphicsEngine_GL/Light/Light.h",
       "source": "GraphicsEngine_GL/Light/Light.cpp"
+    },
+    {
+      "class": "BoxCollider",
+      "name": "BoxCollider",
+      "header": "GraphicsEngine_GL/BoxCollider/BoxCollider.h",
+      "source": "GraphicsEngine_GL/BoxCollider/BoxCollider.cpp"
     },
     {
       "class": "newcomponent",
@@ -24,6 +36,18 @@
       "name": "caca",
       "header": "cmake-build-debug/Assets/caca.h",
       "source": "cmake-build-debug/Assets/caca.cpp"
+    },
+    {
+      "class": "RigidbodyA",
+      "name": "RigidbodyA",
+      "header": "cmake-build-debug/Assets/RigidbodyA.h",
+      "source": "cmake-build-debug/Assets/RigidbodyA.cpp"
+    },
+    {
+      "class": "BoxColliderA",
+      "name": "BoxColliderA",
+      "header": "cmake-build-debug/Assets/BoxColliderA.h",
+      "source": "cmake-build-debug/Assets/BoxColliderA.cpp"
     }
   ]
 }

@@ -161,6 +161,12 @@ endif()
 # Generar una unica implementacio de stb_image
 set(STB_IMAGE_CPP
         "${GENERATED_DIR}/stb_image_impl.cpp"
+        GraphicsEngine_GL/Controllers/Physics/PhysicsWorld.cpp
+        GraphicsEngine_GL/Controllers/Physics/PhysicsWorld.h
+        GraphicsEngine_GL/Rigidbody/RigidBody.cpp
+        GraphicsEngine_GL/Rigidbody/RigidBody.h
+        GraphicsEngine_GL/BoxCollider/BoxCollider.cpp
+        GraphicsEngine_GL/BoxCollider/BoxCollider.h
 )
 
 file(WRITE "${STB_IMAGE_CPP}"

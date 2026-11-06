@@ -10,6 +10,8 @@
 #include "WorldLoader.h"
 #include "Object/GameObject/GameObject.h"
 #include "Object/GameObject/TestGameObject.h"
+#include "Rigidbody/RigidBody.h"
+#include "BoxCollider/BoxCollider.h"
 
 static std::string ReadTextFile(const std::string& fileName)
 {
@@ -39,6 +41,19 @@ bool WorldController::Init()
     SetupShaders();
     //objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
     //objectTest->Start();
+
+    physicsWorld = new PhysicsWorld();
+
+    if (!physicsWorld->Init())
+    {
+        std::cerr << "[WorldController] Physics init failed!"
+                  << std::endl;
+
+        return false;
+    }
+
+    lastFrameTime = glfwGetTime();
+    physicsAccumulator = 0.0f;
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
@@ -102,6 +117,17 @@ update_status WorldController::Update()
     if (!program)
         return UPDATE_CONTINUE;
 
+    const double currentTime = glfwGetTime();
+
+    float deltaTime =
+        static_cast<float>(currentTime - lastFrameTime);
+
+    lastFrameTime = currentTime;
+
+    deltaTime = std::clamp(deltaTime, 0.0f, 0.1f);
+
+    UpdatePhysics(deltaTime);
+
     frameBufferController->Bind();
 
     glViewport(0, 0, 1280, 720);
@@ -163,7 +189,8 @@ update_status WorldController::Update()
 bool WorldController::CleanUp()
 {
     DestroyScene();
-    
+
+    if (physicsWorld) { physicsWorld->CleanUp(); delete physicsWorld; physicsWorld = nullptr; }
     if (vertexShader) { delete vertexShader; vertexShader = nullptr; }
     if (fragmentShader) { delete fragmentShader; fragmentShader = nullptr; }
     if (program) { delete program; program = nullptr; }
@@ -174,6 +201,8 @@ bool WorldController::CleanUp()
 
 void WorldController::DestroyScene()
 {
+    ClearPhysicsBodies();
+
     for (GameObject*& object : GameObjects)
     {
         if (object == nullptr)
@@ -272,6 +301,96 @@ void WorldController::UpdateMVP(GameObject* gameObject)
         GL_FALSE,
         &mvp.m[0][0]);
 }
+
+
+void WorldController::UpdatePhysics(float deltaTime)
+{
+    if (!physicsWorld || !physicsWorld->GetWorld())
+        return;
+
+    for (GameObject* object : GameObjects)
+    {
+        if (!object)
+            continue;
+
+        RigidBody* rigidBody =
+            object->GetComponent<RigidBody>();
+
+        BoxCollider* collider =
+            object->GetComponent<BoxCollider>();
+
+        if (!rigidBody)
+            continue;
+
+        if (!collider)
+        {
+            rigidBody->CleanUpPhysics();
+            continue;
+        }
+    }
+
+    constexpr float MAX_DELTA_TIME = 0.1f;
+
+    deltaTime = std::clamp(
+        deltaTime,
+        0.0f,
+        MAX_DELTA_TIME
+    );
+
+    physicsAccumulator += deltaTime;
+
+    while (physicsAccumulator >= FIXED_TIME_STEP)
+    {
+        physicsWorld->Update(FIXED_TIME_STEP);
+        physicsAccumulator -= FIXED_TIME_STEP;
+    }
+
+    SyncPhysicsTransforms();
+}
+
+void WorldController::SyncPhysicsTransforms()
+{
+    for (GameObject* object : GameObjects)
+    {
+        if (!object)
+            continue;
+
+        RigidBody* rigidBody =
+            object->GetComponent<RigidBody>();
+
+        if (!rigidBody || !rigidBody->GetBody())
+            continue;
+
+        rigidBody->SyncTransform();
+    }
+}
+
+void WorldController::ClearPhysicsBodies()
+{
+    for (GameObject* object : GameObjects)
+    {
+        if (!object)
+            continue;
+
+        RigidBody* rigidBody =
+            object->GetComponent<RigidBody>();
+
+        if (rigidBody)
+            rigidBody->CleanUpPhysics();
+    }
+
+    if (objectTest)
+    {
+        RigidBody* rigidBody =
+            objectTest->GetComponent<RigidBody>();
+
+        if (rigidBody)
+            rigidBody->CleanUpPhysics();
+    }
+
+    physicsAccumulator = 0.0f;
+}
+
 
 bool WorldController::LoadWorld(std::string _fileName)
 {

@@ -6,6 +6,8 @@
 #include "../Input/InputController.h"
 #include "../Camera/FrameBufferController.h"
 #include "../Camera/CameraController.h"
+#include "../Physics/PhysicsWorld.h"
+#include <memory>
 
 class GameObject;
 class WorldLoader;
@@ -54,12 +56,15 @@ public:
 
     std::vector<GameObject*> GameObjects;
 
+    PhysicsWorld* GetPhysicsWorld() { return physicsWorld; };
+
 private:
     void DestroyScene();
     void SetupShaders();
     void UpdateMVP(GameObject* _gameObject);
 
     WorldLoader* worldLoader;
+    PhysicsWorld* physicsWorld;
 
     CameraController* cameraController;
     FrameBufferController* frameBufferController;
@@ -76,6 +81,14 @@ private:
     unsigned int uMVP_Location = 0;
     float yaw;
     float pitch;
+
+    float physicsAccumulator = 0.0f;
+    double lastFrameTime = 0.0;
+    static constexpr float FIXED_TIME_STEP = 1.0f / 60.0f;
+
+    void UpdatePhysics(float deltaTime);
+    void SyncPhysicsTransforms();
+    void ClearPhysicsBodies();
 
     const int MAX_LIGHTS = 100;
 
