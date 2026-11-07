@@ -13,7 +13,6 @@ BoxCollider::~BoxCollider()
 void BoxCollider::Update()
 {
     SerializableComponent<BoxCollider>::Update();
-    Draw();
 }
 
 void BoxCollider::SetupMesh()
