@@ -63,6 +63,8 @@ private:
     void SetupShaders();
     void UpdateMVP(GameObject* _gameObject);
 
+    void DrawMatrix(Mat4x4 translation, Mat4x4 rotationX, Mat4x4 rotationY, Mat4x4 rotationZ, Mat4x4 scale);
+
     WorldLoader* worldLoader;
     PhysicsWorld* physicsWorld;
 

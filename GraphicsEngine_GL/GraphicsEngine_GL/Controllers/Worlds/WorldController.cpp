@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 
 #include "FrameBufferController.h"
 #include "WorldLoader.h"
@@ -37,7 +38,7 @@ bool WorldController::Init()
 {
     cameraController = new CameraController();
     cameraController->Init();
-    
+
     SetupShaders();
     //objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
     //objectTest->Start();
@@ -54,10 +55,10 @@ bool WorldController::Init()
 
     lastFrameTime = glfwGetTime();
     physicsAccumulator = 0.0f;
-    
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
-    
+
     return true;
 }
 
@@ -168,6 +169,23 @@ update_status WorldController::Update()
 
         UpdateMVP(object);
         object->Update(0.0f);
+
+        BoxCollider* collider = object->GetComponent<BoxCollider>();
+
+        if (collider)
+        {
+            const Mat4x4 translation = Mat4x4::Translate(object->position);
+            const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
+            const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
+            const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
+            const Mat4x4 scale = Mat4x4::Scale(
+                Vector3D(collider->width, collider->height, collider->depth)
+            );
+
+            program->Use();
+            DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
+            collider->Draw();
+        }
     }
 
     const double currentTime = glfwGetTime();
@@ -195,7 +213,7 @@ bool WorldController::CleanUp()
     if (fragmentShader) { delete fragmentShader; fragmentShader = nullptr; }
     if (program) { delete program; program = nullptr; }
     if (cameraController) { delete cameraController; cameraController = nullptr; }
-    
+
     return true;
 }
 
@@ -230,7 +248,7 @@ void WorldController::SetupShaders()
 
     vertexShader = new Shader(GL_VERTEX_SHADER, vsCode);
     fragmentShader = new Shader(GL_FRAGMENT_SHADER, fsCode);
-    
+
     program = new ShaderProgram();
     program->AttachShader(*vertexShader);
     program->AttachShader(*fragmentShader);
@@ -245,63 +263,54 @@ void WorldController::SetupShaders()
 
 void WorldController::UpdateMVP(GameObject* gameObject)
 {
-    if (gameObject == nullptr)
+    if (!gameObject || !gameObject->GetComponent<Model>())
         return;
 
-    const Model* model = gameObject->GetComponent<Model>();
+    const Mat4x4 translation = Mat4x4::Translate(gameObject->position);
+    const Mat4x4 rotationX = Mat4x4::RotateX(gameObject->rotation.x);
+    const Mat4x4 rotationY = Mat4x4::RotateY(gameObject->rotation.y);
+    const Mat4x4 rotationZ = Mat4x4::RotateZ(gameObject->rotation.z);
+    const Mat4x4 scale = Mat4x4::Scale(gameObject->size);
 
-    if (model == nullptr)
-        return;
-
-    const Mat4x4 translation =
-        Mat4x4::Translate(gameObject->position);
-
-    const Mat4x4 rotationX =
-        Mat4x4::RotateX(gameObject->rotation.x);
-
-    const Mat4x4 rotationY =
-        Mat4x4::RotateY(gameObject->rotation.y);
-
-    const Mat4x4 rotationZ =
-        Mat4x4::RotateZ(gameObject->rotation.z);
-
-    const Mat4x4 scale =
-        Mat4x4::Scale(gameObject->size);
-
-    modelMatrix =
-        translation *
-        rotationX *
-        rotationY *
-        rotationZ *
-        scale;
-
-    mvp =
-        modelMatrix *
-        cameraController->GetViewMatrix() *
-        cameraController->GetProjMatrix();
-
-    const Mat4x4 normalMatrix =
-        modelMatrix.Inverse().Transpose();
-
-    glUniformMatrix4fv(
-        glGetUniformLocation(program->GetProgramId(), "normalMatrix"),
-        1,
-        GL_FALSE,
-        &normalMatrix.m[0][0]);
-
-    glUniformMatrix4fv(
-        glGetUniformLocation(program->GetProgramId(), "model"),
-        1,
-        GL_FALSE,
-        &modelMatrix.m[0][0]);
-
-    glUniformMatrix4fv(
-        uMVP_Location,
-        1,
-        GL_FALSE,
-        &mvp.m[0][0]);
+    DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
 }
 
+void WorldController::DrawMatrix(Mat4x4 translation, Mat4x4 rotationX, Mat4x4 rotationY, Mat4x4 rotationZ, Mat4x4 scale)
+{
+    const Mat4x4 rotation = rotationX * rotationY * rotationZ;
+    modelMatrix = translation * rotation * scale;
+
+    mvp =
+        cameraController->GetProjMatrix() *
+        cameraController->GetViewMatrix() *
+        modelMatrix;
+
+    Mat4x4 inverseScale;
+    inverseScale.m[0][0] = std::abs(scale.m[0][0]) > 0.000001f ? 1.0f / scale.m[0][0] : 0.0f;
+    inverseScale.m[1][1] = std::abs(scale.m[1][1]) > 0.000001f ? 1.0f / scale.m[1][1] : 0.0f;
+    inverseScale.m[2][2] = std::abs(scale.m[2][2]) > 0.000001f ? 1.0f / scale.m[2][2] : 0.0f;
+    const Mat4x4 normalMatrix = rotation * inverseScale;
+
+    const GLuint programID = program->GetProgramId();
+
+    glUniformMatrix4fv(
+        glGetUniformLocation(programID, "normalMatrix"),
+        1, GL_FALSE, &normalMatrix.m[0][0]
+    );
+
+    glUniformMatrix4fv(
+        glGetUniformLocation(programID, "model"),
+        1, GL_FALSE, &modelMatrix.m[0][0]
+    );
+
+    if (uMVP_Location != -1)
+    {
+        glUniformMatrix4fv(
+            uMVP_Location,
+            1, GL_FALSE, &mvp.m[0][0]
+        );
+    }
+}
 
 void WorldController::UpdatePhysics(float deltaTime)
 {

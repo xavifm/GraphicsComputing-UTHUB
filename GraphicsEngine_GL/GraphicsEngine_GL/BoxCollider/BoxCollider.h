@@ -1,6 +1,7 @@
 #pragma once
 #include "../Object/GameObject/GameObject.h"
 #include "Component/SerializableComponent.h"
+#include "Mesh.h"
 
 namespace Assets {
     class BoxCollider;
@@ -37,8 +38,6 @@ public:
 
     void SetupMesh();
 
-    void SetBoxSizeAndPosition();
-
     void Draw();
 
 private:
@@ -54,7 +53,10 @@ private:
     GLuint VBO = 0;
     GLuint EBO = 0;
 
-    float vertices[24] =
+    Mesh boxMesh;
+    Mat4x4 modelMatrix;
+
+    std::vector<float> vertices =
     {
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
@@ -67,7 +69,19 @@ private:
         -0.5f,  0.5f,  0.5f
     };
 
-    unsigned int indices[24] =
+    std::vector<float> texCoords =
+    {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f
+    };
+
+    std::vector<unsigned int> indices =
     {
         0, 1, 1, 2, 2, 3, 3, 0,
         4, 5, 5, 6, 6, 7, 7, 4,
