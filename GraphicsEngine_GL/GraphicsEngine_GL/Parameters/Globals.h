@@ -225,11 +225,11 @@ struct Mat4x4 {
             {
                 for (int k = 0; k < 4; ++k)
                 {
-                    result.m[c][r] +=
-                        m[k][r] * rhs.m[c][k];
+                    result.m[c][r] += m[k][r] * rhs.m[c][k];
                 }
             }
         }
+
         return result;
     }
 
@@ -248,9 +248,9 @@ struct Mat4x4 {
     {
         Mat4x4 mat;
 
-        mat.m[0][3] = pos.x;
-        mat.m[1][3] = pos.y;
-        mat.m[2][3] = pos.z;
+        mat.m[3][0] = pos.x;
+        mat.m[3][1] = pos.y;
+        mat.m[3][2] = pos.z;
 
         return mat;
     }
