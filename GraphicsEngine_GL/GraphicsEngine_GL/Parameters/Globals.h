@@ -216,17 +216,21 @@ struct Mat4x4 {
 
     Mat4x4 operator*(const Mat4x4& rhs) const
     {
-        Mat4x4 res;
-        std::memset(res.m, 0, sizeof(res.m));
+        Mat4x4 result;
+        std::memset(result.m, 0, sizeof(result.m));
 
-        for (int c = 0; c < 4; ++c) {
-            for (int r = 0; r < 4; ++r) {
-                for (int k = 0; k < 4; ++k) {
-                    res.m[r][c] += m[r][k] * rhs.m[k][c];
+        for (int c = 0; c < 4; ++c)
+        {
+            for (int r = 0; r < 4; ++r)
+            {
+                for (int k = 0; k < 4; ++k)
+                {
+                    result.m[c][r] +=
+                        m[k][r] * rhs.m[c][k];
                 }
             }
         }
-        return res;
+        return result;
     }
 
     float* operator*(const float vec[4]) const {
