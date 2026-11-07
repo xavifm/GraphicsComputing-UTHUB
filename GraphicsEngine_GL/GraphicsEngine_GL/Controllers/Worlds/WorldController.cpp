@@ -178,9 +178,7 @@ update_status WorldController::Update()
             const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
             const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
             const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
-            const Mat4x4 scale = Mat4x4::Scale(
-                Vector3D(collider->width, collider->height, collider->depth)
-            );
+            const Mat4x4 scale = Mat4x4::Scale(Vector3D(collider->width, collider->height, collider->depth));
 
             program->Use();
             DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);

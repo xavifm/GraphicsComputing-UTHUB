@@ -34,6 +34,7 @@ update_status InputController::PreUpdate()
     MouseMotion.x = std::max(-50.0f, std::min(MouseX - LastMouseX, 50.0f));
     MouseMotion.y = std::max(-50.0f, std::min(MouseY - LastMouseY, 50.0f));
 
+    MouseMotion.x = -MouseMotion.x;
     MouseMotion.y = -MouseMotion.y;
 
     LastMouseX = MouseX;

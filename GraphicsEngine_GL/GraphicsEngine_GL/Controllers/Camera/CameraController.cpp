@@ -49,10 +49,10 @@ update_status CameraController::Update()
         _cameraPosition = _cameraPosition - _cameraFront * cameraSpeed;
     }
     if (input->GetKeyboardKey(GLFW_KEY_A, GLFW_PRESS)) {
-        _cameraPosition = _cameraPosition + right * cameraSpeed;
+        _cameraPosition = _cameraPosition - right * cameraSpeed;
     }
     if (input->GetKeyboardKey(GLFW_KEY_D, GLFW_PRESS)) {
-        _cameraPosition = _cameraPosition - right * cameraSpeed;
+        _cameraPosition = _cameraPosition + right * cameraSpeed;
     }
 
     if (input->GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS)) {

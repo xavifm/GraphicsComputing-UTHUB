@@ -11,6 +11,9 @@ public:
 
     void SetData(const std::vector<float>& vertexData, const std::vector<float>& texCoords, const std::vector<unsigned int>& indices);
     void Draw() const;
+
+    void DrawWireframe() const;
+
     void Destroy();
 
     size_t GetVertexCount() const { return vertexCount; }

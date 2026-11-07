@@ -69,16 +69,15 @@ private:
         -0.5f,  0.5f,  0.5f
     };
 
-    std::vector<float> texCoords =
-    {
+    std::vector<float> texCoords = {
         0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
         0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f
+        0.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 0.0f
     };
 
     std::vector<unsigned int> indices =

@@ -22,5 +22,5 @@ void BoxCollider::SetupMesh()
 
 void BoxCollider::Draw()
 {
-    boxMesh.Draw();
+    boxMesh.DrawWireframe();
 }

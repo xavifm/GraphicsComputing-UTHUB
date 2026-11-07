@@ -63,6 +63,13 @@ void Mesh::Draw() const
     glBindVertexArray(0);
 }
 
+void Mesh::DrawWireframe() const
+{
+    glBindVertexArray(VAO);
+    glDrawElements(GL_LINES, (GLsizei)inds.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
 void Mesh::Destroy()
 {
     if (VAO) glDeleteVertexArrays(1, &VAO);
