@@ -75,34 +75,60 @@ bool CameraController::CleanUp()
     return true;
 }
 
-Mat4x4 CameraController::LookAt(const Vector3D& eye, const Vector3D& center, const Vector3D& up)
+Mat4x4 CameraController::LookAt(
+    const Vector3D& eye,
+    const Vector3D& center,
+    const Vector3D& up)
 {
     Vector3D f = (center - eye).normalized();
-    Vector3D s = up.cross(f).normalized();
-    Vector3D u = f.cross(s);
+    Vector3D s = f.cross(up).normalized();
+    Vector3D u = s.cross(f);
 
     Mat4x4 result;
-    result.m[0][0] = s.x; result.m[1][0] = s.y; result.m[2][0] = s.z; result.m[3][0] = -s.dot(eye);
-    result.m[0][1] = u.x; result.m[1][1] = u.y; result.m[2][1] = u.z; result.m[3][1] = -u.dot(eye);
-    result.m[0][2] = -f.x; result.m[1][2] = -f.y; result.m[2][2] = -f.z; result.m[3][2] = f.dot(eye);
-    result.m[0][3] = 0.0f; result.m[1][3] = 0.0f; result.m[2][3] = 0.0f; result.m[3][3] = 1.0f;
+
+    result.m[0][0] = s.x;
+    result.m[0][1] = s.y;
+    result.m[0][2] = s.z;
+    result.m[0][3] = -s.dot(eye);
+
+    result.m[1][0] = u.x;
+    result.m[1][1] = u.y;
+    result.m[1][2] = u.z;
+    result.m[1][3] = -u.dot(eye);
+
+    result.m[2][0] = -f.x;
+    result.m[2][1] = -f.y;
+    result.m[2][2] = -f.z;
+    result.m[2][3] = f.dot(eye);
+
+    result.m[3][0] = 0.0f;
+    result.m[3][1] = 0.0f;
+    result.m[3][2] = 0.0f;
+    result.m[3][3] = 1.0f;
 
     return result;
 }
 
-Mat4x4 CameraController::Perspective(float fovDeg, float aspect, float nearZ, float farZ)
+Mat4x4 CameraController::Perspective(
+    float fovDeg,
+    float aspect,
+    float nearZ,
+    float farZ)
 {
     Mat4x4 p;
     std::memset(p.m, 0, sizeof(p.m));
 
-    float rad      = fovDeg * M_PI / 180.0f;
-    float tanHalf  = std::tan(rad * 0.5f);
+    float rad = fovDeg * M_PI / 180.0f;
+    float tanHalf = std::tan(rad * 0.5f);
 
     p.m[0][0] = 1.0f / (aspect * tanHalf);
     p.m[1][1] = 1.0f / tanHalf;
+
     p.m[2][2] = -(farZ + nearZ) / (farZ - nearZ);
-    p.m[2][3] = -1.0f;
-    p.m[3][2] = -(2.0f * farZ * nearZ) / (farZ - nearZ);
+    p.m[2][3] = -(2.0f * farZ * nearZ) / (farZ - nearZ);
+
+    p.m[3][2] = -1.0f;
+    p.m[3][3] = 0.0f;
 
     return p;
 }

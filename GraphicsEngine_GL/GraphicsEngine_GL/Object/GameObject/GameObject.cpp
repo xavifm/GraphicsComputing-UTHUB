@@ -24,3 +24,21 @@ void GameObject::Destroy()
         component->Destroy();
     }
 }
+
+void GameObject::UpdateModelMatrix()
+{
+    const Mat4x4 translation = Mat4x4::Translate(position);
+
+    const Mat4x4 rotationX = Mat4x4::RotateX(rotation.x);
+    const Mat4x4 rotationY = Mat4x4::RotateY(rotation.y);
+    const Mat4x4 rotationZ = Mat4x4::RotateZ(rotation.z);
+
+    const Mat4x4 scale = Mat4x4::Scale(size);
+
+    modelMatrix =
+        translation *
+        rotationX *
+        rotationY *
+        rotationZ *
+        scale;
+}

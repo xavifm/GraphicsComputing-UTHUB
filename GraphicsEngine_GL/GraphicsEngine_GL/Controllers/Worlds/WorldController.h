@@ -75,8 +75,7 @@ private:
 
     Mat4x4 view;
     Mat4x4 proj;
-    Mat4x4 modelMatrix;
-    Mat4x4 mvp;
+    Mat4x4 worldMatrix;
 
     unsigned int uMVP_Location = 0;
     float yaw;

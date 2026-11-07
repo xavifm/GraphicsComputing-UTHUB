@@ -35,9 +35,11 @@ WorldController::~WorldController() {}
 
 bool WorldController::Init()
 {
+    worldMatrix = Mat4x4();
+
     cameraController = new CameraController();
     cameraController->Init();
-    
+
     SetupShaders();
     //objectTest = new TestGameObject(Vector3D(0.0f, 0.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
     //objectTest->Start();
@@ -54,10 +56,10 @@ bool WorldController::Init()
 
     lastFrameTime = glfwGetTime();
     physicsAccumulator = 0.0f;
-    
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
-    
+
     return true;
 }
 
@@ -195,7 +197,7 @@ bool WorldController::CleanUp()
     if (fragmentShader) { delete fragmentShader; fragmentShader = nullptr; }
     if (program) { delete program; program = nullptr; }
     if (cameraController) { delete cameraController; cameraController = nullptr; }
-    
+
     return true;
 }
 
@@ -230,7 +232,7 @@ void WorldController::SetupShaders()
 
     vertexShader = new Shader(GL_VERTEX_SHADER, vsCode);
     fragmentShader = new Shader(GL_FRAGMENT_SHADER, fsCode);
-    
+
     program = new ShaderProgram();
     program->AttachShader(*vertexShader);
     program->AttachShader(*fragmentShader);
@@ -245,63 +247,52 @@ void WorldController::SetupShaders()
 
 void WorldController::UpdateMVP(GameObject* gameObject)
 {
-    if (gameObject == nullptr)
+    if (!gameObject)
         return;
 
     const Model* model = gameObject->GetComponent<Model>();
 
-    if (model == nullptr)
+    if (!model)
         return;
 
-    const Mat4x4 translation =
-        Mat4x4::Translate(gameObject->position);
+    gameObject->UpdateModelMatrix();
 
-    const Mat4x4 rotationX =
-        Mat4x4::RotateX(gameObject->rotation.x);
+    const Mat4x4& localMatrix = gameObject->modelMatrix;
 
-    const Mat4x4 rotationY =
-        Mat4x4::RotateY(gameObject->rotation.y);
+    const Mat4x4 finalModelMatrix = worldMatrix * localMatrix;
 
-    const Mat4x4 rotationZ =
-        Mat4x4::RotateZ(gameObject->rotation.z);
 
-    const Mat4x4 scale =
-        Mat4x4::Scale(gameObject->size);
-
-    modelMatrix =
-        translation *
-        rotationX *
-        rotationY *
-        rotationZ *
-        scale;
-
-    mvp =
-        modelMatrix *
+    const Mat4x4 mvp =
+        cameraController->GetProjMatrix() *
         cameraController->GetViewMatrix() *
-        cameraController->GetProjMatrix();
+        finalModelMatrix;
 
     const Mat4x4 normalMatrix =
-        modelMatrix.Inverse().Transpose();
+        finalModelMatrix.Inverse().Transpose();
+
+    const GLuint programID = program->GetProgramId();
 
     glUniformMatrix4fv(
-        glGetUniformLocation(program->GetProgramId(), "normalMatrix"),
+        glGetUniformLocation(programID, "normalMatrix"),
         1,
-        GL_FALSE,
-        &normalMatrix.m[0][0]);
+        GL_TRUE,
+        &normalMatrix.m[0][0]
+    );
 
     glUniformMatrix4fv(
-        glGetUniformLocation(program->GetProgramId(), "model"),
+        glGetUniformLocation(programID, "model"),
         1,
-        GL_FALSE,
-        &modelMatrix.m[0][0]);
+        GL_TRUE,
+        &finalModelMatrix.m[0][0]
+    );
 
     glUniformMatrix4fv(
         uMVP_Location,
         1,
-        GL_FALSE,
-        &mvp.m[0][0]);
+        GL_TRUE,
+        &mvp.m[0][0]
+    );
 }
-
 
 void WorldController::UpdatePhysics(float deltaTime)
 {
@@ -399,6 +390,8 @@ bool WorldController::LoadWorld(std::string _fileName)
         worldLoader = new WorldLoader();
 
     DestroyScene();
+
+    worldMatrix = Mat4x4();
 
     std::vector<GameObject*> objects = worldLoader->GetWorldObjects(_fileName, this);
 
