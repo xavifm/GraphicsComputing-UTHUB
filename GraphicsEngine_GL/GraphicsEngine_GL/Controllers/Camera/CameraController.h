@@ -1,14 +1,24 @@
 #pragma once
+#include <algorithm>
 #include "../Controller.h"
 #include "../Input/InputController.h"
 
 class CameraController : public Controller
 {
 public:
-    CameraController();
+    CameraController(bool _scene = true);
     ~CameraController();
 
     bool Init() override;
+
+    void UpdateGameSceneCam();
+
+    void UpdateEditorSceneCam();
+
+    void SetCameraPosition(Vector3D _position) { _cameraPosition = _position; };
+
+    void SetCameraRotation(Vector3D _rotation);
+
     update_status Update() override;
     void UpdateMVP();
     bool CleanUp() override;
@@ -31,6 +41,8 @@ private:
 
     float _yaw;
     float _pitch;
+
+    bool _isScene;
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;

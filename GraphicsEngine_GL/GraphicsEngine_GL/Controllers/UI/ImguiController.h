@@ -34,6 +34,8 @@ public:
 
     void ReplaceAll(std::string &text, const std::string &from, const std::string &to);
 
+    void SetGameCamera(FrameBufferController* framebuffer);
+
     void DrawAssetBrowser();
 
     bool CleanUp() override;
@@ -49,4 +51,5 @@ private:
     WorldController* worldController;
     GameObject* selectedGameObject = nullptr;
     GLFWwindow* window;
+    FrameBufferController* gameCameraFramebuffer;
 };

@@ -6,7 +6,10 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-CameraController::CameraController() : _yaw(-90.0f), _pitch(0.0f) {}
+CameraController::CameraController(bool _scene) : _yaw(-90.0f), _pitch(0.0f)
+{
+    _isScene = _scene;
+}
 CameraController::~CameraController() {}
 
 bool CameraController::Init()
@@ -33,7 +36,12 @@ bool CameraController::Init()
     return true;
 }
 
-update_status CameraController::Update()
+void CameraController::UpdateGameSceneCam()
+{
+    _viewMatrix = LookAt(_cameraPosition, _cameraPosition + _cameraFront, _cameraUp);
+}
+
+void CameraController::UpdateEditorSceneCam()
 {
     input->PreUpdate();
 
@@ -72,6 +80,34 @@ update_status CameraController::Update()
     }
 
     _viewMatrix = LookAt(_cameraPosition, _cameraPosition + _cameraFront, _cameraUp);
+}
+
+void CameraController::SetCameraRotation(Vector3D _rotation)
+{
+    _pitch = std::clamp(_rotation.x, -89.0f, 89.0f);
+    _yaw = _rotation.y - 90.0f;
+
+    const float yawRad = _yaw * M_PI / 180.0f;
+    const float pitchRad = _pitch * M_PI / 180.0f;
+
+    Vector3D front;
+
+    front.x = cos(yawRad) * cos(pitchRad);
+    front.y = sin(pitchRad);
+    front.z = sin(yawRad) * cos(pitchRad);
+
+    _cameraFront = front.normalized();
+}
+
+update_status CameraController::Update()
+{
+    if (!_isScene)
+    {
+        UpdateGameSceneCam();
+        return UPDATE_CONTINUE;
+    }
+
+    UpdateEditorSceneCam();
 
     return UPDATE_CONTINUE;
 }

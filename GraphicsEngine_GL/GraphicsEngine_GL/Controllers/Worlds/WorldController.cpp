@@ -13,6 +13,7 @@
 #include "Object/GameObject/TestGameObject.h"
 #include "Rigidbody/RigidBody.h"
 #include "BoxCollider/BoxCollider.h"
+#include "Camera/CameraComponent.h"
 
 static std::string ReadTextFile(const std::string& fileName)
 {
@@ -113,91 +114,116 @@ void WorldController::UpdateLights()
     );
 }
 
-update_status WorldController::Update()
+void WorldController::BindView()
 {
-    if (!program)
-        return UPDATE_CONTINUE;
-
-    frameBufferController->Bind();
-
-    glViewport(0, 0, 1280, 720);
-    glEnable(GL_DEPTH_TEST);
-
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    cameraController->Update();
-    program->Use();
-
-    const GLuint programID = program->GetProgramId();
-
-    Vector3D cameraPos = cameraController->GetCameraPosition();
-
-    glUniform3f(
-        glGetUniformLocation(programID, "viewPos"),
-        cameraPos.x,
-        cameraPos.y,
-        cameraPos.z
-    );
-
-    glUniform1f(
-        glGetUniformLocation(programID, "ambientStrength"),
-        0.1f
-    );
-
-    glUniform1f(
-        glGetUniformLocation(programID, "diffuseStrength"),
-        1.0f
-    );
-
-    glUniform1f(
-        glGetUniformLocation(programID, "specularStrength"),
-        0.7f
-    );
-
-    glUniform1f(
-        glGetUniformLocation(programID, "shininess"),
-        32.0f
-    );
-
-    UpdateLights();
+    targetCamera = nullptr;
+    gameFrameBufferController = nullptr;
 
     for (GameObject* object : GameObjects)
     {
-        if (!object)
-            continue;
-
-        UpdateMVP(object);
-        object->Update(0.0f);
-
-        BoxCollider* collider = object->GetComponent<BoxCollider>();
-
-        if (collider)
+        CameraComponent* camera = GetCameraComponent(object);
+        if (camera != nullptr && camera->Enabled &&
+            camera->frameBufferController != nullptr)
         {
-            const Mat4x4 translation = Mat4x4::Translate(object->position);
-            const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
-            const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
-            const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
-            const Mat4x4 scale = Mat4x4::Scale(Vector3D(collider->width, collider->height, collider->depth));
-
-            program->Use();
-            DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
-            collider->Draw();
+            targetCamera = camera;
+            gameFrameBufferController = camera->frameBufferController;
+            break;
         }
+    }
+}
+
+CameraComponent* WorldController::GetCameraComponent(GameObject* _gameObject)
+{
+    if (_gameObject == nullptr)
+        return nullptr;
+
+    std::vector<CameraComponent*> cameras = _gameObject->GetComponents<CameraComponent>();
+
+    if (cameras.empty())
+        return nullptr;
+
+    return cameras[0];
+}
+
+update_status WorldController::Update()
+{
+    if (!program || !cameraController || !frameBufferController)
+        return UPDATE_CONTINUE;
+
+    cameraController->Update();
+    BindView();
+
+    auto renderPass = [&](FrameBufferController* framebuffer,
+                          const Mat4x4& view,
+                          const Mat4x4& projection,
+                          const Vector3D& cameraPosition)
+    {
+        if (framebuffer == nullptr)
+            return;
+
+        framebuffer->Bind();
+        glViewport(0, 0, 1280, 720);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderViewMatrix = view;
+        renderProjectionMatrix = projection;
+
+        program->Use();
+        const GLuint programID = program->GetProgramId();
+        glUniform3f(glGetUniformLocation(programID, "viewPos"),
+                    cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        glUniform1f(glGetUniformLocation(programID, "ambientStrength"), 0.1f);
+        glUniform1f(glGetUniformLocation(programID, "diffuseStrength"), 1.0f);
+        glUniform1f(glGetUniformLocation(programID, "specularStrength"), 0.7f);
+        glUniform1f(glGetUniformLocation(programID, "shininess"), 32.0f);
+        UpdateLights();
+
+        for (GameObject* object : GameObjects)
+        {
+            if (!object)
+                continue;
+
+            UpdateMVP(object);
+            object->Update(0.0f);
+
+            if (BoxCollider* collider = object->GetComponent<BoxCollider>())
+            {
+                const Mat4x4 translation = Mat4x4::Translate(object->position);
+                const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
+                const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
+                const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
+                const Mat4x4 scale = Mat4x4::Scale(
+                    Vector3D(collider->width, collider->height, collider->depth));
+                program->Use();
+                DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
+                collider->Draw();
+            }
+        }
+
+        framebuffer->Unbind();
+    };
+
+    renderPass(frameBufferController,
+               cameraController->GetViewMatrix(),
+               cameraController->GetProjMatrix(),
+               cameraController->GetCameraPosition());
+
+    if (targetCamera != nullptr && gameFrameBufferController != nullptr &&
+        gameFrameBufferController != frameBufferController)
+    {
+        renderPass(gameFrameBufferController,
+                   targetCamera->cameraController->GetViewMatrix(),
+                   targetCamera->cameraController->GetProjMatrix(),
+                   targetCamera->cameraController->GetCameraPosition());
     }
 
     const double currentTime = glfwGetTime();
-
-    float deltaTime =
-        static_cast<float>(currentTime - lastFrameTime);
-
+    float deltaTime = static_cast<float>(currentTime - lastFrameTime);
     lastFrameTime = currentTime;
-
     deltaTime = std::clamp(deltaTime, 0.0f, 0.1f);
-
     UpdatePhysics(deltaTime);
-
-    frameBufferController->Unbind();
 
     return UPDATE_CONTINUE;
 }
@@ -279,8 +305,8 @@ void WorldController::DrawMatrix(Mat4x4 translation, Mat4x4 rotationX, Mat4x4 ro
     modelMatrix = translation * rotation * scale;
 
     mvp =
-        cameraController->GetProjMatrix() *
-        cameraController->GetViewMatrix() *
+        renderProjectionMatrix *
+        renderViewMatrix *
         modelMatrix;
 
     Mat4x4 inverseScale;

@@ -6,7 +6,7 @@
 class FrameBufferController : public Controller
 {
 public:
-    FrameBufferController();
+    FrameBufferController(int fbo);
     ~FrameBufferController();
 
     bool Init() override;

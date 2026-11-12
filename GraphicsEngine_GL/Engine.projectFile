@@ -26,6 +26,12 @@
       "source": "GraphicsEngine_GL/BoxCollider/BoxCollider.cpp"
     },
     {
+      "class": "CameraComponent",
+      "name": "CameraComponent",
+      "header": "GraphicsEngine_GL/Camera/CameraComponent.h",
+      "source": "GraphicsEngine_GL/Camera/CameraComponent.cpp"
+    },
+    {
       "class": "newcomponent",
       "name": "newcomponent",
       "header": "cmake-build-debug/Assets/newcomponent.h",
@@ -48,6 +54,24 @@
       "name": "BoxColliderA",
       "header": "cmake-build-debug/Assets/BoxColliderA.h",
       "source": "cmake-build-debug/Assets/BoxColliderA.cpp"
+    },
+    {
+      "class": "cacotaaa",
+      "name": "cacotaaa",
+      "header": "cmake-build-debug/Assets/cacotaaa.h",
+      "source": "cmake-build-debug/Assets/cacotaaa.cpp"
+    },
+    {
+      "class": "Camerad",
+      "name": "Camerad",
+      "header": "cmake-build-debug/Assets/Camerad.h",
+      "source": "cmake-build-debug/Assets/Camerad.cpp"
+    },
+    {
+      "class": "CameraComponentd",
+      "name": "CameraComponentd",
+      "header": "cmake-build-debug/Assets/CameraComponentd.h",
+      "source": "cmake-build-debug/Assets/CameraComponentd.cpp"
     }
   ]
 }

@@ -88,7 +88,7 @@ public:
         if (!std::is_base_of_v<Component, T>)
         {
             std::cout << "T Should hederate from Component!" << std::endl;
-            return nullptr;
+            return {};
         }
 
         std::vector<T*> result;

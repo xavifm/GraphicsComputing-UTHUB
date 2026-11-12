@@ -568,6 +568,7 @@ ImguiController::ImguiController(
     WorldController* controllerWorld)
     : windowController(controller),
       frameBufferController(frameBuffer),
+      gameCameraFramebuffer(nullptr),
       worldController(controllerWorld),
       window(nullptr),
       selectedGameObject(nullptr)
@@ -575,6 +576,11 @@ ImguiController::ImguiController(
 }
 
 ImguiController::~ImguiController() = default;
+
+void ImguiController::SetGameCamera(FrameBufferController* framebuffer)
+{
+    gameCameraFramebuffer = framebuffer;
+}
 
 bool ImguiController::Init()
 {
@@ -621,6 +627,13 @@ bool ImguiController::Init()
 
 update_status ImguiController::PreUpdate()
 {
+    // Actualitza la pestanya Game quan el WorldController canvia de framebuffer.
+    FrameBufferController* currentGameFramebuffer =
+        worldController != nullptr ? worldController->GetGameFrameBufferController() : nullptr;
+
+    if (gameCameraFramebuffer != currentGameFramebuffer)
+        SetGameCamera(currentGameFramebuffer);
+
     return UPDATE_CONTINUE;
 }
 
@@ -1017,7 +1030,7 @@ update_status ImguiController::PostUpdate()
     ImGui::EndChild();
     ImGui::SameLine();
 
-    // Viewport
+    // Viewport: dues pestanyes independents, com a Unity.
     float viewportWidth =
         ImGui::GetContentRegionAvail().x - inspectorWidth;
 
@@ -1036,28 +1049,60 @@ update_status ImguiController::PostUpdate()
         true,
         viewportFlags);
 
-    ImGui::TextColored(ImVec4(.52f,.74f,1,1), "SCENE VIEWPORT");
-    ImGui::Separator();
-
-    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-    viewportSize.x = std::max(viewportSize.x, 1.0f);
-    viewportSize.y = std::max(viewportSize.y, 1.0f);
-
-    if (frameBufferController != nullptr)
+    // Només es dibuixa la vista activa. Cada pestanya usa el seu framebuffer.
+    if (ImGui::BeginTabBar("CameraViewTabs"))
     {
-        const GLuint sceneTexture =
-            frameBufferController->GetColorTexture();
+        if (ImGui::BeginTabItem("Scene"))
+        {
+            ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+            viewportSize.x = std::max(viewportSize.x, 1.0f);
+            viewportSize.y = std::max(viewportSize.y, 1.0f);
 
-        ImGui::Image(
-            (ImTextureID)(intptr_t)sceneTexture,
-            viewportSize,
-            ImVec2(0, 1),
-            ImVec2(1, 0)
-        );
-    }
-    else
-    {
-        ImGui::TextDisabled("FrameBufferController no disponible.");
+            if (frameBufferController != nullptr)
+            {
+                const GLuint sceneTexture =
+                    frameBufferController->GetColorTexture();
+
+                ImGui::Image(
+                    (ImTextureID)(intptr_t)sceneTexture,
+                    viewportSize,
+                    ImVec2(0, 1),
+                    ImVec2(1, 0));
+            }
+            else
+            {
+                ImGui::TextDisabled("FrameBufferController d'escena no disponible.");
+            }
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Game"))
+        {
+            ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+            viewportSize.x = std::max(viewportSize.x, 1.0f);
+            viewportSize.y = std::max(viewportSize.y, 1.0f);
+
+            if (gameCameraFramebuffer != nullptr)
+            {
+                const GLuint gameTexture =
+                    gameCameraFramebuffer->GetColorTexture();
+
+                ImGui::Image(
+                    (ImTextureID)(intptr_t)gameTexture,
+                    viewportSize,
+                    ImVec2(0, 1),
+                    ImVec2(1, 0));
+            }
+            else
+            {
+                ImGui::TextDisabled("Game camera no assignada. Crida setGameCamera().");
+            }
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
     }
 
     ImGui::EndChild();

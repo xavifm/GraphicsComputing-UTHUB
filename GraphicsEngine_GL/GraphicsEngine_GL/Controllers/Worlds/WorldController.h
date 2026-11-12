@@ -9,6 +9,8 @@
 #include "../Physics/PhysicsWorld.h"
 #include <memory>
 
+#include "Camera/CameraComponent.h"
+
 class GameObject;
 class WorldLoader;
 
@@ -39,6 +41,8 @@ public:
 
     void UpdateLights();
 
+    void BindView();
+
     update_status Update() override;
     bool CleanUp() override;
 
@@ -57,6 +61,7 @@ public:
     std::vector<GameObject*> GameObjects;
 
     PhysicsWorld* GetPhysicsWorld() { return physicsWorld; };
+    FrameBufferController* GetGameFrameBufferController() { return gameFrameBufferController; };
 
 private:
     void DestroyScene();
@@ -64,12 +69,15 @@ private:
     void UpdateMVP(GameObject* _gameObject);
 
     void DrawMatrix(Mat4x4 translation, Mat4x4 rotationX, Mat4x4 rotationY, Mat4x4 rotationZ, Mat4x4 scale);
+    CameraComponent *GetCameraComponent(GameObject *_gameObject);
 
     WorldLoader* worldLoader;
     PhysicsWorld* physicsWorld;
 
     CameraController* cameraController;
     FrameBufferController* frameBufferController;
+    FrameBufferController* gameFrameBufferController;
+    CameraComponent* targetCamera;
 
     Shader* vertexShader = nullptr;
     Shader* fragmentShader = nullptr;
@@ -79,6 +87,8 @@ private:
     Mat4x4 proj;
     Mat4x4 modelMatrix;
     Mat4x4 mvp;
+    Mat4x4 renderViewMatrix;
+    Mat4x4 renderProjectionMatrix;
 
     unsigned int uMVP_Location = 0;
     float yaw;

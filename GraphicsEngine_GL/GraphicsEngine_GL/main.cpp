@@ -24,7 +24,7 @@ int main()
 
     App->AddController(new WindowController());
     App->AddController(new OpenGLController());
-    App->AddController(new FrameBufferController());
+    App->AddController(new FrameBufferController(0));
     App->AddController(new WorldController(dynamic_cast<FrameBufferController*>(App->GetController(2))));
     App->AddController(new ImguiController(dynamic_cast<WindowController*>(App->GetController(0)), dynamic_cast<FrameBufferController*>(App->GetController(2)), dynamic_cast<WorldController*>(App->GetController(3))));
     App->AddController(new EngineController(dynamic_cast<ImguiController*>(App->GetController(4))));

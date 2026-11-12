@@ -1,7 +1,8 @@
 #include "FrameBufferController.h"
 
-FrameBufferController::FrameBufferController()
+FrameBufferController::FrameBufferController(int fbo)
 {
+    _fbo = fbo;
 }
 
 FrameBufferController::~FrameBufferController()
