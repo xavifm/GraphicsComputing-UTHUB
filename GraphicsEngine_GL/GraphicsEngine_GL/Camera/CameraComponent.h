@@ -30,6 +30,8 @@ public:
     float rotationY = 0.f;
     float rotationZ = 0.f;
 
+    int Priority = 1;
+
     bool Enabled = true;
 
     [[nodiscard]] const char* GetTypeName() const override
@@ -63,6 +65,7 @@ private:
         visitor("rotationY", self.localRY);
         visitor("rotationZ", self.localRZ);
         visitor("Enabled", self.Enabled);
+        visitor("Priority", self.Priority);
     }
 };
 

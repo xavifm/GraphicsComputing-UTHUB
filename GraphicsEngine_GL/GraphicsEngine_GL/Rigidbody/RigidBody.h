@@ -56,7 +56,7 @@ public:
 
     void LockRigidbody(bool lock);
 
-    Vector3D transformDirection(const btVector3 &direction);
+    Vector3D TransformDirection(const btVector3 &direction);
 
     void AddImpulse(const btVector3& impulse);
 

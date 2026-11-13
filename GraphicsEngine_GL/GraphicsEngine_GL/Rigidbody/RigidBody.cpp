@@ -499,9 +499,12 @@ void RigidBody::LockRigidbody(bool lock)
     lock = true;
 }
 
-Vector3D RigidBody::transformDirection(const btVector3& direction)
+Vector3D RigidBody::TransformDirection(const btVector3& direction)
 {
+    btQuaternion rotation = body->getWorldTransform().getRotation();
+    btVector3 result = quatRotate(rotation, direction);
 
+    return Vector3D(result.x(), result.y(), result.z());
 }
 
 void RigidBody::AddImpulse(const btVector3& impulse)

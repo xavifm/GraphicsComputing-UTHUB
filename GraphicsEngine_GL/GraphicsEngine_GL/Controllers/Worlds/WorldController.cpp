@@ -122,12 +122,19 @@ void WorldController::BindView()
     for (GameObject* object : GameObjects)
     {
         CameraComponent* camera = GetCameraComponent(object);
+
+        if (camera == nullptr || !camera->Enabled ||
+            camera->frameBufferController == nullptr)
+            continue;
+
+        if (targetCamera != nullptr && camera->Priority >= targetCamera->Priority)
+            continue;
+        
         if (camera != nullptr && camera->Enabled &&
             camera->frameBufferController != nullptr)
         {
             targetCamera = camera;
             gameFrameBufferController = camera->frameBufferController;
-            break;
         }
     }
 }
