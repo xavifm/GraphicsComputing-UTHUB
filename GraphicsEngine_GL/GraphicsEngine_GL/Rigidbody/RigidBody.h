@@ -81,6 +81,7 @@ private:
     bool lastUseGravity = true;
 
     btVector3 lastSyncedPosition{0, 0, 0};
+    btVector3 lastSyncedRotation{0, 0, 0};
     bool hasSyncedPosition = false;
 
     bool CreateBody(const btTransform& transform);

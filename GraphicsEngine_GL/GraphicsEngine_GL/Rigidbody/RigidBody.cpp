@@ -43,6 +43,14 @@ bool RigidBody::InitializePhysics()
         object->position.y,
         object->position.z
     ));
+    
+    btQuaternion initialRotation;
+    initialRotation.setEulerZYX(
+        btRadians(object->rotation.z),
+        btRadians(object->rotation.y),
+        btRadians(object->rotation.x)
+    );
+    transform.setRotation(initialRotation);
 
     if (!CreateBody(transform))
     {
@@ -109,6 +117,9 @@ bool RigidBody::CreateBody(const btTransform& transform)
     CacheProperties();
 
     lastSyncedPosition = transform.getOrigin();
+    lastSyncedRotation = btVector3(
+        object->rotation.x, object->rotation.y, object->rotation.z
+    );
     hasSyncedPosition = true;
 
     return true;
@@ -319,6 +330,10 @@ void RigidBody::RebuildPhysics()
         body->activate(true);
 
     lastSyncedPosition = transform.getOrigin();
+    if (GameObject* object = GetAttachedGameObject())
+        lastSyncedRotation = btVector3(
+            object->rotation.x, object->rotation.y, object->rotation.z
+        );
     hasSyncedPosition = true;
 }
 
@@ -336,6 +351,7 @@ void RigidBody::CleanUpPhysics()
     physicsWorld = nullptr;
 
     lastSyncedPosition = btVector3(0, 0, 0);
+    lastSyncedRotation = btVector3(0, 0, 0);
     hasSyncedPosition = false;
 }
 
@@ -346,39 +362,53 @@ void RigidBody::SyncEditorTransform()
         return;
 
     GameObject* object = GetAttachedGameObject();
-
     if (!object)
         return;
 
     const btVector3 editorPosition(
-        object->position.x,
-        object->position.y,
-        object->position.z
+        object->position.x, object->position.y, object->position.z
+    );
+    const btVector3 editorRotation(
+        object->rotation.x, object->rotation.y, object->rotation.z
     );
 
     if (!hasSyncedPosition)
     {
         lastSyncedPosition = editorPosition;
+        lastSyncedRotation = editorRotation;
         hasSyncedPosition = true;
         return;
     }
 
-    const btVector3 difference =
-        editorPosition - lastSyncedPosition;
+    constexpr btScalar epsilon2 = btScalar(0.000001);
+    const bool positionChanged =
+        (editorPosition - lastSyncedPosition).length2() > epsilon2;
+    const bool rotationChanged =
+        (editorRotation - lastSyncedRotation).length2() > epsilon2;
 
-    if (difference.length2() < 0.000001f)
+    if (!positionChanged && !rotationChanged)
         return;
 
     btTransform transform = body->getWorldTransform();
-    transform.setOrigin(editorPosition);
+
+    if (positionChanged)
+        transform.setOrigin(editorPosition);
+
+    if (rotationChanged)
+    {
+        btQuaternion rotation;
+        rotation.setEulerZYX(
+            btRadians(editorRotation.z()),
+            btRadians(editorRotation.y()),
+            btRadians(editorRotation.x())
+        );
+        transform.setRotation(rotation);
+    }
 
     body->setWorldTransform(transform);
     body->setInterpolationWorldTransform(transform);
-
     if (body->getMotionState())
-    {
         body->getMotionState()->setWorldTransform(transform);
-    }
 
     body->setLinearVelocity(btVector3(0, 0, 0));
     body->setAngularVelocity(btVector3(0, 0, 0));
@@ -387,61 +417,41 @@ void RigidBody::SyncEditorTransform()
     if (physicsWorld && physicsWorld->GetWorld())
     {
         auto* world = physicsWorld->GetWorld();
-
         world->updateSingleAabb(body.get());
 
-        btBroadphaseProxy* proxy =
-            body->getBroadphaseHandle();
-
+        btBroadphaseProxy* proxy = body->getBroadphaseHandle();
         if (proxy)
         {
-            auto* pairCache =
-                world->getBroadphase()
-                     ->getOverlappingPairCache();
-
-            btBroadphasePairArray& pairs =
-                pairCache->getOverlappingPairArray();
+            auto* pairCache = world->getBroadphase()->getOverlappingPairCache();
+            btBroadphasePairArray& pairs = pairCache->getOverlappingPairArray();
 
             for (int i = 0; i < pairs.size(); ++i)
             {
                 const btBroadphasePair& pair = pairs[i];
-
                 btBroadphaseProxy* otherProxy = nullptr;
 
                 if (pair.m_pProxy0 == proxy)
-                {
                     otherProxy = pair.m_pProxy1;
-                }
                 else if (pair.m_pProxy1 == proxy)
-                {
                     otherProxy = pair.m_pProxy0;
-                }
 
                 if (!otherProxy)
                     continue;
 
                 auto* collisionObject =
-                    static_cast<btCollisionObject*>(
-                        otherProxy->m_clientObject
-                    );
+                    static_cast<btCollisionObject*>(otherProxy->m_clientObject);
+                btRigidBody* otherBody = btRigidBody::upcast(collisionObject);
 
-                btRigidBody* otherBody =
-                    btRigidBody::upcast(collisionObject);
-
-                if (!otherBody || otherBody == body.get())
-                    continue;
-
-                if (!otherBody->isStaticOrKinematicObject())
-                {
+                if (otherBody && otherBody != body.get() &&
+                    !otherBody->isStaticOrKinematicObject())
                     otherBody->activate(true);
-                }
             }
         }
     }
 
     body->activate(true);
-
     lastSyncedPosition = editorPosition;
+    lastSyncedRotation = editorRotation;
     hasSyncedPosition = true;
 }
 
@@ -451,24 +461,27 @@ void RigidBody::SyncTransform()
         return;
 
     GameObject* object = GetAttachedGameObject();
-
     if (!object)
         return;
 
-    btTransform transform;
-
-    if (body->getMotionState())
-        body->getMotionState()->getWorldTransform(transform);
-    else
-        transform = body->getWorldTransform();
-
+    const btTransform& transform = body->getWorldTransform();
     const btVector3 position = transform.getOrigin();
 
     object->position.x = position.x();
     object->position.y = position.y();
     object->position.z = position.z();
 
+    btScalar angleZ, angleY, angleX;
+    transform.getRotation().getEulerZYX(angleZ, angleY, angleX);
+
+    object->rotation.x = btDegrees(angleX);
+    object->rotation.y = btDegrees(angleY);
+    object->rotation.z = btDegrees(angleZ);
+
     lastSyncedPosition = position;
+    lastSyncedRotation = btVector3(
+        object->rotation.x, object->rotation.y, object->rotation.z
+    );
     hasSyncedPosition = true;
 }
 

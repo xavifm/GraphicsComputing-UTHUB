@@ -129,7 +129,7 @@ void WorldController::BindView()
 
         if (targetCamera != nullptr && camera->Priority >= targetCamera->Priority)
             continue;
-        
+
         if (camera != nullptr && camera->Enabled &&
             camera->frameBufferController != nullptr)
         {
