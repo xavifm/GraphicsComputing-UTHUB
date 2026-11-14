@@ -199,9 +199,9 @@ update_status WorldController::Update()
             if (BoxCollider* collider = object->GetComponent<BoxCollider>())
             {
                 const Mat4x4 translation = Mat4x4::Translate(object->position);
-                const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
-                const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
-                const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
+                const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(object->rotation.x));
+                const Mat4x4 rotationY = Mat4x4::RotateY(Mathx::ToRadians(object->rotation.y));
+                const Mat4x4 rotationZ = Mat4x4::RotateZ(Mathx::ToRadians(object->rotation.z));
                 const Mat4x4 scale = Mat4x4::Scale(
                     Vector3D(collider->width, collider->height, collider->depth));
                 program->Use();
@@ -212,9 +212,9 @@ update_status WorldController::Update()
             if (SphereCollider* collider = object->GetComponent<SphereCollider>())
             {
                 const Mat4x4 translation = Mat4x4::Translate(object->position);
-                const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
-                const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
-                const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
+                const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(object->rotation.x));
+                const Mat4x4 rotationY = Mat4x4::RotateY(Mathx::ToRadians(object->rotation.y));
+                const Mat4x4 rotationZ = Mat4x4::RotateZ(Mathx::ToRadians(object->rotation.z));
 
                 const Mat4x4 scale = Mat4x4::Scale(
                     Vector3D(collider->radius, collider->radius, collider->radius));
@@ -314,9 +314,9 @@ void WorldController::UpdateMVP(GameObject* gameObject)
         return;
 
     const Mat4x4 translation = Mat4x4::Translate(gameObject->position);
-    const Mat4x4 rotationX = Mat4x4::RotateX(gameObject->rotation.x);
-    const Mat4x4 rotationY = Mat4x4::RotateY(gameObject->rotation.y);
-    const Mat4x4 rotationZ = Mat4x4::RotateZ(gameObject->rotation.z);
+    const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(gameObject->rotation.x));
+    const Mat4x4 rotationY = Mat4x4::RotateY(Mathx::ToRadians(gameObject->rotation.y));
+    const Mat4x4 rotationZ = Mat4x4::RotateZ(Mathx::ToRadians(gameObject->rotation.z));
     const Mat4x4 scale = Mat4x4::Scale(gameObject->size);
 
     DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);

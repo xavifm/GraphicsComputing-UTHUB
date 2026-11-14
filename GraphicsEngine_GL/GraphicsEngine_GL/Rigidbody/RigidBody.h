@@ -22,10 +22,7 @@ public:
     float friction = 0.5f;
     float restitution = 0.0f;
 
-    // Quan es true, elimina la friccio de contacte per lliscar per pendents.
     bool slideOnSlopes = true;
-
-    // Acceleracio extra en pendents (0 = fisica normal).
     float slopeAcceleration = 2.0f;
 
     bool useGravity = true;
@@ -98,7 +95,6 @@ private:
     void ApplyProperties();
     void ApplySlopeAcceleration();
     void UpdateGravity();
-    void ReloadForces(bool stop);
     bool NeedsRebuild();
     void CacheProperties();
 

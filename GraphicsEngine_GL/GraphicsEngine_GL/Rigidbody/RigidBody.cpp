@@ -141,10 +141,6 @@ bool RigidBody::CreateBody(const btTransform& transform)
 
     physicsWorld->AddRigidBody(body.get());
 
-    // Bullet combina la friccio de les dues superficies.
-    // Si la rampa te friccio zero, l'esfera no rep parell de contacte
-    // i no roda, encara que la seva friccio sigui alta.
-    // La caixa lliscant conserva una friccio petita, no nul-la.
     const btScalar contactFriction = sphereShape
         ? btScalar(std::max(0.8f, friction))
         : (slideOnSlopes ? btScalar(0.25f)
@@ -183,8 +179,6 @@ void RigidBody::Update()
         return;
     }
 
-    // Mantenim l'edicio de transforms. Evita cridar-ho si
-    // el motor reescriu GameObject::position/rotation cada frame.
     SyncEditorTransform();
 
     if (NeedsRebuild())
@@ -202,10 +196,6 @@ void RigidBody::ApplyProperties()
     if (!body)
         return;
 
-    // Bullet combina la friccio de les dues superficies.
-    // Si la rampa te friccio zero, l'esfera no rep parell de contacte
-    // i no roda, encara que la seva friccio sigui alta.
-    // La caixa lliscant conserva una friccio petita, no nul-la.
     const btScalar contactFriction = sphereShape
         ? btScalar(std::max(0.8f, friction))
         : (slideOnSlopes ? btScalar(0.25f)
@@ -220,8 +210,6 @@ void RigidBody::ApplyProperties()
     }
 }
 
-// Dona acceleracio extra a l'esfera nomes quan toca una pendent.
-// IMPORTANT: cridar una vegada per pas de simulacio i ABANS de stepSimulation().
 void RigidBody::ApplySlopeAcceleration()
 {
     if (!body || !sphereShape || !physicsWorld ||
@@ -237,7 +225,6 @@ void RigidBody::ApplySlopeAcceleration()
     if (gravity.length2() < btScalar(1e-8f))
         return;
 
-    // Vector amunt, oposat a la gravetat.
     const btVector3 up = -gravity.normalized();
     btVector3 bestNormal(0, 0, 0);
     btScalar bestUpDot = btScalar(0.15f);
@@ -262,8 +249,6 @@ void RigidBody::ApplySlopeAcceleration()
             if (contact.getDistance() > btScalar(0.01f))
                 continue;
 
-            // m_normalWorldOnB apunta del cos B cap al cos A.
-            // Necessitem la normal que apunta de la rampa a l'esfera.
             btVector3 normal = (objectA == body.get())
                 ? contact.m_normalWorldOnB
                 : -contact.m_normalWorldOnB;
@@ -274,7 +259,6 @@ void RigidBody::ApplySlopeAcceleration()
             normal.normalize();
             const btScalar upDot = normal.dot(up);
 
-            // Ignora parets, sostres i terres gairebe plans.
             if (upDot > bestUpDot && upDot < btScalar(0.999f))
             {
                 bestUpDot = upDot;
@@ -296,7 +280,6 @@ void RigidBody::ApplySlopeAcceleration()
     if (inverseMass <= btScalar(0))
         return;
 
-    // F = m*a. S'afegeix a la gravetat que Bullet ja simula.
     body->applyCentralForce(
         tangentGravity * (btScalar(slopeAcceleration) / inverseMass)
     );
@@ -342,7 +325,6 @@ bool RigidBody::NeedsRebuild()
 
     if (auto* box = object->GetComponent<BoxCollider>())
     {
-        // BoxCollider te prioritat si conviuen els dos components.
         colliderModified = !collisionShape || sphereShape ||
             box->width != lastWidth ||
             box->height != lastHeight ||

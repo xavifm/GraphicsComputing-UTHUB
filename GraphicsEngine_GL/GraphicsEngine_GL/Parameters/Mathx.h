@@ -18,4 +18,10 @@ struct Mathx
 
         return origin + (destination - origin) * t;
     }
+
+    static inline float ToRadians(float degrees)
+    {
+        constexpr float PI = 3.14159265358979323846f;
+        return degrees * PI / 180.0f;
+    }
 };
