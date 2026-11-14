@@ -170,6 +170,8 @@ set(STB_IMAGE_CPP
         GraphicsEngine_GL/Camera/CameraComponent.cpp
         GraphicsEngine_GL/Camera/CameraComponent.h
         GraphicsEngine_GL/Parameters/Mathx.h
+        GraphicsEngine_GL/SphereCollider/SphereCollider.cpp
+        GraphicsEngine_GL/SphereCollider/SphereCollider.h
 )
 
 file(WRITE "${STB_IMAGE_CPP}"

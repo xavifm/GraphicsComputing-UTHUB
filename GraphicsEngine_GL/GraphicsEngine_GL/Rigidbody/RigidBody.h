@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "Component/SerializableComponent.h"
@@ -22,6 +21,12 @@ public:
     float mass = 1.0f;
     float friction = 0.5f;
     float restitution = 0.0f;
+
+    // Quan es true, elimina la friccio de contacte per lliscar per pendents.
+    bool slideOnSlopes = true;
+
+    // Acceleracio extra en pendents (0 = fisica normal).
+    float slopeAcceleration = 2.0f;
 
     bool useGravity = true;
     bool LockObject = false;
@@ -69,6 +74,7 @@ private:
     PhysicsWorld* physicsWorld = nullptr;
 
     std::unique_ptr<btBoxShape> collisionShape;
+    std::unique_ptr<btCollisionShape> sphereShape;
     std::unique_ptr<btDefaultMotionState> motionState;
     std::unique_ptr<btRigidBody> body;
 
@@ -76,6 +82,7 @@ private:
     float lastWidth = -1.0f;
     float lastHeight = -1.0f;
     float lastDepth = -1.0f;
+    float lastRadius = -1.0f;
 
     bool lastLockObject = false;
     bool lastUseGravity = true;
@@ -89,6 +96,7 @@ private:
     void StopPhysics();
 
     void ApplyProperties();
+    void ApplySlopeAcceleration();
     void UpdateGravity();
     void ReloadForces(bool stop);
     bool NeedsRebuild();
@@ -99,6 +107,8 @@ private:
     {
         visitor("mass", self.mass);
         visitor("friction", self.friction);
+        visitor("slideOnSlopes", self.slideOnSlopes);
+        visitor("slopeAcceleration", self.slopeAcceleration);
         visitor("restitution", self.restitution);
         visitor("useGravity", self.useGravity);
         visitor("LockObject", self.LockObject);

@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "FrameBufferController.h"
+#include "SphereCollider.h"
 #include "WorldLoader.h"
 #include "Object/GameObject/GameObject.h"
 #include "Object/GameObject/TestGameObject.h"
@@ -207,6 +208,21 @@ update_status WorldController::Update()
                 DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
                 collider->Draw();
             }
+
+            if (SphereCollider* collider = object->GetComponent<SphereCollider>())
+            {
+                const Mat4x4 translation = Mat4x4::Translate(object->position);
+                const Mat4x4 rotationX = Mat4x4::RotateX(object->rotation.x);
+                const Mat4x4 rotationY = Mat4x4::RotateY(object->rotation.y);
+                const Mat4x4 rotationZ = Mat4x4::RotateZ(object->rotation.z);
+
+                const Mat4x4 scale = Mat4x4::Scale(
+                    Vector3D(collider->radius, collider->radius, collider->radius));
+
+                program->Use();
+                DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
+                collider->Draw();
+            }
         }
 
         framebuffer->Unbind();
@@ -359,10 +375,12 @@ void WorldController::UpdatePhysics(float deltaTime)
         BoxCollider* collider =
             object->GetComponent<BoxCollider>();
 
+        SphereCollider* sphereCollider = object->GetComponent<SphereCollider>();
+
         if (!rigidBody)
             continue;
 
-        if (!collider)
+        if (!collider && !sphereCollider)
         {
             rigidBody->CleanUpPhysics();
         }

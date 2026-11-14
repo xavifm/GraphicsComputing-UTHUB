@@ -2,6 +2,7 @@
 #include "RigidBody.h"
 
 #include "../BoxCollider/BoxCollider.h"
+#include "../SphereCollider/SphereCollider.h"
 #include "Object/GameObject/GameObject.h"
 #include "Controllers/Worlds/WorldController.h"
 
@@ -43,7 +44,7 @@ bool RigidBody::InitializePhysics()
         object->position.y,
         object->position.z
     ));
-    
+
     btQuaternion initialRotation;
     initialRotation.setEulerZYX(
         btRadians(object->rotation.z),
@@ -68,18 +69,34 @@ bool RigidBody::CreateBody(const btTransform& transform)
     if (!object || !physicsWorld || !physicsWorld->GetWorld())
         return false;
 
-    auto* collider = object->GetComponent<BoxCollider>();
+    // Un sol btRigidBody fa servir una forma activa, pero conservem dos punters separats.
+    collisionShape.reset();
+    sphereShape.reset();
 
-    if (!collider)
+    btCollisionShape* activeShape = nullptr;
+
+    if (auto* box = object->GetComponent<BoxCollider>())
+    {
+        collisionShape = std::make_unique<btBoxShape>(
+            btVector3(
+                std::max(0.001f, box->width * 0.5f),
+                std::max(0.001f, box->height * 0.5f),
+                std::max(0.001f, box->depth * 0.5f)
+            )
+        );
+        activeShape = collisionShape.get();
+    }
+    else if (auto* sphere = object->GetComponent<SphereCollider>())
+    {
+        sphereShape = std::make_unique<btSphereShape>(
+            std::max(0.001f, sphere->radius)
+        );
+        activeShape = sphereShape.get();
+    }
+    else
+    {
         return false;
-
-    collisionShape = std::make_unique<btBoxShape>(
-        btVector3(
-            std::max(0.001f, collider->width * 0.5f),
-            std::max(0.001f, collider->height * 0.5f),
-            std::max(0.001f, collider->depth * 0.5f)
-        )
-    );
+    }
 
     motionState = std::make_unique<btDefaultMotionState>(
         transform
@@ -93,7 +110,7 @@ bool RigidBody::CreateBody(const btTransform& transform)
 
     if (bodyMass > 0.0f)
     {
-        collisionShape->calculateLocalInertia(
+        activeShape->calculateLocalInertia(
             bodyMass,
             inertia
         );
@@ -102,15 +119,37 @@ bool RigidBody::CreateBody(const btTransform& transform)
     btRigidBody::btRigidBodyConstructionInfo info(
         bodyMass,
         motionState.get(),
-        collisionShape.get(),
+        activeShape,
         inertia
     );
 
     body = std::make_unique<btRigidBody>(info);
 
+    if (bodyMass > 0.0f)
+    {
+        body->setLinearFactor(btVector3(1, 1, 1));
+        body->setAngularFactor(btVector3(1, 1, 1));
+
+        body->setRollingFriction(0.0f);
+        body->setSpinningFriction(0.0f);
+
+        body->setDamping(0.0f, 0.0f);
+        body->setSleepingThresholds(0.0f, 0.0f);
+
+        body->activate(true);
+    }
+
     physicsWorld->AddRigidBody(body.get());
 
-    body->setFriction(friction);
+    // Bullet combina la friccio de les dues superficies.
+    // Si la rampa te friccio zero, l'esfera no rep parell de contacte
+    // i no roda, encara que la seva friccio sigui alta.
+    // La caixa lliscant conserva una friccio petita, no nul-la.
+    const btScalar contactFriction = sphereShape
+        ? btScalar(std::max(0.8f, friction))
+        : (slideOnSlopes ? btScalar(0.25f)
+                         : btScalar(std::max(0.0f, friction)));
+    body->setFriction(contactFriction);
     body->setRestitution(restitution);
     UpdateGravity();
 
@@ -137,12 +176,15 @@ void RigidBody::Update()
 
     GameObject* object = GetAttachedGameObject();
 
-    if (!object || !object->GetComponent<BoxCollider>())
+    if (!object || (!object->GetComponent<BoxCollider>() &&
+                    !object->GetComponent<SphereCollider>()))
     {
         CleanUpPhysics();
         return;
     }
 
+    // Mantenim l'edicio de transforms. Evita cridar-ho si
+    // el motor reescriu GameObject::position/rotation cada frame.
     SyncEditorTransform();
 
     if (NeedsRebuild())
@@ -152,6 +194,7 @@ void RigidBody::Update()
     }
 
     ApplyProperties();
+    ApplySlopeAcceleration();
 }
 
 void RigidBody::ApplyProperties()
@@ -159,7 +202,15 @@ void RigidBody::ApplyProperties()
     if (!body)
         return;
 
-    body->setFriction(friction);
+    // Bullet combina la friccio de les dues superficies.
+    // Si la rampa te friccio zero, l'esfera no rep parell de contacte
+    // i no roda, encara que la seva friccio sigui alta.
+    // La caixa lliscant conserva una friccio petita, no nul-la.
+    const btScalar contactFriction = sphereShape
+        ? btScalar(std::max(0.8f, friction))
+        : (slideOnSlopes ? btScalar(0.25f)
+                         : btScalar(std::max(0.0f, friction)));
+    body->setFriction(contactFriction);
     body->setRestitution(restitution);
 
     if (useGravity != lastUseGravity)
@@ -167,6 +218,89 @@ void RigidBody::ApplyProperties()
         UpdateGravity();
         lastUseGravity = useGravity;
     }
+}
+
+// Dona acceleracio extra a l'esfera nomes quan toca una pendent.
+// IMPORTANT: cridar una vegada per pas de simulacio i ABANS de stepSimulation().
+void RigidBody::ApplySlopeAcceleration()
+{
+    if (!body || !sphereShape || !physicsWorld ||
+        !useGravity || slopeAcceleration <= 0.0f ||
+        body->isStaticOrKinematicObject())
+        return;
+
+    btDiscreteDynamicsWorld* world = physicsWorld->GetWorld();
+    if (!world)
+        return;
+
+    const btVector3 gravity = body->getGravity();
+    if (gravity.length2() < btScalar(1e-8f))
+        return;
+
+    // Vector amunt, oposat a la gravetat.
+    const btVector3 up = -gravity.normalized();
+    btVector3 bestNormal(0, 0, 0);
+    btScalar bestUpDot = btScalar(0.15f);
+
+    btDispatcher* dispatcher = world->getDispatcher();
+    for (int i = 0; i < dispatcher->getNumManifolds(); ++i)
+    {
+        btPersistentManifold* manifold =
+            dispatcher->getManifoldByIndexInternal(i);
+
+        const btCollisionObject* objectA =
+            static_cast<const btCollisionObject*>(manifold->getBody0());
+        const btCollisionObject* objectB =
+            static_cast<const btCollisionObject*>(manifold->getBody1());
+
+        if (objectA != body.get() && objectB != body.get())
+            continue;
+
+        for (int j = 0; j < manifold->getNumContacts(); ++j)
+        {
+            const btManifoldPoint& contact = manifold->getContactPoint(j);
+            if (contact.getDistance() > btScalar(0.01f))
+                continue;
+
+            // m_normalWorldOnB apunta del cos B cap al cos A.
+            // Necessitem la normal que apunta de la rampa a l'esfera.
+            btVector3 normal = (objectA == body.get())
+                ? contact.m_normalWorldOnB
+                : -contact.m_normalWorldOnB;
+
+            if (normal.length2() < btScalar(1e-8f))
+                continue;
+
+            normal.normalize();
+            const btScalar upDot = normal.dot(up);
+
+            // Ignora parets, sostres i terres gairebe plans.
+            if (upDot > bestUpDot && upDot < btScalar(0.999f))
+            {
+                bestUpDot = upDot;
+                bestNormal = normal;
+            }
+        }
+    }
+
+    if (bestNormal.length2() < btScalar(0.5f))
+        return;
+
+    const btVector3 tangentGravity =
+        gravity - bestNormal * gravity.dot(bestNormal);
+
+    if (tangentGravity.length2() < btScalar(1e-8f))
+        return;
+
+    const btScalar inverseMass = body->getInvMass();
+    if (inverseMass <= btScalar(0))
+        return;
+
+    // F = m*a. S'afegeix a la gravetat que Bullet ja simula.
+    body->applyCentralForce(
+        tangentGravity * (btScalar(slopeAcceleration) / inverseMass)
+    );
+    body->activate(true);
 }
 
 void RigidBody::UpdateGravity()
@@ -204,12 +338,25 @@ bool RigidBody::NeedsRebuild()
     if (!object)
         return false;
 
-    auto* collider = object->GetComponent<BoxCollider>();
+    bool colliderModified = false;
 
-    if (!collider)
+    if (auto* box = object->GetComponent<BoxCollider>())
+    {
+        // BoxCollider te prioritat si conviuen els dos components.
+        colliderModified = !collisionShape || sphereShape ||
+            box->width != lastWidth ||
+            box->height != lastHeight ||
+            box->depth != lastDepth;
+    }
+    else if (auto* sphere = object->GetComponent<SphereCollider>())
+    {
+        colliderModified = !sphereShape || collisionShape ||
+            sphere->radius != lastRadius;
+    }
+    else
+    {
         return false;
-
-    bool colliderModified = (collider->width != lastWidth || collider->height != lastHeight || collider->depth != lastDepth);
+    }
 
     return mass != lastMass || LockObject != lastLockObject || colliderModified;
 }
@@ -221,18 +368,20 @@ void RigidBody::CacheProperties()
     if (!object)
         return;
 
-    auto* collider = object->GetComponent<BoxCollider>();
-
-    if (!collider)
-        return;
-
     lastMass = mass;
     lastLockObject = LockObject;
     lastUseGravity = useGravity;
 
-    lastWidth = collider->width;
-    lastHeight = collider->height;
-    lastDepth = collider->depth;
+    if (auto* box = object->GetComponent<BoxCollider>())
+    {
+        lastWidth = box->width;
+        lastHeight = box->height;
+        lastDepth = box->depth;
+    }
+    else if (auto* sphere = object->GetComponent<SphereCollider>())
+    {
+        lastRadius = sphere->radius;
+    }
 }
 
 void RigidBody::StopPhysics()
@@ -243,11 +392,7 @@ void RigidBody::StopPhysics()
     body->setLinearVelocity(btVector3(0, 0, 0));
     body->setAngularVelocity(btVector3(0, 0, 0));
     body->clearForces();
-
-    body->setLinearFactor(btVector3(0, 0, 0));
-    body->setAngularFactor(btVector3(0, 0, 0));
 }
-
 
 void RigidBody::RebuildPhysics()
 {
@@ -347,6 +492,7 @@ void RigidBody::CleanUpPhysics()
     body.reset();
     motionState.reset();
     collisionShape.reset();
+    sphereShape.reset();
 
     physicsWorld = nullptr;
 
@@ -505,11 +651,12 @@ void RigidBody::SetVelocity(const btVector3 &velocity)
 
 void RigidBody::LockRigidbody(bool lock)
 {
-    if (!body || body->isStaticOrKinematicObject())
+
+    if (LockObject == lock)
         return;
 
-    body->activate(true);
-    lock = true;
+    LockObject = lock;
+    RebuildPhysics();
 }
 
 Vector3D RigidBody::TransformDirection(const btVector3& direction)

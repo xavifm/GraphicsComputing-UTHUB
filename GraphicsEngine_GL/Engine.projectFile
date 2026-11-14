@@ -26,6 +26,12 @@
       "source": "GraphicsEngine_GL/BoxCollider/BoxCollider.cpp"
     },
     {
+      "class": "SphereCollider",
+      "name": "SphereCollider",
+      "header": "GraphicsEngine_GL/SphereCollider/SphereCollider.h",
+      "source": "GraphicsEngine_GL/SphereCollider/SphereCollider.cpp"
+    },
+    {
       "class": "CameraComponent",
       "name": "CameraComponent",
       "header": "GraphicsEngine_GL/Camera/CameraComponent.h",

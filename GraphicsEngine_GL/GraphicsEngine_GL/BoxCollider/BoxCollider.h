@@ -35,9 +35,7 @@ public:
     }
 
     void Update();
-
     void SetupMesh();
-
     void Draw();
 
 private:
