@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "CapsuleCollider.h"
 #include "FrameBufferController.h"
 #include "SphereCollider.h"
 #include "WorldLoader.h"
@@ -196,7 +197,7 @@ update_status WorldController::Update()
             UpdateMVP(object);
             object->Update(0.0f);
 
-            if (BoxCollider* collider = object->GetComponent<BoxCollider>())
+            if (auto* collider = object->GetComponent<BoxCollider>())
             {
                 const Mat4x4 translation = Mat4x4::Translate(object->position);
                 const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(object->rotation.x));
@@ -209,7 +210,7 @@ update_status WorldController::Update()
                 collider->Draw();
             }
 
-            if (SphereCollider* collider = object->GetComponent<SphereCollider>())
+            if (auto* collider = object->GetComponent<SphereCollider>())
             {
                 const Mat4x4 translation = Mat4x4::Translate(object->position);
                 const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(object->rotation.x));
@@ -218,6 +219,21 @@ update_status WorldController::Update()
 
                 const Mat4x4 scale = Mat4x4::Scale(
                     Vector3D(collider->radius, collider->radius, collider->radius));
+
+                program->Use();
+                DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
+                collider->Draw();
+            }
+
+            if (auto* collider = object->GetComponent<CapsuleCollider>())
+            {
+                const Mat4x4 translation = Mat4x4::Translate(object->position);
+                const Mat4x4 rotationX = Mat4x4::RotateX(Mathx::ToRadians(object->rotation.x));
+                const Mat4x4 rotationY = Mat4x4::RotateY(Mathx::ToRadians(object->rotation.y));
+                const Mat4x4 rotationZ = Mat4x4::RotateZ(Mathx::ToRadians(object->rotation.z));
+
+                const Mat4x4 scale = Mat4x4::Scale(
+                    Vector3D(collider->radius, collider->finalHeight, collider->radius));
 
                 program->Use();
                 DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);

@@ -172,6 +172,8 @@ set(STB_IMAGE_CPP
         GraphicsEngine_GL/Parameters/Mathx.h
         GraphicsEngine_GL/SphereCollider/SphereCollider.cpp
         GraphicsEngine_GL/SphereCollider/SphereCollider.h
+        GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.cpp
+        GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.h
 )
 
 file(WRITE "${STB_IMAGE_CPP}"
