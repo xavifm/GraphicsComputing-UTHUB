@@ -233,7 +233,7 @@ update_status WorldController::Update()
                 const Mat4x4 rotationZ = Mat4x4::RotateZ(Mathx::ToRadians(object->rotation.z));
 
                 const Mat4x4 scale = Mat4x4::Scale(
-                    Vector3D(collider->radius, collider->finalHeight, collider->radius));
+                    Vector3D(1.0f, 1.0f, 1.0f));
 
                 program->Use();
                 DrawMatrix(translation, rotationX, rotationY, rotationZ, scale);
@@ -340,7 +340,7 @@ void WorldController::UpdateMVP(GameObject* gameObject)
 
 void WorldController::DrawMatrix(Mat4x4 translation, Mat4x4 rotationX, Mat4x4 rotationY, Mat4x4 rotationZ, Mat4x4 scale)
 {
-    const Mat4x4 rotation = rotationX * rotationY * rotationZ;
+    const Mat4x4 rotation = rotationZ * rotationY * rotationX;
     modelMatrix = translation * rotation * scale;
 
     mvp =
@@ -393,10 +393,12 @@ void WorldController::UpdatePhysics(float deltaTime)
 
         SphereCollider* sphereCollider = object->GetComponent<SphereCollider>();
 
+        CapsuleCollider* capsuleCollider = object->GetComponent<CapsuleCollider>();
+
         if (!rigidBody)
             continue;
 
-        if (!collider && !sphereCollider)
+        if (!collider && !sphereCollider && !capsuleCollider)
         {
             rigidBody->CleanUpPhysics();
         }

@@ -2,7 +2,7 @@
 
 CapsuleCollider::CapsuleCollider()
 {
-    SetupMesh();
+    SetupMesh(radius, height);
 }
 
 CapsuleCollider::~CapsuleCollider()
@@ -13,12 +13,12 @@ CapsuleCollider::~CapsuleCollider()
 void CapsuleCollider::Update()
 {
     SerializableComponent<CapsuleCollider>::Update();
-    finalHeight = (height / 2) - radius;
 }
 
-void CapsuleCollider::SetupMesh()
+void CapsuleCollider::SetupMesh(float _radius, float _height)
 {
-    GenerateCapsuleCollider();
+    GenerateCapsuleCollider(_radius, _height);
+
     capsuleMesh.SetData(vertices, texCoords, indices);
 }
 

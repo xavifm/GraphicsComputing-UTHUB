@@ -71,6 +71,7 @@ private:
     PhysicsWorld* physicsWorld = nullptr;
 
     std::unique_ptr<btBoxShape> collisionShape;
+    std::unique_ptr<btCollisionShape> capsuleShape;
     std::unique_ptr<btCollisionShape> sphereShape;
     std::unique_ptr<btDefaultMotionState> motionState;
     std::unique_ptr<btRigidBody> body;
@@ -80,6 +81,8 @@ private:
     float lastHeight = -1.0f;
     float lastDepth = -1.0f;
     float lastRadius = -1.0f;
+    float lastCapsuleRadius = -1.0f;
+    float lastCapsuleHeight = -1.0f;
 
     bool lastLockObject = false;
     bool lastUseGravity = true;

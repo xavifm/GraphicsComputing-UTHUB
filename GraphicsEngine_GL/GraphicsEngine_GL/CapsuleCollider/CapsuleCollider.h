@@ -15,7 +15,6 @@ public:
 
     float radius = 1.0f;
     float height = 1.0f;
-    float finalHeight = 1.0f;
 
     [[nodiscard]] const char* GetTypeName() const override
     {
@@ -35,7 +34,7 @@ public:
     }
 
     void Update();
-    void SetupMesh();
+    void SetupMesh(float _radius, float _height);
     void Draw();
 
 private:

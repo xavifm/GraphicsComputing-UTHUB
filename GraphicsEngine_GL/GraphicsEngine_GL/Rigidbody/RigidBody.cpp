@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "CapsuleCollider.h"
+
 RigidBody::RigidBody()
 {
 }
@@ -69,9 +71,9 @@ bool RigidBody::CreateBody(const btTransform& transform)
     if (!object || !physicsWorld || !physicsWorld->GetWorld())
         return false;
 
-    // Un sol btRigidBody fa servir una forma activa, pero conservem dos punters separats.
     collisionShape.reset();
     sphereShape.reset();
+    capsuleShape.reset();
 
     btCollisionShape* activeShape = nullptr;
 
@@ -92,6 +94,32 @@ bool RigidBody::CreateBody(const btTransform& transform)
             std::max(0.001f, sphere->radius)
         );
         activeShape = sphereShape.get();
+    }
+    else if (auto* capsule = object->GetComponent<CapsuleCollider>())
+    {
+        float radius = std::max(
+                    0.001f,
+                    capsule->radius * 0.5f
+                    );
+
+        float height = std::max(
+                    2.0f * radius,
+                    capsule->height
+                    );
+
+        capsule->SetupMesh(radius, height);
+
+        const float cylinderHeight = std::max(
+            0.0f,
+            height - 2.0f * radius
+        );
+
+        capsuleShape = std::make_unique<btCapsuleShape>(
+            radius,
+            cylinderHeight
+        );
+
+        activeShape = capsuleShape.get();
     }
     else
     {
@@ -173,7 +201,8 @@ void RigidBody::Update()
     GameObject* object = GetAttachedGameObject();
 
     if (!object || (!object->GetComponent<BoxCollider>() &&
-                    !object->GetComponent<SphereCollider>()))
+                    !object->GetComponent<SphereCollider>() &&
+                    !object->GetComponent<CapsuleCollider>()))
     {
         CleanUpPhysics();
         return;
@@ -189,6 +218,8 @@ void RigidBody::Update()
 
     ApplyProperties();
     ApplySlopeAcceleration();
+
+    SyncTransform();
 }
 
 void RigidBody::ApplyProperties()
@@ -325,22 +356,30 @@ bool RigidBody::NeedsRebuild()
 
     if (auto* box = object->GetComponent<BoxCollider>())
     {
-        colliderModified = !collisionShape || sphereShape ||
+        colliderModified = !collisionShape || sphereShape || capsuleShape ||
             box->width != lastWidth ||
             box->height != lastHeight ||
             box->depth != lastDepth;
     }
     else if (auto* sphere = object->GetComponent<SphereCollider>())
     {
-        colliderModified = !sphereShape || collisionShape ||
+        colliderModified = !sphereShape || collisionShape || capsuleShape ||
             sphere->radius != lastRadius;
+    }
+    else if (auto* capsule = object->GetComponent<CapsuleCollider>())
+    {
+        colliderModified = !capsuleShape || collisionShape || sphereShape ||
+            capsule->radius != lastCapsuleRadius ||
+            capsule->height != lastCapsuleHeight;
     }
     else
     {
         return false;
     }
 
-    return mass != lastMass || LockObject != lastLockObject || colliderModified;
+    return mass != lastMass ||
+           LockObject != lastLockObject ||
+           colliderModified;
 }
 
 void RigidBody::CacheProperties()
@@ -363,6 +402,11 @@ void RigidBody::CacheProperties()
     else if (auto* sphere = object->GetComponent<SphereCollider>())
     {
         lastRadius = sphere->radius;
+    }
+    else if (auto* capsule = object->GetComponent<CapsuleCollider>())
+    {
+        lastCapsuleRadius = capsule->radius;
+        lastCapsuleHeight = capsule->height;
     }
 }
 
@@ -475,6 +519,7 @@ void RigidBody::CleanUpPhysics()
     motionState.reset();
     collisionShape.reset();
     sphereShape.reset();
+    capsuleShape.reset();
 
     physicsWorld = nullptr;
 
