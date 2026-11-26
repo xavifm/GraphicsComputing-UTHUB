@@ -74,8 +74,8 @@ update_status GameUIController::PreUpdate()
 
 update_status GameUIController::Update()
 {
-    //if (context)
-        //context->Update();
+    if (context)
+        context->Update();
 
     return UPDATE_CONTINUE;
 }
@@ -96,34 +96,18 @@ void GameUIController::Render()
     if (!context || !renderer)
         return;
 
-    GLint before = 0;
-    GLint after = 0;
+    GLint fbo = 0;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbo);
 
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &before);
+    context->Update();
 
     renderer->SetViewport(1280, 720);
+
     renderer->BeginFrame();
-
     context->Render();
-
     renderer->EndFrame();
 
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &after);
-
-    static bool printed = false;
-    if (!printed)
-    {
-        std::cout << "[GameUI] FBO before: "
-                  << before << '\n';
-
-        std::cout << "[GameUI] FBO after: "
-                  << after << '\n';
-
-        std::cout << "[GameUI] Documents: "
-                  << context->GetNumDocuments() << '\n';
-
-        printed = true;
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 }
 
 void GameUIController::Shutdown()
