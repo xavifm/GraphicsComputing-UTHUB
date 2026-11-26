@@ -194,6 +194,8 @@ set(STB_IMAGE_CPP
         GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.h
         GraphicsEngine_GL/GameUI/UIComponent.cpp
         GraphicsEngine_GL/GameUI/UIComponent.h
+        GraphicsEngine_GL/Controllers/GameUI/GameUIController.cpp
+        GraphicsEngine_GL/Controllers/GameUI/GameUIController.h
 )
 
 file(WRITE "${STB_IMAGE_CPP}"
@@ -261,6 +263,37 @@ add_executable(GraphicsEngine_GL
         # Generated components
         "${GENERATED_CPP}"
         "${GENERATED_HEADER}"
+)
+
+
+# --------------------------------------------------
+# RmlUi OpenGL 3 Backend
+# --------------------------------------------------
+
+set(RMLUI_BACKENDS_DIR
+        "${RMLUI_DIR}/Backends"
+)
+
+set(RMLUI_GL3_SOURCE
+        "${RMLUI_BACKENDS_DIR}/RmlUi_Renderer_GL3.cpp"
+)
+
+if(NOT EXISTS "${RMLUI_GL3_SOURCE}")
+    message(FATAL_ERROR
+            "No existeix el renderer GL3: ${RMLUI_GL3_SOURCE}"
+    )
+endif()
+
+target_sources(GraphicsEngine_GL PRIVATE
+        "${RMLUI_GL3_SOURCE}"
+)
+
+target_include_directories(GraphicsEngine_GL PRIVATE
+        "${RMLUI_BACKENDS_DIR}"
+)
+
+target_compile_definitions(GraphicsEngine_GL PRIVATE
+        RMLUI_GL3_CUSTOM_LOADER=<glad/glad.h>
 )
 
 target_include_directories(GraphicsEngine_GL BEFORE PRIVATE

@@ -27,6 +27,7 @@
 #include "Component/ComponentRegistry.h"
 #include "Controllers/Window/WindowController.h"
 #include "Model/Model.h"
+#include "GameUI/UIComponent.h"
 #include "Object/GameObject/GameObject.h"
 
 namespace
@@ -69,6 +70,7 @@ namespace
     };
 
     std::unordered_map<Model*, ModelEditorState> g_modelEditorStates;
+    std::unordered_map<UIComponent*, std::array<char, 512>> g_uiEditorPaths;
 
     // Appearance: consistent dark slate with cool-blue accents.
     void ApplyEditorStyle()
@@ -182,12 +184,15 @@ namespace
     // Copiem la ruta al payload: no depenem de la vida d'una variable temporal.
     constexpr const char* kAssetPathPayload = "ENGINE_ASSET_PATH";
 
-    bool HasAssetExtension(const fs::path& path, bool texture)
+    enum class AssetKind { Model, Texture, RmlUi };
+
+    bool HasAssetExtension(const fs::path& path, AssetKind kind)
     {
         std::string ext = path.extension().string();
         std::transform(ext.begin(), ext.end(), ext.begin(),
             [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        if (texture)
+        if (kind == AssetKind::RmlUi) return ext == ".rml";
+        if (kind == AssetKind::Texture)
             return ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
                    ext == ".tga" || ext == ".bmp" || ext == ".dds";
         return ext == ".obj" || ext == ".fbx" || ext == ".gltf" ||
@@ -196,7 +201,7 @@ namespace
     }
 
     // El payload només conté rutes de fitxers originades a l'Asset Browser.
-    bool AcceptAssetPath(std::string& target, bool texture)
+    bool AcceptAssetPath(std::string& target, AssetKind kind)
     {
         bool changed = false;
         if (ImGui::BeginDragDropTarget())
@@ -213,7 +218,7 @@ namespace
                     {
                         const fs::path path(std::string(data, size - 1));
                         std::error_code ec;
-                        if (HasAssetExtension(path, texture) &&
+                        if (HasAssetExtension(path, kind) &&
                             fs::is_regular_file(path, ec) && !ec)
                         {
                             // Desa la ruta relativa a l'interior d'Assets/.
@@ -1236,7 +1241,7 @@ update_status ImguiController::PostUpdate()
                 if (ImGui::InputText("##ModelAsset", assetState.modelPath.data(),
                                      assetState.modelPath.size()))
                     modelComponent->FileName = assetState.modelPath.data();
-                if (AcceptAssetPath(modelComponent->FileName, false))
+                if (AcceptAssetPath(modelComponent->FileName, AssetKind::Model))
                     std::snprintf(assetState.modelPath.data(), assetState.modelPath.size(),
                                   "%s", modelComponent->FileName.c_str());
 
@@ -1247,7 +1252,7 @@ update_status ImguiController::PostUpdate()
                 if (ImGui::InputText("##TextureAsset", assetState.texturePath.data(),
                                      assetState.texturePath.size()))
                     modelComponent->TextureName = assetState.texturePath.data();
-                if (AcceptAssetPath(modelComponent->TextureName, true))
+                if (AcceptAssetPath(modelComponent->TextureName, AssetKind::Texture))
                     std::snprintf(assetState.texturePath.data(), assetState.texturePath.size(),
                                   "%s", modelComponent->TextureName.c_str());
 
@@ -1280,6 +1285,24 @@ update_status ImguiController::PostUpdate()
                 }
             }
 
+            // Fitxers .rml: arrossega una UI de l'Asset Browser.
+            if (UIComponent* uiComponent = dynamic_cast<UIComponent*>(component))
+            {
+                auto& uiPathBuffer = g_uiEditorPaths[uiComponent];
+
+                ImGui::TextUnformatted("RmlUi file (drag & drop)");
+                if (!ImGui::IsAnyItemActive())
+                    std::snprintf(uiPathBuffer.data(), uiPathBuffer.size(),
+                                  "%s", uiComponent->uiFilePath.c_str());
+
+                if (ImGui::InputText("##RmlUiAsset", uiPathBuffer.data(), uiPathBuffer.size()))
+                    uiComponent->uiFilePath = uiPathBuffer.data();
+
+                if (AcceptAssetPath(uiComponent->uiFilePath, AssetKind::RmlUi))
+                    std::snprintf(uiPathBuffer.data(), uiPathBuffer.size(),
+                                  "%s", uiComponent->uiFilePath.c_str());
+            }
+
             ImGui::Spacing();
 
             if (ImGui::Button("Remove Component"))
@@ -1292,6 +1315,10 @@ update_status ImguiController::PostUpdate()
                 if (Model* model = dynamic_cast<Model*>(componentToDelete))
                 {
                     RemoveModelEditorState(model);
+                }
+                if (UIComponent* ui = dynamic_cast<UIComponent*>(componentToDelete))
+                {
+                    g_uiEditorPaths.erase(ui);
                 }
 
                 selectedGameObject->RemoveComponent(componentToDelete);

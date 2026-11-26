@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "Camera/CameraComponent.h"
+#include "GameUI/GameUIController.h"
 
 class GameObject;
 class WorldLoader;
@@ -34,7 +35,7 @@ struct WorldLights
 class WorldController : public Controller
 {
 public:
-    WorldController(FrameBufferController* frameBuffer);
+    WorldController(FrameBufferController* frameBuffer, GameUIController* gameUI);
     ~WorldController();
 
     bool Init() override;
@@ -55,6 +56,8 @@ public:
     bool LoadWorld(std::string _fileName);
 
     GameObject* FindGameObject(std::string _name);
+
+    GameUIController* GetGameUIController() { return gameUIController; }
 
     bool SaveWorld(std::string _fileName);
 
@@ -77,6 +80,7 @@ private:
     CameraController* cameraController;
     FrameBufferController* frameBufferController;
     FrameBufferController* gameFrameBufferController;
+    GameUIController* gameUIController;
     CameraComponent* targetCamera;
 
     Shader* vertexShader = nullptr;

@@ -16,6 +16,7 @@
 #include "Rigidbody/RigidBody.h"
 #include "BoxCollider/BoxCollider.h"
 #include "Camera/CameraComponent.h"
+#include "GameUI/GameUIController.h"
 
 static std::string ReadTextFile(const std::string& fileName)
 {
@@ -32,8 +33,10 @@ static std::string ReadTextFile(const std::string& fileName)
     return ss.str();
 }
 
-WorldController::WorldController(FrameBufferController* frameBuffer) {
+WorldController::WorldController(FrameBufferController* frameBuffer, GameUIController* gameUI)
+{
     frameBufferController = frameBuffer;
+    gameUIController = gameUI;
 }
 WorldController::~WorldController() {}
 
@@ -165,7 +168,8 @@ update_status WorldController::Update()
     auto renderPass = [&](FrameBufferController* framebuffer,
                           const Mat4x4& view,
                           const Mat4x4& projection,
-                          const Vector3D& cameraPosition)
+                          const Vector3D& cameraPosition,
+                          bool renderGameUI)
     {
         if (framebuffer == nullptr)
             return;
@@ -241,13 +245,19 @@ update_status WorldController::Update()
             }
         }
 
+        if (renderGameUI && gameUIController != nullptr)
+        {
+            gameUIController->Render();
+        }
+
         framebuffer->Unbind();
     };
 
     renderPass(frameBufferController,
                cameraController->GetViewMatrix(),
                cameraController->GetProjMatrix(),
-               cameraController->GetCameraPosition());
+               cameraController->GetCameraPosition(),
+               false);
 
     if (targetCamera != nullptr && gameFrameBufferController != nullptr &&
         gameFrameBufferController != frameBufferController)
@@ -255,7 +265,8 @@ update_status WorldController::Update()
         renderPass(gameFrameBufferController,
                    targetCamera->cameraController->GetViewMatrix(),
                    targetCamera->cameraController->GetProjMatrix(),
-                   targetCamera->cameraController->GetCameraPosition());
+                   targetCamera->cameraController->GetCameraPosition(),
+                   targetCamera->cameraController != nullptr);
     }
 
     const double currentTime = glfwGetTime();
