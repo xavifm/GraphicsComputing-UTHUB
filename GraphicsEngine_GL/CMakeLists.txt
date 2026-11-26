@@ -48,6 +48,24 @@ add_subdirectory(
         "${CMAKE_CURRENT_BINARY_DIR}/bullet"
 )
 
+
+# --------------------------------------------------
+# RmlUi
+# --------------------------------------------------
+
+set(RMLUI_DIR
+        "${ENGINE_DIR}/ThirdParty/include/RmlUi"
+)
+
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+        "${RMLUI_DIR}"
+        "${CMAKE_CURRENT_BINARY_DIR}/rmlui"
+)
+
+
 # --------------------------------------------------
 # Read the projectFile components
 # --------------------------------------------------
@@ -174,6 +192,8 @@ set(STB_IMAGE_CPP
         GraphicsEngine_GL/SphereCollider/SphereCollider.h
         GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.cpp
         GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.h
+        GraphicsEngine_GL/GameUI/UIComponent.cpp
+        GraphicsEngine_GL/GameUI/UIComponent.h
 )
 
 file(WRITE "${STB_IMAGE_CPP}"
@@ -278,4 +298,7 @@ target_link_libraries(GraphicsEngine_GL PRIVATE
         BulletDynamics
         BulletCollision
         LinearMath
+
+        #RmlUi
+        RmlUi::RmlUi
 )

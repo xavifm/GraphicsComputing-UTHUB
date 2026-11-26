@@ -38,6 +38,12 @@
       "source": "GraphicsEngine_GL/CapsuleCollider/CapsuleCollider.cpp"
     },
     {
+      "class": "UIComponent",
+      "name": "UIComponent",
+      "header": "GraphicsEngine_GL/GameUI/UIComponent.h",
+      "source": "GraphicsEngine_GL/GameUI/UIComponent.cpp"
+    },
+    {
       "class": "CameraComponent",
       "name": "CameraComponent",
       "header": "GraphicsEngine_GL/Camera/CameraComponent.h",
@@ -84,6 +90,12 @@
       "name": "CameraComponentd",
       "header": "cmake-build-debug/Assets/CameraComponentd.h",
       "source": "cmake-build-debug/Assets/CameraComponentd.cpp"
+    },
+    {
+      "class": "UIComponentA",
+      "name": "UIComponentA",
+      "header": "cmake-build-debug/Assets/UIComponentA.h",
+      "source": "cmake-build-debug/Assets/UIComponentA.cpp"
     }
   ]
 }
